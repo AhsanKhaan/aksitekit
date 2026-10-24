@@ -1,0 +1,136 @@
+# Production deploy to Cloudflare Workers with static assets (wrangler deploy, configured by the project's
+# wrangler.jsonc / wrangler.json / wrangler.toml), only when factory.config.json hosting.target is cloudflare-workers
+# (the architect's choice when the app needs server-side code); deploy-pages.yml covers cloudflare-pages. The owner's
+# GO for each commit is the approval on the `production` environment (required reviewers; .github/README.md).
+# Triggers:
+#   - by hand (workflow_dispatch) from the production branch: deploys its head, or `commit`, an earlier commit on it
+#     (the rollback path);
+#   - a green `ci` run on a push to the production branch, only while the repo variable AUTO_DEPLOY is 'true'. Set it
+#     only once `production` has required reviewers: without them a push would deploy with no GO.
+# After the deploy, check:live runs against LIVE_SITE_URL; on failure, roll back (README) and fix forward.
+# Security (.github/README.md): actions pinned to full commit SHAs; workflow_run acts only on push runs of this
+# repository and deploys the exact commit CI tested; secrets only in the approved job, passed to wrangler-action
+# inputs, never to run:; no dependency cache in the job that holds secrets; one production deploy at a time.
+name: deploy-workers
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: 'Commit to deploy: a full SHA on the production branch (empty: its head). Rollback path.'
+        type: string
+        required: false
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
+    branches: [main] # = hosting.productionBranch, checked again at run time
+
+permissions: {}
+
+concurrency:
+  group: deploy-production # shared with deploy-pages.yml
+  cancel-in-progress: false
+
+jobs:
+  config:
+    name: hosting target and commit
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository && vars.AUTO_DEPLOY == 'true')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      deploy: ${{ steps.read.outputs.deploy }}
+      sha: ${{ steps.read.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0 # to check the commit is on the production branch
+          persist-credentials: false
+
+      - name: Read hosting.target and pick the commit
+        id: read
+        env:
+          WANT: cloudflare-workers
+          EVENT: ${{ github.event_name }}
+          DISPATCH_REF: ${{ github.ref_name }}
+          RUN_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          INPUT_COMMIT: ${{ inputs.commit }}
+        run: |
+          set -euo pipefail
+          target=$(node -p 'require("./factory.config.json").hosting?.target || ""')
+          branch=$(node -p 'require("./factory.config.json").hosting?.productionBranch || "main"')
+          skip() { echo "deploy=false" >> "$GITHUB_OUTPUT"; echo "::notice::$1"; exit 0; }
+          fail() { echo "::error::$1"; exit 1; }
+          [ "$target" = "$WANT" ] || skip "hosting.target is not $WANT: nothing to deploy here"
+          [[ "$branch" =~ ^[A-Za-z0-9._/-]+$ ]] || fail "hosting.productionBranch is not a valid branch name"
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            [ "$DISPATCH_REF" = "$branch" ] || fail "start the deploy from the production branch ($branch)"
+            sha=${INPUT_COMMIT:-$(git rev-parse HEAD)}
+          else
+            [ "$RUN_BRANCH" = "$branch" ] || skip "CI ran on another branch than the production branch ($branch)"
+            sha=$RUN_SHA
+            [ "$sha" = "$(git rev-parse "origin/$branch")" ] || skip "a newer commit is on $branch; its own CI run deploys it"
+          fi
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || fail "commit must be a full 40-character SHA"
+          git merge-base --is-ancestor "$sha" "origin/$branch" || fail "the commit is not on the production branch ($branch)"
+          git show "$sha:wrangler.jsonc" > /dev/null 2>&1 || git show "$sha:wrangler.json" > /dev/null 2>&1 || git show "$sha:wrangler.toml" > /dev/null 2>&1 \
+            || fail "a Workers deploy needs wrangler.jsonc (or .json/.toml) with the static-assets directory; the architect writes it"
+          { echo "deploy=true"; echo "sha=$sha"; } >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: deploy to Cloudflare Workers (production)
+    needs: config
+    if: needs.config.outputs.deploy == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: production # the owner's GO: required reviewers on this environment
+      url: ${{ vars.LIVE_SITE_URL }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.config.outputs.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          package-manager-cache: false # no cache in a job that holds secrets
+
+      - name: Install (lockfile only; install scripts blocked by .npmrc)
+        run: npm ci
+
+      - name: Production build (production-gate, static export, check-out)
+        env:
+          SITE_ENV: production
+          NEXT_PUBLIC_SITE_URL: ${{ vars.LIVE_SITE_URL }}
+          NEXT_PUBLIC_INDEXABLE: 'true'
+        run: npm run build
+
+      - name: Deploy with wrangler
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.151.1' # exact, at least 7 days old (.npmrc min-release-age)
+          command: deploy
+
+      - name: Check the live site (check:live)
+        if: vars.LIVE_SITE_URL != ''
+        env:
+          LIVE_SITE_URL: ${{ vars.LIVE_SITE_URL }}
+          LIVE_PAGES_HOST: ${{ vars.LIVE_PAGES_HOST }}
+        run: |
+          args=("$LIVE_SITE_URL")
+          if [ -n "$LIVE_PAGES_HOST" ]; then args+=(--pages "$LIVE_PAGES_HOST"); fi
+          npm run check:live -- "${args[@]}"

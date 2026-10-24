@@ -1,0 +1,237 @@
+# Pre-production checks (docs/BLUEPRINT.md flow: "pre-prod checks on the production branch" before the owner's GO).
+# Runs on pull requests whose base is the production branch (factory.config.json hosting.productionBranch, read at
+# run time), and by hand before a release. Every gate:
+#   gates:          gate:adsense, gate:design, check:release, the production build (check-out runs inside it), a
+#                   secret scan of out/, the e2e suite (responsive 320-1280 px), Lighthouse budgets;
+#   preview:        finds the pull request's Cloudflare Pages preview (.github/scripts/preview-url.mjs);
+#   check-security: npm run check:security against that preview;
+#   zap-baseline:   ZAP baseline against that preview, decided by zap-gate.mjs.
+# It skips while factory.config.json project.domain is empty (the template itself: nothing to release), and the
+# preview jobs skip without LIVE_PAGES_HOST or PREVIEW_URL (no Cloudflare project yet).
+# Security (.github/README.md): actions and images pinned; read-only token (plus checks/statuses read to find the
+# preview); no secrets; never pull_request_target; event values reach scripts through env only.
+name: preprod
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: 'Preview to check (one of this project''s hosts; empty: find the Cloudflare Pages preview)'
+        type: string
+        required: false
+
+permissions: {}
+
+concurrency:
+  group: preprod-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  config:
+    name: production branch?
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      applies: ${{ steps.read.outputs.applies }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Read hosting.productionBranch and project.domain from factory.config.json
+        id: read
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          branch=$(node -p 'require("./factory.config.json").hosting?.productionBranch || "main"')
+          domain=$(node -p 'require("./factory.config.json").project?.domain || ""')
+          if [ -z "$domain" ]; then
+            echo "applies=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::factory.config.json project.domain is empty (the template, or a project before /start): nothing to release; preprod skipped"
+          elif [ "$EVENT" = "workflow_dispatch" ] || [ "$BASE_REF" = "$branch" ]; then
+            echo "applies=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "applies=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::not a pull request to the production branch ($branch); preprod skipped"
+          fi
+
+  gates:
+    name: gates (adsense, design, release, build, e2e, lighthouse)
+    needs: config
+    if: needs.config.outputs.applies == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    env:
+      PORT: '4321'
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb # gitleaks_8.30.1_linux_x64.tar.gz
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - name: Install (lockfile only; install scripts blocked by .npmrc)
+        run: npm ci
+
+      - name: AdSense gate
+        run: npm run gate:adsense
+
+      - name: Design gate (WCAG AA contrast)
+        run: npm run gate:design
+
+      - name: Release content checks
+        run: npm run check:release
+
+      - name: Production build (production-gate, static export, check-out)
+        env:
+          SITE_ENV: production
+          NEXT_PUBLIC_SITE_URL: ${{ vars.LIVE_SITE_URL }}
+          NEXT_PUBLIC_INDEXABLE: 'true'
+        run: npm run build
+
+      - name: Secret and private-URL scan of out/ (gitleaks, checksum pinned)
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gitleaks.tgz" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tgz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" dir --redact --no-banner --exit-code 1 out
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests (incl. responsive 320-1280 px)
+        run: npm run test:e2e
+
+      - name: Serve out/ (unless lighthouserc.json serves it)
+        run: |
+          if node -e 'const c=require("./lighthouserc.json").ci?.collect??{};process.exit(c.startServerCommand||c.staticDistDir?0:1)'; then
+            echo "lighthouserc.json serves the site itself"; exit 0
+          fi
+          nohup npm run serve > "$RUNNER_TEMP/serve.log" 2>&1 &
+          for _ in $(seq 1 30); do
+            if curl -fsS -o /dev/null "http://localhost:${PORT}/"; then exit 0; fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/serve.log"; exit 1
+
+      - name: Lighthouse CI (budgets from lighthouserc.json)
+        run: npm run audit:lighthouse
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: preprod-reports
+          path: |
+            playwright-report/
+            test-results/
+            .lighthouseci/
+          retention-days: 14
+          if-no-files-found: ignore
+          include-hidden-files: true
+
+  preview:
+    name: find the preview
+    needs: config
+    if: needs.config.outputs.applies == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      checks: read # the Cloudflare Pages check run on the head commit
+      statuses: read # or its commit status
+    outputs:
+      url: ${{ steps.find.outputs.url }}
+      skip: ${{ steps.find.outputs.skip }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          package-manager-cache: false
+
+      - name: Wait for the preview deployment of this commit
+        id: find
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          HEAD_REF: ${{ github.head_ref || github.ref_name }}
+          INPUT_URL: ${{ inputs.preview_url }}
+          WAIT_MINUTES: '20'
+          LIVE_SITE_URL: ${{ vars.LIVE_SITE_URL }}
+          LIVE_PAGES_HOST: ${{ vars.LIVE_PAGES_HOST }}
+          PREVIEW_URL: ${{ vars.PREVIEW_URL }}
+        run: node .github/scripts/preview-url.mjs
+
+  check-security:
+    name: check:security (preview)
+    needs: preview
+    if: needs.preview.outputs.skip == 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - name: Install (lockfile only; install scripts blocked by .npmrc)
+        run: npm ci
+
+      - name: Security probes against the preview (own host only)
+        env:
+          TARGET_URL: ${{ needs.preview.outputs.url }}
+          LIVE_SITE_URL: ${{ vars.LIVE_SITE_URL }}
+          LIVE_PAGES_HOST: ${{ vars.LIVE_PAGES_HOST }}
+        run: npm run check:security -- "$TARGET_URL"
+
+  zap-baseline:
+    name: ZAP baseline (preview)
+    needs: preview
+    if: needs.preview.outputs.skip == 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          package-manager-cache: false
+
+      - name: ZAP baseline scan (passive)
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
+        with:
+          target: ${{ needs.preview.outputs.url }}
+          docker_name: ghcr.io/zaproxy/zaproxy:2.17.0@sha256:5ccfff9a411743ab2615136a2edd7416bec9ce41572fa94e935df38c14adb2b6
+          rules_file_name: .github/zap/rules.tsv
+          allow_issue_writing: false
+          fail_action: false # zap-gate.mjs decides
+          artifact_name: zap-baseline-preprod
+
+      - name: ZAP gate (Medium and High alerts outside .github/zap/rules.tsv fail)
+        run: node .github/scripts/zap-gate.mjs report_json.json .github/zap/rules.tsv

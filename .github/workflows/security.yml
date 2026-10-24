@@ -1,0 +1,200 @@
+# Security checks (docs/BLUEPRINT.md, security table).
+#   Static, on every pull request, push to main and weekly: gitleaks (git history), the npm audit gate (high and
+#   critical, with the reviewed exceptions in scripts/audit.mjs), npm registry signatures, Semgrep registry rules.
+#   ZAP baseline (passive) against a preview: on each successful deployment_status event (a deployment that reports
+#   its URL to GitHub), or by hand with a URL.
+#   ZAP full scan (active) weekly, and by hand before a release, against PREVIEW_URL or https://<LIVE_PAGES_HOST>/,
+#   never the custom domain unless given by hand.
+# Every ZAP target must be one of this project's own hosts (.github/scripts/target-url.mjs). Pass or fail is decided
+# by .github/scripts/zap-gate.mjs with the reviewed exceptions in .github/zap/rules.tsv.
+# Security (.github/README.md): actions and images pinned (commit SHA, image digest, binary checksum); read-only token,
+# no secrets; ZAP never writes issues; never pull_request_target; event values reach scripts through env only.
+name: security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '23 4 * * 1' # Mondays 04:23 UTC
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      scan:
+        description: 'static = gitleaks, npm audit, Semgrep; baseline / full = a ZAP scan of target_url'
+        type: choice
+        options: [static, baseline, full]
+        default: static
+      target_url:
+        description: 'ZAP target, one of this project''s hosts (empty: PREVIEW_URL, else https://LIVE_PAGES_HOST/)'
+        type: string
+        required: false
+
+permissions: {}
+
+concurrency:
+  # One run per ref and event; deployment events get one group per deployment and status, so a later status
+  # (inactive, superseded) never cancels the scan of a successful one.
+  group: security-${{ github.event_name }}-${{ github.event.deployment.id || github.ref }}-${{ github.event.deployment_status.state || inputs.scan || 'static' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  gitleaks:
+    name: gitleaks (git history)
+    if: github.event_name != 'deployment_status' && (github.event_name != 'workflow_dispatch' || inputs.scan == 'static')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      # Release binary, not gitleaks/gitleaks-action: the action needs a GITLEAKS_LICENSE key for organisation repos.
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb # gitleaks_8.30.1_linux_x64.tar.gz
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # full history for the secret scan
+          persist-credentials: false
+
+      - name: Install gitleaks (checksum pinned)
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gitleaks.tgz" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tgz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP" gitleaks
+
+      - name: Secret scan (redacted output)
+        run: '"$RUNNER_TEMP/gitleaks" git --redact --no-banner --exit-code 1 .'
+
+  npm-audit:
+    name: npm audit gate
+    if: github.event_name != 'deployment_status' && (github.event_name != 'workflow_dispatch' || inputs.scan == 'static')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - name: Install (lockfile only; install scripts blocked by .npmrc)
+        run: npm ci
+
+      - name: Vulnerability gate (high and critical fail; reviewed exceptions in the script)
+        run: npm run audit
+
+      - name: Registry signatures and provenance of installed packages
+        run: npm audit signatures
+
+  semgrep:
+    name: Semgrep (registry rules, no account)
+    if: github.event_name != 'deployment_status' && (github.event_name != 'workflow_dispatch' || inputs.scan == 'static')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    container:
+      image: semgrep/semgrep:1.181.0@sha256:81474464c1f07483ba0682a44787fd93c91397419762a04abe2bafaae396304b
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Findings fail the job (--error). No SARIF upload: code scanning needs GitHub Code Security on private repos.
+      - name: Semgrep scan
+        run: >-
+          semgrep scan --error --metrics=off --disable-version-check
+          --config p/ci --config p/typescript --config p/react --config p/nodejs --config p/secrets
+          --config p/github-actions
+
+  zap-baseline:
+    name: ZAP baseline (preview)
+    if: >-
+      (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success') ||
+      (github.event_name == 'workflow_dispatch' && inputs.scan == 'baseline')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          package-manager-cache: false
+
+      - name: Check the target is this project's own host
+        id: target
+        env:
+          TARGET_URL: ${{ github.event.deployment_status.environment_url || inputs.target_url }}
+          FALLBACK: ${{ github.event_name == 'workflow_dispatch' }}
+          SKIP_FOREIGN: ${{ github.event_name == 'deployment_status' }}
+          LIVE_SITE_URL: ${{ vars.LIVE_SITE_URL }}
+          LIVE_PAGES_HOST: ${{ vars.LIVE_PAGES_HOST }}
+          PREVIEW_URL: ${{ vars.PREVIEW_URL }}
+        run: node .github/scripts/target-url.mjs
+
+      - name: ZAP baseline scan (passive)
+        if: steps.target.outputs.skip == 'false'
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
+        with:
+          target: ${{ steps.target.outputs.url }}
+          docker_name: ghcr.io/zaproxy/zaproxy:2.17.0@sha256:5ccfff9a411743ab2615136a2edd7416bec9ce41572fa94e935df38c14adb2b6
+          rules_file_name: .github/zap/rules.tsv
+          allow_issue_writing: false
+          fail_action: false # zap-gate.mjs decides
+          artifact_name: zap-baseline
+
+      - name: ZAP gate (Medium and High alerts outside .github/zap/rules.tsv fail)
+        if: steps.target.outputs.skip == 'false'
+        run: node .github/scripts/zap-gate.mjs report_json.json .github/zap/rules.tsv
+
+  zap-full-scan:
+    name: ZAP full scan (active)
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.scan == 'full')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          package-manager-cache: false
+
+      - name: Check the target is this project's own host
+        id: target
+        env:
+          TARGET_URL: ${{ inputs.target_url }}
+          FALLBACK: 'true'
+          LIVE_SITE_URL: ${{ vars.LIVE_SITE_URL }}
+          LIVE_PAGES_HOST: ${{ vars.LIVE_PAGES_HOST }}
+          PREVIEW_URL: ${{ vars.PREVIEW_URL }}
+        run: node .github/scripts/target-url.mjs
+
+      - name: ZAP full scan (active attacks, own host only)
+        if: steps.target.outputs.skip == 'false'
+        uses: zaproxy/action-full-scan@3c58388149901b9a03b7718852c5ba889646c27c # v0.13.0
+        with:
+          target: ${{ steps.target.outputs.url }}
+          docker_name: ghcr.io/zaproxy/zaproxy:2.17.0@sha256:5ccfff9a411743ab2615136a2edd7416bec9ce41572fa94e935df38c14adb2b6
+          rules_file_name: .github/zap/rules.tsv
+          allow_issue_writing: false
+          fail_action: false # zap-gate.mjs decides
+          artifact_name: zap-full-scan
+
+      - name: ZAP gate (Medium and High alerts outside .github/zap/rules.tsv fail)
+        if: steps.target.outputs.skip == 'false'
+        run: node .github/scripts/zap-gate.mjs report_json.json .github/zap/rules.tsv

@@ -1,0 +1,29 @@
+# Weekly, grouped version updates with a 7-day cooldown, matching .npmrc min-release-age=7 (no version younger than
+# a week). Security updates aren't delayed by the cooldown. GitHub Actions updates keep the full-SHA pins and move the
+# version comment. Bumped by hand instead (.github/README.md; Dependabot support for image digests inside workflow
+# files is unverified [U]): the Semgrep and ZAP image digests, the gitleaks binary and checksum, wranglerVersion.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      npm-all:
+        patterns: ['*']
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      actions-all:
+        patterns: ['*']
+    open-pull-requests-limit: 5

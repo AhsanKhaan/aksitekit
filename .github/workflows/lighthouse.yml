@@ -1,0 +1,72 @@
+# Lighthouse budgets on the built site (docs/BLUEPRINT.md: Accessibility, Best Practices and SEO 100; Performance
+# >= 90 on mobile; LCP, INP and CLS limits). The budgets live in lighthouserc.json (Step C), read by
+# `npm run audit:lighthouse` (npx @lhci/cli@0.15.1 autorun), the same command as locally; no third-party action.
+# out/ is served with scripts/serve-out.mjs on port 4321 (the _headers rules applied, as on Cloudflare) unless
+# lighthouserc.json starts its own server (startServerCommand) or reads out/ directly (staticDistDir).
+# Security (.github/README.md): actions pinned to full commit SHAs; read-only token; no secrets.
+name: lighthouse
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lighthouse:
+    name: lighthouse budgets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    env:
+      PORT: '4321'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - name: Install (lockfile only; install scripts blocked by .npmrc)
+        run: npm ci
+
+      # A lab build, never deployed: indexable, so the SEO category isn't failed by the preview noindex.
+      - name: Build
+        env:
+          NEXT_PUBLIC_INDEXABLE: 'true'
+        run: npm run build
+
+      - name: Serve out/ (unless lighthouserc.json serves it)
+        run: |
+          if node -e 'const c=require("./lighthouserc.json").ci?.collect??{};process.exit(c.startServerCommand||c.staticDistDir?0:1)'; then
+            echo "lighthouserc.json serves the site itself"; exit 0
+          fi
+          nohup npm run serve > "$RUNNER_TEMP/serve.log" 2>&1 &
+          for _ in $(seq 1 30); do
+            if curl -fsS -o /dev/null "http://localhost:${PORT}/"; then exit 0; fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/serve.log"; exit 1
+
+      - name: Lighthouse CI (budgets from lighthouserc.json)
+        run: npm run audit:lighthouse
+
+      - name: Upload the Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse
+          path: .lighthouseci/
+          retention-days: 14
+          if-no-files-found: ignore
+          include-hidden-files: true
