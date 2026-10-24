@@ -1,0 +1,276 @@
+{
+  "$comment": "Pipeline stages in order. gate.mjs reads this file. 'outputs' must exist ({competitor} expands to each competitor domain; a path ending in / needs at least one file). 'checks' are built-in checks in gate.mjs. 'npm' are npm scripts from docs/CONTRACT.md, run in order. 'manual' stages are recorded with the owner's confirmation. 'when' skips a stage that doesn't apply. 'npmProduces' runs the npm scripts before checking outputs (they create them).",
+  "stages": [
+    {
+      "id": "intake",
+      "agent": "orchestrator",
+      "summary": "Domain, competitors and their DR (owner supplies DR); the lowest-DR competitor becomes the keyword seed",
+      "outputs": [
+        "factory.config.json",
+        "research/inputs/competitors.csv"
+      ],
+      "checks": [
+        "intake"
+      ],
+      "npm": []
+    },
+    {
+      "id": "recon",
+      "agent": "competitor-recon",
+      "summary": "Structure, page types and UX gaps of each competitor, from public pages only; no copied text",
+      "outputs": [
+        "research/out/recon/{competitor}.md"
+      ],
+      "checks": [
+        "recon-no-copy"
+      ],
+      "npm": []
+    },
+    {
+      "id": "keywords",
+      "agent": "keyword-researcher",
+      "summary": "Keyword Planner CSVs → keywords.json → selected.json → keyword-map.json",
+      "needs": [
+        "research/inputs/kp/"
+      ],
+      "outputs": [
+        "research/out/keywords.json",
+        "research/out/selected.json",
+        "research/out/keyword-map.json"
+      ],
+      "checks": [
+        "json-outputs"
+      ],
+      "npm": [
+        "research:ingest",
+        "research:select",
+        "research:cluster"
+      ],
+      "npmProduces": true
+    },
+    {
+      "id": "strategy",
+      "agent": "content-strategist",
+      "summary": "Content strategy, wave-1 briefs, JSON-LD plan per page type",
+      "outputs": [
+        "docs/CONTENT-STRATEGY.md",
+        "research/out/content-plan.json",
+        "research/out/briefs/"
+      ],
+      "checks": [
+        "content-plan",
+        "no-template-placeholders"
+      ],
+      "npm": []
+    },
+    {
+      "id": "growth",
+      "agent": "growth-strategist",
+      "summary": "90-day ADHD-friendly growth plan: one task a day, at most 45 minutes, a done check each",
+      "outputs": [
+        "docs/GROWTH-90.md",
+        "growth/plan.json"
+      ],
+      "checks": [
+        "growth-plan",
+        "no-template-placeholders"
+      ],
+      "npm": [
+        "growth:today"
+      ]
+    },
+    {
+      "id": "architecture",
+      "agent": "architect",
+      "summary": "ARCHITECTURE.md and hosting target (Pages for a static export, Workers only for server code)",
+      "outputs": [
+        "docs/ARCHITECTURE.md"
+      ],
+      "checks": [
+        "hosting",
+        "no-template-placeholders"
+      ],
+      "npm": []
+    },
+    {
+      "id": "design",
+      "agent": "designer",
+      "summary": "DESIGN.md in the google-labs-code/design.md format; AA contrast; self-hosted fonts",
+      "outputs": [
+        "docs/DESIGN.md"
+      ],
+      "checks": [
+        "design-md",
+        "no-template-placeholders"
+      ],
+      "npm": [
+        "lint:design",
+        "gate:design"
+      ]
+    },
+    {
+      "id": "build",
+      "agent": "coder",
+      "summary": "Pages, components and content from the keyword map, briefs and DESIGN.md",
+      "outputs": [],
+      "checks": [],
+      "npm": [
+        "verify"
+      ]
+    },
+    {
+      "id": "tests",
+      "agent": "harness",
+      "summary": "Unit and e2e tests for every new page type and module",
+      "outputs": [],
+      "checks": [],
+      "npm": [
+        "test",
+        "test:e2e"
+      ]
+    },
+    {
+      "id": "reconcile",
+      "agent": "reconciler",
+      "summary": "Keyword map ↔ pages ↔ design ↔ briefs agree; parity report against competitors",
+      "outputs": [
+        "reports/reconcile.md"
+      ],
+      "checks": [],
+      "npm": [
+        "check:release",
+        "audit:unique"
+      ]
+    },
+    {
+      "id": "seo",
+      "agent": "seo-auditor",
+      "summary": "Titles, canonicals, sitemap, schema, internal links, depth ≤ 3",
+      "outputs": [
+        "reports/seo.md"
+      ],
+      "checks": [],
+      "npm": [
+        "build"
+      ]
+    },
+    {
+      "id": "adsense",
+      "agent": "adsense-gatekeeper",
+      "summary": "Required pages, consent, no ad code before approval, policy-risk scan",
+      "outputs": [
+        "reports/adsense.md"
+      ],
+      "checks": [],
+      "npm": [
+        "gate:adsense"
+      ]
+    },
+    {
+      "id": "security",
+      "agent": "secops-reviewer",
+      "summary": "Secrets, CVEs, SAST, CSP, XSS, CSRF, path traversal, rate limiting, private-URL exposure, CDN-only, email spoofing",
+      "outputs": [
+        "reports/security.md",
+        "docs/SECURITY.md"
+      ],
+      "checks": [
+        "no-template-placeholders"
+      ],
+      "npm": [
+        "check:repo",
+        "audit",
+        "check:security"
+      ],
+      "urlArg": [
+        "check:security"
+      ]
+    },
+    {
+      "id": "responsive",
+      "agent": "responsive-checker",
+      "summary": "320–1280 px: no horizontal scroll, touch targets",
+      "outputs": [
+        "reports/responsive.md"
+      ],
+      "checks": [],
+      "npm": [
+        "test:e2e"
+      ]
+    },
+    {
+      "id": "performance",
+      "agent": "performance-auditor",
+      "summary": "Lighthouse budgets and Core Web Vitals limits from factory.config.json",
+      "outputs": [
+        "reports/performance.md"
+      ],
+      "checks": [],
+      "npm": [
+        "audit:lighthouse",
+        "audit:perf",
+        "audit:a11y"
+      ]
+    },
+    {
+      "id": "preprod",
+      "agent": "orchestrator",
+      "summary": "PR to the production branch: preprod.yml (every gate) green in CI for the exact SHA",
+      "outputs": [],
+      "checks": [],
+      "npm": [],
+      "manual": "Owner or gh: preprod.yml is green on the PR to the production branch for this SHA"
+    },
+    {
+      "id": "cloudflare",
+      "agent": "cloudflare-reviewer",
+      "summary": "Free-plan Cloudflare checklist through MCP reads; writes only with the owner's yes",
+      "when": "cloudflare",
+      "outputs": [
+        "reports/cloudflare.md"
+      ],
+      "checks": [],
+      "npm": []
+    },
+    {
+      "id": "go",
+      "agent": "owner",
+      "summary": "The owner types GO for the exact commit SHA",
+      "outputs": [],
+      "checks": [],
+      "npm": [],
+      "manual": "Owner typed 'GO <sha>' in chat for this exact SHA"
+    },
+    {
+      "id": "deploy",
+      "agent": "devsecops-deployer",
+      "summary": "Merge → deploy workflow → live check → rollback path recorded",
+      "outputs": [],
+      "checks": [],
+      "npm": [
+        "check:live"
+      ],
+      "urlArg": [
+        "check:live"
+      ]
+    },
+    {
+      "id": "docs",
+      "agent": "doc-generator",
+      "summary": "PRD, DESIGN, ARCHITECTURE, SECURITY and the AGENTS.md project section regenerated from the agents' outputs",
+      "outputs": [
+        "docs/PRD.md",
+        "docs/DESIGN.md",
+        "docs/ARCHITECTURE.md",
+        "docs/SECURITY.md",
+        "AGENTS.md"
+      ],
+      "checks": [
+        "no-template-placeholders"
+      ],
+      "npm": [
+        "check:repo"
+      ]
+    }
+  ]
+}

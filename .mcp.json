@@ -1,0 +1,50 @@
+{
+  "mcpServers": {
+    "cloudflare-docs": {
+      "type": "http",
+      "url": "https://docs.mcp.cloudflare.com/mcp"
+    },
+    "cloudflare-api": {
+      "type": "http",
+      "url": "https://mcp.cloudflare.com/mcp"
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/readonly",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN:-}"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@0.0.83",
+        "--headless",
+        "--isolated",
+        "--block-service-workers",
+        "--blocked-origins",
+        "https://pagead2.googlesyndication.com;https://tpc.googlesyndication.com;https://googleads.g.doubleclick.net;https://securepubads.g.doubleclick.net;https://www.googletagservices.com;https://adservice.google.com"
+      ]
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@1.11.0", "--headless", "--isolated", "--no-usage-statistics"]
+    },
+    "google-analytics": {
+      "type": "stdio",
+      "command": "pipx",
+      "args": ["run", "--spec", "analytics-mcp==0.7.0", "analytics-mcp"],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "${GOOGLE_APPLICATION_CREDENTIALS:-}",
+        "GOOGLE_PROJECT_ID": "${GOOGLE_PROJECT_ID:-}"
+      }
+    },
+    "claude-docs": {
+      "type": "http",
+      "url": "https://code.claude.com/docs/mcp"
+    }
+  }
+}

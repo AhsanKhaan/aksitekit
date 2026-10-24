@@ -1,0 +1,136 @@
+# AGENTS.md: agent map, pipeline and gates
+
+Read by any coding agent (Claude Code, or another tool that reads `AGENTS.md`). The rules in `CLAUDE.md` apply to every
+agent here; this file says **who does what, in which order, and which script decides**. File ownership, npm script
+names and data formats are fixed in `docs/CONTRACT.md`.
+
+## 1. The rules (short form; `CLAUDE.md` has the full list)
+| Rule | What it means in practice |
+|---|---|
+| **Free tools only, ask first** | Never use a paid tool, API, plan or trial. A stage that would need one stops and asks the owner (tool, cost, purpose). If the owner says no, the agent proposes a free alternative |
+| **Trusted sources only** | Skills, plugins, MCP servers and GitHub Actions come from `skills.lock.json`, pinned to a commit. `pending-review` and `excluded` sources need the owner's yes. See `docs/SKILLS.md` |
+| **Agents propose, scripts decide** | Each stage writes a file; its gate passes or fails it. A stage is done only when its gate passes and the ledger says so |
+| **Owner GO before production** | Nothing merges to the production branch or deploys without the owner typing `GO <sha>` for that exact commit |
+| **Never copy competitors** | Recon records structure and UX gaps from public pages; no copied text, images, code or design assets. Quotes ≤ 15 words with a source |
+| **Never scrape Google or bypass CAPTCHAs** | No automated Google queries, no CAPTCHA solving, no automation against a site's terms. KD comes from the free SERP check (Claude's WebSearch plus the owner's input) |
+| **"Competition" is not KD** | Keyword Planner's Competition column measures advertiser bidding. It's stored as `competitionAds`, a commercial-value signal, never as difficulty |
+| **Label every number** | **[M]** measured (say the source), **[R]** range, **[P]** proxy or estimate, **[U]** unverified |
+| **DR comes from the owner** | Agents never fetch DR or other paid metrics. The owner writes it in `research/inputs/competitors.csv` |
+| **No ad code before approval** | No AdSense code, ad script or `ads.txt` until `npm run gate:adsense` passes and the owner confirms approval |
+
+## 2. Agent map
+Each agent has a file in `.claude/agents/`. "Skills" are sources from `skills.lock.json`; the agent loads only what's
+listed there and approved.
+
+| # | Agent | Job | Main skills / MCP | Writes | Gate |
+|---|---|---|---|---|---|
+| 1 | `orchestrator` | Runs `/start`: intake, then each stage in order; records the ledger | the ledger, `/gate` | `factory.config.json`, `research/inputs/competitors.csv`, `reports/ledger.md` | each stage's gate |
+| 2 | `competitor-recon` | Structure, page types and UX gaps of each competitor (public pages only) | replica-recon, replica-diff, rea (after review), marketingskills `competitors`, Playwright MCP | `research/out/recon/<competitor>.md` | `gate.mjs recon` (one file per competitor, no copied passages); `npm run audit:unique` after the build |
+| 3 | `keyword-researcher` | Keyword Planner CSVs → selected keywords → one owner URL per keyword | claude-seo `seo-cluster`, searchfit `keyword-clustering` (pending review), marketingskills `programmatic-seo` | `research/out/{keywords,selected,keyword-map}.json`, `research/inputs/kd.csv` | `npm run research:ingest` → `research:select` → `research:cluster` |
+| 4 | `content-strategist` | Content strategy, wave-1 briefs, JSON-LD plan, `llms.txt` inputs | searchfit `content-strategy` / `content-brief` (pending review), marketingskills `schema` / `ai-seo`, claude-seo `seo-geo` / `seo-schema` | `docs/CONTENT-STRATEGY.md`, `research/out/content-plan.json`, `research/out/briefs/*.md` | `gate.mjs strategy` |
+| 5 | `growth-strategist` | The 90-day ADHD-friendly growth plan | marketingskills `marketing-loops`, `marketing-ideas`, `marketing-council` (Hormozi lens), `customer-research` | `docs/GROWTH-90.md`, `growth/plan.json` | `gate.mjs growth` → `npm run growth:today` |
+| 6 | `architect` | Stack, hosting target, page templates, URL rules | system-design (pending review), marketingskills `site-architecture`, cloudflare skills, Cloudflare docs MCP | `docs/ARCHITECTURE.md`, `factory.config.json` → `hosting.target` | `gate.mjs architecture` |
+| 7 | `designer` | Visual identity as design tokens and rules | ui-ux-pro-max, awesome-design-md (reference), genjutsu (motion, optional, license unclear), replica-design | `docs/DESIGN.md` | `gate.mjs design` (spec lint) → `npm run gate:design` (AA contrast) |
+| 8 | `coder` | Builds pages and components from the map, briefs and DESIGN.md | anthropics `frontend-design`, cloudflare skills | `app/`, `components/`, `lib/`, `content/` | `npm run verify` |
+| 9 | `harness` | Unit and e2e tests for every new page type and module | anthropics `webapp-testing`, Playwright MCP | `tests/**` | `npm test`, `npm run test:e2e` |
+| 10 | `reconciler` | Keyword map ↔ pages ↔ design ↔ briefs agree; parity vs competitors | ECC (after review), replica-diff | `reports/reconcile.md` | `npm run check:release`, `npm run audit:unique` |
+| 11 | `seo-auditor` | On-page and technical SEO of the built site | claude-seo suite | `reports/seo.md` | `npm run build` (runs `check-out.mjs`) |
+| 12 | `adsense-gatekeeper` | GO / NO-GO on the AdSense gate; never adds ad code | (ported agent) | `reports/adsense.md` | `npm run gate:adsense` |
+| 13 | `secops-reviewer` | The security-check table: secrets, CVEs, SAST, CSP/XSS, CSRF, traversal, rate limits, leaks, CDN-only, email spoofing | trailofbits `semgrep`, `supply-chain-risk-auditor`, `gha-security-review` and `security-and-hardening` (both pending review) | `reports/security.md`, `docs/SECURITY.md` | `npm run check:repo`, `npm run audit`, `npm run check:security -- <url>`; CI `security.yml` (gitleaks, Semgrep), ZAP |
+| 14 | `cloudflare-reviewer` | Free-plan Cloudflare checklist, reads only; **only when the target is Cloudflare** | Cloudflare API MCP (reads), Cloudflare docs MCP | `reports/cloudflare.md` | MCP reads against the checklist; `npm run check:live -- <url>` |
+| 15 | `responsive-checker` | 320–1280 px layouts, touch targets | (ported) | `reports/responsive.md` | `npm run test:e2e` |
+| 16 | `performance-auditor` | Lighthouse budgets and Core Web Vitals | Lighthouse CI (official), Chrome DevTools MCP | `reports/performance.md` | `npm run audit:lighthouse`, `audit:perf`, `audit:a11y` |
+| 17 | `devsecops-deployer` | Pre-prod → owner GO → deploy → live check → rollback path | (ported production-deploy), wrangler-action | `reports/deploys/<date>-<sha>.md` | `preprod.yml` green, owner GO, deploy workflow green, `npm run check:live` |
+| 18 | `doc-generator` | Regenerates the project docs from the agents' outputs | `docs/templates/` | `docs/PRD.md`, `docs/DESIGN.md`, `docs/ARCHITECTURE.md`, `docs/SECURITY.md`, §6 of this file | `gate.mjs docs` (no placeholders left), `npm run check:repo` |
+
+**Who runs where.** Subagents can't start other subagents, and they can't talk to the owner. So the orchestrator and
+the deployer run **in the main session** (through `/start` and `/deploy-production`); they hand single stages to the
+other agents and ask the owner every question themselves. An agent that needs an owner decision stops and returns the
+question; it never guesses.
+
+## 3. Pipeline flow
+```text
+/start
+  intake ── owner: domain, competitors + DR ──► seed = lowest-DR competitor
+  recon (competitors, public pages only)
+  keywords ── owner drops Keyword Planner CSVs in research/inputs/kp/ ──► ingest → select → cluster
+  strategy + growth (90 days)
+  architecture → design
+  build + tests
+  reconcile
+  reviews: seo · adsense · security · responsive · performance
+  preprod: PR to the production branch, preprod.yml green  (+ cloudflare-reviewer when hosting is Cloudflare)
+  owner GO <sha>
+  deploy → check:live → rollback path recorded
+  docs regenerated
+```
+Every stage is resumable: `node .claude/skills/gate/gate.mjs status` reads the ledger and prints the next stage.
+
+## 4. Gate table
+The machine-readable copy is `.claude/skills/gate/stages.json`; `node .claude/skills/gate/gate.mjs <stage>` checks the
+outputs, runs the npm gates in order, and appends the result to the ledger. Scripts marked **C** come from Step C and
+**B** from Step B (`docs/CONTRACT.md`); until they exist the gate records **BLOCKED** and points to
+`docs/TODO-step-c.md` (or Step B).
+
+| Stage | Agent | Output file(s) | Gate command(s) |
+|---|---|---|---|
+| intake | orchestrator | `factory.config.json` (`project.domain`, `competitors[]`), `research/inputs/competitors.csv` | `node .claude/skills/gate/gate.mjs intake` |
+| recon | competitor-recon | `research/out/recon/<competitor>.md` | `node .claude/skills/gate/gate.mjs recon` |
+| keywords | keyword-researcher | `research/out/keywords.json`, `selected.json`, `keyword-map.json` | `npm run research:ingest`, `npm run research:select`, `npm run research:cluster` (**B**) |
+| strategy | content-strategist | `docs/CONTENT-STRATEGY.md`, `research/out/content-plan.json`, `research/out/briefs/*.md` | `node .claude/skills/gate/gate.mjs strategy` |
+| growth | growth-strategist | `docs/GROWTH-90.md`, `growth/plan.json` | `node .claude/skills/gate/gate.mjs growth`, then `npm run growth:today` (**C**) |
+| architecture | architect | `docs/ARCHITECTURE.md`, `hosting.target` | `node .claude/skills/gate/gate.mjs architecture` |
+| design | designer | `docs/DESIGN.md` | `node .claude/skills/gate/gate.mjs design` (DESIGN.md spec lint), `npm run gate:design` (**C**) |
+| build | coder | app code | `npm run verify` (**C**) |
+| tests | harness | `tests/**` | `npm test`, `npm run test:e2e` (**C**) |
+| reconcile | reconciler | `reports/reconcile.md` | `npm run check:release`, `npm run audit:unique` (**C**) |
+| seo | seo-auditor | `reports/seo.md` | `npm run build` → `check-out.mjs` (**C**) |
+| adsense | adsense-gatekeeper | `reports/adsense.md` | `npm run gate:adsense` (**C**) |
+| security | secops-reviewer | `reports/security.md`, `docs/SECURITY.md` | `npm run check:repo`, `npm run audit`, `npm run check:security -- <preview-url>` (**C**); CI `security.yml` |
+| responsive | responsive-checker | `reports/responsive.md` | `npm run test:e2e` (**C**) |
+| performance | performance-auditor | `reports/performance.md` | `npm run audit:lighthouse`, `npm run audit:perf`, `npm run audit:a11y` (**C**) |
+| preprod | orchestrator | PR to the production branch | `preprod.yml` green for the exact SHA (CI, Step D); recorded with `gate.mjs record preprod` |
+| cloudflare | cloudflare-reviewer (Cloudflare targets only) | `reports/cloudflare.md` | `node .claude/skills/gate/gate.mjs cloudflare` (report exists); MCP reads against the checklist |
+| go | owner | — | the owner types `GO <sha>`; recorded with `gate.mjs record go` |
+| deploy | devsecops-deployer | `reports/deploys/<date>-<sha>.md` | deploy workflow green; `npm run check:live -- https://<domain>` (**C**) |
+| docs | doc-generator | `docs/PRD.md`, `docs/DESIGN.md`, `docs/ARCHITECTURE.md`, `docs/SECURITY.md`, `AGENTS.md` §6 | `node .claude/skills/gate/gate.mjs docs`, `npm run check:repo` (**C**) |
+
+Thresholds come from `factory.config.json`: `research.minVolume`, `maxKd`, `maxSeasonality`,
+`maxSecondaryKeywordsPerPage`, and `budgets` (Lighthouse Accessibility, Best Practices and SEO 100; Performance ≥ 90 on
+mobile; LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1). These are starting defaults [P], tuned per project by the owner.
+
+## 5. The ledger (`reports/ledger.md`)
+One file per project, **append-only**, written by `gate.mjs` (and by the orchestrator only through `gate.mjs record`).
+`reports/` is git-ignored, so the ledger stays on the machine that ran the stages and never causes a commit.
+
+```markdown
+# Pipeline ledger
+
+| When (UTC) | Stage | Agent | Attempt | Result | Gate | Evidence | Next |
+|---|---|---|---|---|---|---|---|
+| 2026-01-05T09:12Z | intake | orchestrator | 1 | PASS | gate.mjs intake | domain set; 3 competitors; seed example.org (DR 12 [M: owner]) | recon |
+| 2026-01-05T10:40Z | keywords | keyword-researcher | 1 | BLOCKED | npm run research:ingest | research/inputs/kp/ is empty | owner: drop Keyword Planner CSVs |
+```
+
+| Column | Rule |
+|---|---|
+| When | UTC, minute precision |
+| Stage | an `id` from `stages.json` |
+| Attempt | counts up per stage; a stage stops after **3 failed attempts with the same failure** and asks the owner |
+| Result | `PASS`, `FAIL`, `BLOCKED` (a script, file, tool or owner input is missing), `SKIPPED` (the stage doesn't apply, e.g. `cloudflare` on another host) |
+| Gate | the exact command that decided |
+| Evidence | the key output lines or the reason; no secrets, ever |
+| Next | the next stage, or the owner action that unblocks this one |
+
+**Resuming:** the next stage is the first one, in `stages.json` order, whose latest row isn't `PASS` or `SKIPPED`.
+`gate.mjs status` prints it. Re-run that stage's gate before trusting anything older than the current session.
+
+## 6. Project status (regenerated by `doc-generator`)
+<!-- project:start -->
+This copy hasn't run `/start` yet. After intake, `doc-generator` replaces this section with the project's name, domain,
+hosting target, the stage table from the ledger, and the open owner items.
+
+- Project: {{PROJECT_NAME}}
+- Domain: {{DOMAIN}}
+- Hosting: {{HOSTING_TARGET}}
+<!-- project:end -->
