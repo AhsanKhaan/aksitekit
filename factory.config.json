@@ -1,0 +1,44 @@
+{
+  "project": {
+    "name": "",
+    "domain": "",
+    "brand": "",
+    "locale": "en",
+    "markets": ["US"]
+  },
+  "hosting": {
+    "target": "cloudflare-pages",
+    "options": ["cloudflare-pages", "cloudflare-workers", "other"],
+    "rule": "cloudflare-pages for a static export; cloudflare-workers when the app needs server-side code (architect decides, owner confirms)",
+    "productionBranch": "main",
+    "freePlanOnly": true
+  },
+  "competitors": [],
+  "research": {
+    "seedFrom": "lowest-dr-competitor",
+    "minVolume": 1000,
+    "maxKd": 30,
+    "maxSeasonality": 2.5,
+    "maxSecondaryKeywordsPerPage": 10,
+    "kdSource": "serp-check",
+    "note": "Starting defaults, not research results: tune per project. maxSeasonality = peak month / median month over the 12 Keyword Planner monthly columns. Keyword Planner 'Competition' is advertiser bidding, never used as KD."
+  },
+  "bots": {
+    "search": "allow",
+    "adsense": "allow",
+    "aiSearch": "allow",
+    "aiTraining": "ask"
+  },
+  "budgets": {
+    "lighthouse": { "performance": 90, "accessibility": 100, "bestPractices": 100, "seo": 100 },
+    "coreWebVitals": { "lcpMs": 2500, "inpMs": 200, "cls": 0.1 }
+  },
+  "monetization": {
+    "adsense": { "enabled": false, "publisherId": "" }
+  },
+  "analytics": { "ga4MeasurementId": "" },
+  "paidTools": {
+    "allowed": false,
+    "rule": "Never use a paid tool or API. If a step needs one, stop and ask the owner; if the owner says no, propose a free alternative."
+  }
+}

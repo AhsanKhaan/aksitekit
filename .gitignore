@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# generated at build from NEXT_PUBLIC_SITE_URL (scripts/gen-public-files.mjs)
+public/.well-known/security.txt
+
+# tests
+reports/
+test-results/
+playwright-report/
+coverage/
+
+# env files: secrets never committed (SEC-SEC-02); .env.example is the template
+.env*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

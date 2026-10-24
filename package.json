@@ -1,0 +1,56 @@
+{
+  "name": "adsense-site-factory",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Template: keyword research to a deployed, AdSense-ready static site, run by Claude Code agents with deterministic gates. Free tools only.",
+  "engines": {
+    "node": ">=24.22.0 <25"
+  },
+  "scripts": {
+    "dev": "node scripts/gen-public-files.mjs && next dev",
+    "build": "node scripts/production-gate.mjs && node scripts/gen-public-files.mjs && next build && node scripts/flatten-segments.mjs && node scripts/check-out.mjs",
+    "serve": "node scripts/serve-out.mjs",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "check:repo": "node scripts/check-repo.mjs",
+    "check:release": "vitest run tests/content.test.ts --mode release",
+    "check:live": "node scripts/check-live.mjs",
+    "check:security": "node scripts/check-security.mjs",
+    "audit": "node scripts/audit.mjs",
+    "audit:perf": "node scripts/audits/perf.mjs",
+    "audit:a11y": "node scripts/audits/a11y.mjs",
+    "audit:unique": "node scripts/audits/unique-text.mjs out",
+    "audit:ga": "node scripts/audits/ga-live.mjs",
+    "audit:lighthouse": "npx --yes @lhci/cli@0.15.1 autorun",
+    "gate:adsense": "node scripts/adsense-gate.mjs",
+    "gate:design": "node scripts/design/contrast.mjs",
+    "research:ingest": "node scripts/research/kp-ingest.mjs",
+    "research:select": "node scripts/research/keyword-select.mjs",
+    "research:cluster": "node scripts/research/cluster.mjs",
+    "research:all": "npm run research:ingest && npm run research:select && npm run research:cluster",
+    "growth:today": "node scripts/growth/today.mjs",
+    "verify": "npm run check:repo && npm run audit && npm run lint && npm run typecheck && npm test && npm run build && npm run test:e2e"
+  },
+  "dependencies": {
+    "next": "16.4.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.1",
+    "eslint-plugin-no-unsanitized": "4.1.5",
+    "eslint-plugin-regexp": "3.3.1",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3",
+    "vitest": "5.0.4"
+  }
+}
