@@ -1,0 +1,792 @@
+{
+  "$comment": "Trusted sources for skills, plugins, MCP servers and GitHub Actions. Explained in docs/SKILLS.md. commit = the default branch HEAD from GET https://api.github.com/repos/{owner}/{repo}/commits/HEAD on the reviewed date. For GitHub Actions, workflows pin release.commit (the newest release tag) by full SHA.",
+  "lockVersion": 1,
+  "reviewed": "2026-10-25",
+  "statuses": {
+    "approved": "Agents may use it, at the pinned commit",
+    "approved-with-limits": "Agents may use it within the limits in notes",
+    "pending-review": "Not used until the owner records a review and a yes in docs/SKILLS.md",
+    "optional-paid": "Needs a paid plan or API; off unless the owner decides otherwise",
+    "excluded": "Never used"
+  },
+  "sources": [
+    {
+      "repo": "anthropics/skills",
+      "url": "https://github.com/anthropics/skills",
+      "kind": "skills",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0 for most skills; docx, pdf, pptx and xlsx are source-available (per its README)",
+      "purpose": "Anthropic example skills: frontend design and Playwright web-app testing",
+      "skills": [
+        "frontend-design",
+        "webapp-testing"
+      ],
+      "usedBy": [
+        "coder",
+        "harness"
+      ],
+      "defaultBranch": "main",
+      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
+      "commitDate": "2026-10-09T18:45:49Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "anthropics/claude-plugins-official",
+      "url": "https://github.com/anthropics/claude-plugins-official",
+      "kind": "plugins",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "Anthropic's official plugin marketplace",
+      "skills": [
+        "frontend-design"
+      ],
+      "usedBy": [
+        "coder"
+      ],
+      "defaultBranch": "main",
+      "commit": "58267944f92187b7d6a1c822165c96c81c864806",
+      "commitDate": "2026-10-23T18:21:26Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "anthropics/claude-code-action",
+      "url": "https://github.com/anthropics/claude-code-action",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "optional-paid",
+      "license": "MIT",
+      "purpose": "Claude in CI. Off: it needs a paid Anthropic API key",
+      "usedBy": [],
+      "defaultBranch": "main",
+      "commit": "925afb53776cf1a2b738c6bdbed37b4d4000ef13",
+      "commitDate": "2026-10-24T00:45:41Z",
+      "reviewed": "2026-10-25",
+      "release": {
+        "tag": "v1.0.262",
+        "commit": "925afb53776cf1a2b738c6bdbed37b4d4000ef13"
+      },
+      "notes": "Not used. CI runs the free deterministic scripts only."
+    },
+    {
+      "repo": "cloudflare/skills",
+      "url": "https://github.com/cloudflare/skills",
+      "kind": "skills",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "Cloudflare platform skills (Pages, Workers, Wrangler)",
+      "skills": [
+        "wrangler",
+        "workers-best-practices",
+        "web-perf"
+      ],
+      "usedBy": [
+        "architect",
+        "coder"
+      ],
+      "defaultBranch": "main",
+      "commit": "86505e44f87d801aa1864a3c4109e9a8ae5c409f",
+      "commitDate": "2026-10-15T21:19:27Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "cloudflare/mcp-server-cloudflare",
+      "url": "https://github.com/cloudflare/mcp-server-cloudflare",
+      "kind": "mcp-server",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "Cloudflare domain MCP servers, including the docs server (docs.mcp.cloudflare.com)",
+      "usedBy": [
+        "architect",
+        "cloudflare-reviewer"
+      ],
+      "defaultBranch": "main",
+      "commit": "a21972e219289337731a066befb5c66886b9ce7b",
+      "commitDate": "2026-10-22T15:20:22Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "cloudflare/mcp",
+      "url": "https://github.com/cloudflare/mcp",
+      "kind": "mcp-server",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "Cloudflare API MCP server (mcp.cloudflare.com, Code Mode). Reads free; writes only with the owner's yes per call",
+      "usedBy": [
+        "cloudflare-reviewer",
+        "devsecops-deployer"
+      ],
+      "defaultBranch": "main",
+      "commit": "550e1be82b2227818e6b98fc32a313a59403ae3f",
+      "commitDate": "2026-10-22T15:50:50Z",
+      "reviewed": "2026-10-25",
+      "notes": "Added: the Cloudflare API server moved here from cloudflare/mcp-server-cloudflare (its README points to it)."
+    },
+    {
+      "repo": "github/github-mcp-server",
+      "url": "https://github.com/github/github-mcp-server",
+      "kind": "mcp-server",
+      "tier": "official",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "GitHub MCP server, read-only tool set",
+      "usedBy": [
+        "devsecops-deployer",
+        "orchestrator"
+      ],
+      "defaultBranch": "main",
+      "commit": "f38526264abb14961b32cea386e38ec6d3cf674f",
+      "commitDate": "2026-10-22T11:24:10Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "microsoft/playwright-mcp",
+      "url": "https://github.com/microsoft/playwright-mcp",
+      "kind": "mcp-server",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "Playwright browser automation over MCP (headless, isolated, ad hosts blocked)",
+      "usedBy": [
+        "competitor-recon",
+        "harness",
+        "responsive-checker"
+      ],
+      "defaultBranch": "main",
+      "commit": "0c4107acbecb75472b23c05c0e42471a0011874f",
+      "commitDate": "2026-10-22T17:43:21Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "ChromeDevTools/chrome-devtools-mcp",
+      "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+      "kind": "mcp-server",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "Chrome DevTools traces and Lighthouse over MCP (usage statistics off)",
+      "usedBy": [
+        "performance-auditor"
+      ],
+      "defaultBranch": "main",
+      "commit": "ada7963246c0c91eae185125a57aecd13cbe0376",
+      "commitDate": "2026-10-23T06:08:34Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "googleanalytics/google-analytics-mcp",
+      "url": "https://github.com/googleanalytics/google-analytics-mcp",
+      "kind": "mcp-server",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "Google Analytics 4 reports over MCP, read-only",
+      "usedBy": [
+        "growth-strategist"
+      ],
+      "defaultBranch": "main",
+      "commit": "ce84226bf4cedea7f2910f5afb07a6b9138f6553",
+      "commitDate": "2026-10-22T14:02:19Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "GoogleChrome/lighthouse-ci",
+      "url": "https://github.com/GoogleChrome/lighthouse-ci",
+      "kind": "tool",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "Lighthouse CI budgets (run as npx @lhci/cli@0.15.1)",
+      "usedBy": [
+        "performance-auditor"
+      ],
+      "defaultBranch": "main",
+      "commit": "85d33432a9149033b62c69f11c6fe6da0e12e679",
+      "commitDate": "2026-10-23T21:45:53Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "cloudflare/wrangler-action",
+      "url": "https://github.com/cloudflare/wrangler-action",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "Deploys to Cloudflare Pages or Workers from GitHub Actions with a scoped token secret",
+      "usedBy": [
+        "devsecops-deployer"
+      ],
+      "defaultBranch": "main",
+      "commit": "a17640ae5ec0d99c8c75e908aa69f5519037cd4e",
+      "commitDate": "2026-09-24T21:14:23Z",
+      "reviewed": "2026-10-25",
+      "release": {
+        "tag": "v4.1.3",
+        "commit": "953926a2e2182532811c01a25e53647d93bf07c0"
+      }
+    },
+    {
+      "repo": "gitleaks/gitleaks",
+      "url": "https://github.com/gitleaks/gitleaks",
+      "kind": "tool",
+      "tier": "official",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "Secret scanner CLI (MIT). Preferred over gitleaks-action: download the release and verify its checksum",
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "master",
+      "commit": "5f6ec56cfa6f8c67648d863582c7ae2f206d5c1c",
+      "commitDate": "2026-10-23T20:44:59Z",
+      "reviewed": "2026-10-25",
+      "release": {
+        "tag": "v8.30.1",
+        "commit": "83d9cd684c87d95d656c1458ef04895a7f1cbd8e"
+      },
+      "notes": "Added next to gitleaks-action because of the action's license terms."
+    },
+    {
+      "repo": "gitleaks/gitleaks-action",
+      "url": "https://github.com/gitleaks/gitleaks-action",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved-with-limits",
+      "license": "Gitleaks-Action EULA (source-available since v2; MIT before)",
+      "purpose": "Secret scanning in GitHub Actions",
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "master",
+      "commit": "bcfb9cce635345aac9996cedc19b2de8e01b894f",
+      "commitDate": "2026-07-21T07:03:09Z",
+      "reviewed": "2026-10-25",
+      "release": {
+        "tag": "v3.0.0",
+        "commit": "e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e"
+      },
+      "notes": "Since v2 it is under a source-available EULA, not MIT; repositories owned by a GitHub organization need a license key (free on sign-up at gitleaks.io, which asks for name, email and company). Personal-account repositories need none. Prefer the gitleaks CLI in CI."
+    },
+    {
+      "repo": "semgrep/semgrep",
+      "url": "https://github.com/semgrep/semgrep",
+      "kind": "tool",
+      "tier": "official",
+      "status": "approved-with-limits",
+      "license": "LGPL-2.1",
+      "purpose": "SAST (Semgrep Community Edition)",
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "develop",
+      "commit": "087e93b3a1fdf44f97bc92b5b9c2ba221cb2488b",
+      "commitDate": "2026-10-22T02:08:25Z",
+      "reviewed": "2026-10-25",
+      "notes": "Community Edition only, with --metrics=off and explicit rule packs. Never Semgrep Pro, the AppSec Platform or `semgrep ci` with a token (paid). Registry rule packs carry their own rule licenses."
+    },
+    {
+      "repo": "zaproxy/action-baseline",
+      "url": "https://github.com/zaproxy/action-baseline",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "ZAP baseline scan on every PR against the preview URL (the free equivalent of Burp Pro's scanner)",
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "master",
+      "commit": "72166cb1b917b984128586ed28801f4b4a37a0e2",
+      "commitDate": "2026-10-19T08:11:18Z",
+      "reviewed": "2026-10-25",
+      "release": {
+        "tag": "v0.15.0",
+        "commit": "de8ad967d3548d44ef623df22cf95c3b0baf8b25"
+      },
+      "notes": "From the blueprint's security-check table."
+    },
+    {
+      "repo": "zaproxy/action-full-scan",
+      "url": "https://github.com/zaproxy/action-full-scan",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "ZAP full scan, weekly and before a release",
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "master",
+      "commit": "373906d606ca990dd62655c65983bab507527b41",
+      "commitDate": "2026-10-19T08:12:15Z",
+      "reviewed": "2026-10-25",
+      "release": {
+        "tag": "v0.13.0",
+        "commit": "3c58388149901b9a03b7718852c5ba889646c27c"
+      },
+      "notes": "From the blueprint's security-check table."
+    },
+    {
+      "repo": "actions/checkout",
+      "url": "https://github.com/actions/checkout",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "GitHub first-party: check out the repository in workflows",
+      "usedBy": [
+        "devsecops-deployer"
+      ],
+      "defaultBranch": "main",
+      "commit": "f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a",
+      "commitDate": "2026-07-20T16:20:47Z",
+      "reviewed": "2026-10-25",
+      "release": {
+        "tag": "v7.0.1",
+        "commit": "3d3c42e5aac5ba805825da76410c181273ba90b1"
+      },
+      "notes": "Added: CLAUDE.md requires every GitHub Action to be in this lock."
+    },
+    {
+      "repo": "actions/setup-node",
+      "url": "https://github.com/actions/setup-node",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "GitHub first-party: set up Node.js in workflows",
+      "usedBy": [
+        "devsecops-deployer"
+      ],
+      "defaultBranch": "main",
+      "commit": "949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "commitDate": "2026-10-08T02:43:26Z",
+      "reviewed": "2026-10-25",
+      "release": {
+        "tag": "v7.1.0",
+        "commit": "949feb2413d6458794dcd2491c4babbbce0c15c1"
+      },
+      "notes": "Added: CLAUDE.md requires every GitHub Action to be in this lock."
+    },
+    {
+      "repo": "actions/upload-artifact",
+      "url": "https://github.com/actions/upload-artifact",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "GitHub first-party: keep reports from workflow runs",
+      "usedBy": [
+        "devsecops-deployer"
+      ],
+      "defaultBranch": "main",
+      "commit": "cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+      "commitDate": "2026-10-07T10:00:52Z",
+      "reviewed": "2026-10-25",
+      "release": {
+        "tag": "v7.0.2",
+        "commit": "cf430e030ddbb5b0abf93d22962f4752f3646cd9"
+      },
+      "notes": "Added: CLAUDE.md requires every GitHub Action to be in this lock."
+    },
+    {
+      "repo": "trailofbits/skills",
+      "url": "https://github.com/trailofbits/skills",
+      "kind": "skills",
+      "tier": "security-firm",
+      "status": "approved",
+      "license": "CC-BY-SA-4.0",
+      "purpose": "Trail of Bits security skills",
+      "skills": [
+        "semgrep",
+        "supply-chain-risk-auditor"
+      ],
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "main",
+      "commit": "196a9073ab10d35bacf111f945e02c00b2c6883a",
+      "commitDate": "2026-10-23T09:26:17Z",
+      "reviewed": "2026-10-25",
+      "notes": "The semgrep skill can use Semgrep Pro when available; we never do (paid)."
+    },
+    {
+      "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+      "kind": "skills",
+      "tier": "community",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "UI/UX style, palette and font-pairing reasoning",
+      "skills": [
+        "ui-ux-pro-max"
+      ],
+      "usedBy": [
+        "designer"
+      ],
+      "defaultBranch": "main",
+      "commit": "d14efff8ed1faa4187f004f79926f428c8074ec7",
+      "commitDate": "2026-10-23T10:06:30Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "VoltAgent/awesome-design-md",
+      "url": "https://github.com/VoltAgent/awesome-design-md",
+      "kind": "reference",
+      "tier": "community",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "Example DESIGN.md files, for format only",
+      "usedBy": [
+        "designer"
+      ],
+      "defaultBranch": "main",
+      "commit": "3b605329240ce735b510037cca322f1831fdd7f8",
+      "commitDate": "2026-10-14T05:46:47Z",
+      "reviewed": "2026-10-25",
+      "notes": "Never copy a listed brand's palette or identity."
+    },
+    {
+      "repo": "google-labs-code/design.md",
+      "url": "https://github.com/google-labs-code/design.md",
+      "kind": "spec",
+      "tier": "community",
+      "status": "approved",
+      "license": "Apache-2.0",
+      "purpose": "The DESIGN.md format spec and its linter (npm @google/design.md)",
+      "usedBy": [
+        "designer"
+      ],
+      "defaultBranch": "main",
+      "commit": "6e5da5382f41edbba9d73b2c62f33f32e9971f15",
+      "commitDate": "2026-10-16T18:21:40Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "AThevon/genjutsu",
+      "url": "https://github.com/AThevon/genjutsu",
+      "kind": "skills",
+      "tier": "community",
+      "status": "approved-with-limits",
+      "license": "unclear (NOASSERTION)",
+      "purpose": "Motion design (optional)",
+      "skills": [
+        "genjutsu"
+      ],
+      "usedBy": [
+        "designer"
+      ],
+      "defaultBranch": "main",
+      "commit": "1f518a71378b15d423389e546e767cffc86e14c3",
+      "commitDate": "2026-10-05T23:55:58Z",
+      "reviewed": "2026-10-25",
+      "notes": "License unclear (GitHub reports NOASSERTION): read it, but vendor nothing until the owner confirms the license."
+    },
+    {
+      "repo": "morluto/rea",
+      "url": "https://github.com/morluto/rea",
+      "kind": "skills",
+      "tier": "community",
+      "status": "pending-review",
+      "license": "MIT",
+      "purpose": "Recon helper",
+      "usedBy": [
+        "competitor-recon"
+      ],
+      "defaultBranch": "main",
+      "commit": "22b88300d0ec2930060789e97fbd1371a20e9f5e",
+      "commitDate": "2026-10-24T20:12:53Z",
+      "reviewed": "2026-10-25",
+      "notes": "The blueprint allows it after review. Not used until the owner records the review in docs/SKILLS.md."
+    },
+    {
+      "repo": "affaan-m/ECC",
+      "url": "https://github.com/affaan-m/ECC",
+      "kind": "plugins",
+      "tier": "community",
+      "status": "pending-review",
+      "license": "MIT",
+      "purpose": "Claude Code configuration collection",
+      "usedBy": [
+        "reconciler"
+      ],
+      "defaultBranch": "main",
+      "commit": "90606c8315ee09cafc303515c5f33024db6b9882",
+      "commitDate": "2026-10-20T21:28:23Z",
+      "reviewed": "2026-10-25",
+      "notes": "The blueprint allows it after review. Not used until the owner records the review in docs/SKILLS.md."
+    },
+    {
+      "repo": "AgriciDaniel/claude-seo",
+      "url": "https://github.com/AgriciDaniel/claude-seo",
+      "kind": "plugins",
+      "tier": "community",
+      "status": "approved-with-limits",
+      "license": "MIT",
+      "purpose": "SEO audit and planning skills",
+      "skills": [
+        "seo-cluster",
+        "seo-geo",
+        "seo-schema",
+        "seo-technical",
+        "seo-sitemap",
+        "seo-content"
+      ],
+      "usedBy": [
+        "keyword-researcher",
+        "content-strategist",
+        "seo-auditor"
+      ],
+      "defaultBranch": "main",
+      "commit": "6be93f45064ffbadced572b5d5c95f55fd263af0",
+      "commitDate": "2026-10-22T16:47:38Z",
+      "reviewed": "2026-10-25",
+      "notes": "Free checks only: skip the sub-agents that need paid APIs (DataForSEO and other paid sources)."
+    },
+    {
+      "repo": "coreyhaines31/marketingskills",
+      "url": "https://github.com/coreyhaines31/marketingskills",
+      "kind": "skills",
+      "tier": "community",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "Marketing and SEO skills",
+      "skills": [
+        "competitors",
+        "programmatic-seo",
+        "schema",
+        "ai-seo",
+        "site-architecture",
+        "marketing-loops",
+        "marketing-ideas",
+        "marketing-council",
+        "customer-research"
+      ],
+      "usedBy": [
+        "competitor-recon",
+        "keyword-researcher",
+        "content-strategist",
+        "architect",
+        "growth-strategist"
+      ],
+      "defaultBranch": "main",
+      "commit": "e85f3cbc2e4a79bf33b2a12e9bdd9087d414735b",
+      "commitDate": "2026-10-19T21:29:53Z",
+      "reviewed": "2026-10-25"
+    },
+    {
+      "repo": "Jakeschincariol/replica-skill",
+      "url": "https://github.com/Jakeschincariol/replica-skill",
+      "kind": "skills",
+      "tier": "caution",
+      "status": "approved-with-limits",
+      "license": "MIT",
+      "purpose": "App recon and parity scoring",
+      "skills": [
+        "replica-recon",
+        "replica-diff",
+        "replica-design",
+        "replica-architect"
+      ],
+      "usedBy": [
+        "competitor-recon",
+        "reconciler",
+        "designer",
+        "architect"
+      ],
+      "defaultBranch": "main",
+      "commit": "77c9436fb3d18c3d58169efb8caf4fe906b0dc51",
+      "commitDate": "2026-10-03T12:07:14Z",
+      "reviewed": "2026-10-25",
+      "notes": "Young repository (about 3 weeks old at the blueprint check). Structure and parity only: ignore every step that clones, copies or rebuilds a competitor."
+    },
+    {
+      "repo": "getsentry/skills",
+      "url": "https://github.com/getsentry/skills",
+      "kind": "skills",
+      "tier": "community",
+      "status": "pending-review",
+      "license": "Apache-2.0",
+      "purpose": "GitHub Actions security review",
+      "skills": [
+        "gha-security-review"
+      ],
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "main",
+      "commit": "d12f250460ffd961f549dbebf7eeb0cf4afd4c2e",
+      "commitDate": "2026-10-23T21:17:27Z",
+      "reviewed": "2026-10-25",
+      "notes": "Named in the blueprint's agent table but missing from its trusted list. Needs the owner's yes."
+    },
+    {
+      "repo": "addyosmani/agent-skills",
+      "url": "https://github.com/addyosmani/agent-skills",
+      "kind": "skills",
+      "tier": "community",
+      "status": "pending-review",
+      "license": "MIT",
+      "purpose": "Secure-coding practices",
+      "skills": [
+        "security-and-hardening"
+      ],
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "main",
+      "commit": "aeac41d4d005999432bb7312f7ff06383a91d59d",
+      "commitDate": "2026-10-13T20:21:06Z",
+      "reviewed": "2026-10-25",
+      "notes": "Named in the blueprint's agent table but missing from its trusted list. Needs the owner's yes."
+    },
+    {
+      "repo": "searchfit/searchfit-seo",
+      "url": "https://github.com/searchfit/searchfit-seo",
+      "kind": "plugins",
+      "tier": "community",
+      "status": "pending-review",
+      "license": "MIT",
+      "purpose": "Keyword clustering and content planning",
+      "skills": [
+        "keyword-clustering",
+        "content-strategy",
+        "content-brief"
+      ],
+      "usedBy": [
+        "keyword-researcher",
+        "content-strategist"
+      ],
+      "defaultBranch": "main",
+      "commit": "c324a2e87c4dd84fe6bd6d55e45272acdd090afd",
+      "commitDate": "2026-09-10T04:15:40Z",
+      "reviewed": "2026-10-25",
+      "notes": "Named in the blueprint's agent table but missing from its trusted list. Needs the owner's yes."
+    },
+    {
+      "repo": "zacker-tech/hormozi-skills",
+      "url": "https://github.com/zacker-tech/hormozi-skills",
+      "kind": "skills",
+      "tier": "excluded",
+      "status": "excluded",
+      "license": "none",
+      "purpose": "Hormozi-style offer skills",
+      "usedBy": [],
+      "defaultBranch": "main",
+      "commit": "44c83820a55ff53fe4f48bd9306659c22b6a358f",
+      "commitDate": "2026-03-30T08:23:30Z",
+      "reviewed": "2026-10-25",
+      "notes": "No license. The Hormozi lens comes from marketingskills marketing-council instead."
+    },
+    {
+      "repo": "mrgoonie/claudekit-skills",
+      "url": "https://github.com/mrgoonie/claudekit-skills",
+      "kind": "skills",
+      "tier": "excluded",
+      "status": "excluded",
+      "license": "none",
+      "purpose": "Design and UI skills",
+      "skills": [
+        "design-system",
+        "ui-styling"
+      ],
+      "usedBy": [],
+      "defaultBranch": "main",
+      "commit": "80113d86bc4407f105af40a2c4ea58194f7c370a",
+      "commitDate": "2026-04-03T06:19:25Z",
+      "reviewed": "2026-10-25",
+      "notes": "No repository license (some SKILL.md files claim MIT, but the repo has none). The blueprint names design-system for the designer; it comes from here, so the designer must not use it."
+    }
+  ],
+  "packages": [
+    {
+      "name": "@playwright/mcp",
+      "registry": "npm",
+      "version": "0.0.83",
+      "published": "2026-09-28",
+      "source": "microsoft/playwright-mcp",
+      "license": "Apache-2.0",
+      "usedIn": ".mcp.json → playwright"
+    },
+    {
+      "name": "chrome-devtools-mcp",
+      "registry": "npm",
+      "version": "1.11.0",
+      "published": "2026-10-15",
+      "source": "ChromeDevTools/chrome-devtools-mcp",
+      "license": "Apache-2.0",
+      "usedIn": ".mcp.json → chrome-devtools",
+      "notes": "1.12.0 (2026-10-22) is younger than 7 days on the reviewed date."
+    },
+    {
+      "name": "analytics-mcp",
+      "registry": "pypi",
+      "version": "0.7.0",
+      "published": "2026-07-29",
+      "source": "googleanalytics/google-analytics-mcp",
+      "license": "Apache-2.0",
+      "usedIn": ".mcp.json → google-analytics",
+      "notes": "0.8.0 (2026-10-22) is younger than 7 days on the reviewed date."
+    },
+    {
+      "name": "@google/design.md",
+      "registry": "npm",
+      "version": "0.4.0",
+      "published": "2026-07-27",
+      "source": "google-labs-code/design.md",
+      "license": "Apache-2.0 (repository)",
+      "usedIn": "npm run lint:design (requested from Phase E)"
+    },
+    {
+      "name": "@lhci/cli",
+      "registry": "npm",
+      "version": "0.15.1",
+      "published": "2025-06-25",
+      "source": "GoogleChrome/lighthouse-ci",
+      "license": "Apache-2.0",
+      "usedIn": "npm run audit:lighthouse"
+    }
+  ],
+  "remoteMcp": [
+    {
+      "name": "cloudflare-docs",
+      "url": "https://docs.mcp.cloudflare.com/mcp",
+      "source": "cloudflare/mcp-server-cloudflare"
+    },
+    {
+      "name": "cloudflare-api",
+      "url": "https://mcp.cloudflare.com/mcp",
+      "source": "cloudflare/mcp"
+    },
+    {
+      "name": "github",
+      "url": "https://api.githubcopilot.com/mcp/readonly",
+      "source": "github/github-mcp-server"
+    },
+    {
+      "name": "claude-docs",
+      "url": "https://code.claude.com/docs/mcp",
+      "source": "Anthropic (Claude Code documentation)"
+    }
+  ],
+  "unresolved": [
+    {
+      "name": "system-design",
+      "usedBy": [
+        "architect"
+      ],
+      "status": "pending-review",
+      "notes": "Named in the blueprint's agent table; its source repository is not identified (a local copy credits liquidslr/system-design-notes for its notes only). The architect works without it until the owner names and approves a source."
+    },
+    {
+      "name": "/design-code",
+      "usedBy": [],
+      "status": "excluded",
+      "notes": "Not found at the blueprint check; left out until the owner sends its source."
+    }
+  ]
+}
