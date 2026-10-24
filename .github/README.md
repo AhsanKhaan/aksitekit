@@ -178,7 +178,7 @@ Dependabot bumps the actions (SHA and comment). Bump the rest by hand, about mon
 - Keep the 7-day rule: no version published less than a week ago.
 
 ## What these workflows expect from Step C [U]
-These are the interfaces assumed (the shapes of the calculatorporch scripts Step C ports). Step C confirms them or asks
+These are the interfaces assumed (as specified in `docs/TODO-step-c.md`). Step C confirms them or asks
 Step E to adjust the workflows:
 - `npm run serve` serves `out/` with the `_headers` rules on `PORT` (default 4321); Playwright's `webServer` does the same.
 - `lighthouserc.json` collects from `http://localhost:4321/…` (or sets `startServerCommand` / `staticDistDir`, which the

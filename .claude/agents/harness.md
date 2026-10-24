@@ -34,8 +34,21 @@ case that makes it fail.
 - No skipped or `.only` tests left behind; no snapshot tests of copy that changes weekly.
 - A flaky test is fixed or quarantined with an issue note and an owner, never retried until green.
 
+## CI integration
+Every test you write must run in CI, not only on your machine:
+- `npm test` (all Vitest suites under `tests/`, including `tests/research/`) and `npm run test:e2e` run in
+  `.github/workflows/ci.yml` on every pull request and push to `main`; `preprod.yml` runs e2e again (with the
+  320–1280 px responsive checks) on pull requests to the production branch.
+- Put new tests where those commands already find them (`tests/**/*.test.ts` for Vitest, `tests/e2e/**` for
+  Playwright). A check that needs a new command goes into an npm script the workflows already call: ask Phase E to
+  change `package.json` (step owners never edit it). Helper scripts under `.github/scripts/` get planted cases in
+  `selftest.mjs`.
+- Never add `continue-on-error`, `--passWithNoTests` or a skipped job to get green. After the PR runs, confirm in the
+  workflow log that the new tests actually ran (count them) [M].
+
 ## Gate
-`npm test` and `npm run test:e2e` (Step C configs), run by `node .claude/skills/gate/gate.mjs tests`. BLOCKED until
+`npm test` and `npm run test:e2e` (Step C configs), run by `node .claude/skills/gate/gate.mjs tests` locally and by
+`ci.yml` on GitHub. BLOCKED until
 `vitest.config.ts`, `playwright.config.ts` and `node_modules` exist (Step C, `docs/TODO-step-c.md`).
 
 ## Stop and ask when

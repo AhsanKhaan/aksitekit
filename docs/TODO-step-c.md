@@ -8,6 +8,8 @@ ask the owner, and if refused, use a free alternative.
 - Next.js with **static export** (`output: 'export'`, trailing slashes), TypeScript, Tailwind. Root configs:
   `next.config.ts`, `tsconfig.json`, `eslint.config.mjs` (include `eslint-plugin-no-unsanitized` and
   `eslint-plugin-regexp`), `vitest.config.ts`, `playwright.config.ts`, `postcss.config.mjs`.
+  All of them must ignore `.claude/worktrees/**`: parallel sessions keep full copies of the repo there, and without the
+  exclusion Vitest runs every test twice (measured 2026-10-25: 110 instead of 55 [M]).
 - Pages generated from a **content registry** that reads `research/out/keyword-map.json`:
   home, category hubs, tool pages, guide pages, and the trust pages (About, Contact, Privacy, Terms, Editorial policy).
 - URL rule: `/{category}/{slug}/` for tools and hubs, `/{category}/{slug}/{child}/` for guides and instances; lowercase,
