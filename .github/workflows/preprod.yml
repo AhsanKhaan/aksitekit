@@ -2,7 +2,8 @@
 # Runs on pull requests whose base is the production branch (factory.config.json hosting.productionBranch, read at
 # run time), and by hand before a release. Every gate:
 #   gates:          gate:adsense, gate:design, check:release, the production build (check-out runs inside it), a
-#                   secret scan of out/, the e2e suite (responsive 320-1280 px), Lighthouse budgets;
+#                   secret scan of the build output folder (build.outputDir), the e2e suite (responsive
+#                   320-1280 px), Lighthouse budgets;
 #   preview:        finds the pull request's Cloudflare Pages preview (.github/scripts/preview-url.mjs);
 #   check-security: npm run check:security against that preview;
 #   zap-baseline:   ZAP baseline against that preview, decided by zap-gate.mjs.
@@ -93,19 +94,23 @@ jobs:
       - name: Release content checks
         run: npm run check:release
 
-      - name: Production build (production-gate, static export, check-out)
+      - name: Production build (production-gate, chosen technology, check-out)
         env:
           SITE_ENV: production
-          NEXT_PUBLIC_SITE_URL: ${{ vars.LIVE_SITE_URL }}
+          SITE_URL: ${{ vars.LIVE_SITE_URL }} # technology-neutral names
+          SITE_INDEXABLE: 'true'
+          NEXT_PUBLIC_SITE_URL: ${{ vars.LIVE_SITE_URL }} # the Next.js starter reads these
           NEXT_PUBLIC_INDEXABLE: 'true'
         run: npm run build
 
-      - name: Secret and private-URL scan of out/ (gitleaks, checksum pinned)
+      - name: Secret and private-URL scan of the build output folder (gitleaks, checksum pinned)
         run: |
+          outdir=$(node -p 'require("./factory.config.json").build?.outputDir || "out"')
+          [[ "$outdir" =~ ^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$ && "/$outdir/" != *"/../"* ]] || { echo "::error::build.outputDir must be a relative folder inside the repo"; exit 1; }
           curl -sSfL -o "$RUNNER_TEMP/gitleaks.tgz" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
           echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tgz" | sha256sum -c -
           tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP" gitleaks
-          "$RUNNER_TEMP/gitleaks" dir --redact --no-banner --exit-code 1 out
+          "$RUNNER_TEMP/gitleaks" dir --redact --no-banner --exit-code 1 "$outdir"
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
@@ -113,7 +118,7 @@ jobs:
       - name: End-to-end tests (incl. responsive 320-1280 px)
         run: npm run test:e2e
 
-      - name: Serve out/ (unless lighthouserc.json serves it)
+      - name: Serve the build output folder (unless lighthouserc.json serves it)
         run: |
           if node -e 'const c=require("./lighthouserc.json").ci?.collect??{};process.exit(c.startServerCommand||c.staticDistDir?0:1)'; then
             echo "lighthouserc.json serves the site itself"; exit 0

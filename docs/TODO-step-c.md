@@ -4,7 +4,13 @@ Status: **not started**. Build this when a project needs it. Read `docs/BLUEPRIN
 Step C owns the files listed for it in the contract. Free tools only: if anything below would need a paid tool, stop and
 ask the owner, and if refused, use a free alternative.
 
-## 1. Starter app (generic, no niche)
+**Two parts.** Sections 2–4 (public files, gates, tests) apply to **every technology**: the gates read the built site
+from `factory.config.json` → `build.outputDir` (never a hard-coded `out/`), so they work whatever produced it. Section 1
+is the **Next.js starter**, used when the owner picks `nextjs` at `/start`. For any other technology the architect plans
+the equivalent structure in `ARCHITECTURE.md` and sets `build.commands` / `build.outputDir`; the coder builds it to the
+same rules (crawlable HTML for every page, same URLs, headers, JSON-LD, bot policy and budgets).
+
+## 1. Next.js starter (when `build.framework` is `nextjs`; generic, no niche)
 - Next.js with **static export** (`output: 'export'`, trailing slashes), TypeScript, Tailwind. Root configs:
   `next.config.ts`, `tsconfig.json`, `eslint.config.mjs` (include `eslint-plugin-no-unsanitized` and
   `eslint-plugin-regexp`), `vitest.config.ts`, `playwright.config.ts`, `postcss.config.mjs`.
@@ -37,7 +43,7 @@ ask the owner, and if refused, use a free alternative.
 | `check:repo` | No secrets, no `.env` files, no placeholder text ("TODO", "lorem", "coming soon") in content |
 | `audit` | `npm audit` gate (high and critical fail, with a reviewed-exceptions file) |
 | `check:live` | Live site: 200s, HTTPS, one HSTS value, `www` and no-slash redirects, sitemap pages self-canonical, `/favicon.ico`, no NEL headers, DNSSEC validates, CAA allows only the host's certificate authorities |
-| `check:security` | The blueprint's security table: XSS payload probes, CSRF (no POST endpoints, or Origin checks), path-traversal probes, a capped rate-limit burst on the project's own hosts only, private-URL and secret leaks in `out/` and bundles, every response served through the CDN, SPF/DKIM/DMARC |
+| `check:security` | The blueprint's security table: XSS payload probes, CSRF (no POST endpoints, or Origin checks), path-traversal probes, a capped rate-limit burst on the project's own hosts only, private-URL and secret leaks in the output folder (`build.outputDir`) and bundles, every response served through the CDN, SPF/DKIM/DMARC |
 | `gate:adsense` | Required pages present, certified consent for Europe and the UK, no ad code or `ads.txt` before approval, no placeholders, content floors met, policy-risk words |
 | `gate:design` | Text and UI colour contrast meets WCAG AA from the design tokens |
 | `audit:lighthouse` | `lighthouserc.json` budgets from `factory.config.json` (Accessibility, Best Practices, SEO 100; Performance ≥ 90 mobile) |

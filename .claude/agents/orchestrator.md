@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: Runs the whole site pipeline through /start - intake (domain, competitors and the DR the owner supplies), the keyword seed, then every stage and its gate in order, with a resumable ledger. Runs in the main session (it asks the owner questions and hands stages to the other agents), so use /start rather than calling it as a subagent.
+description: Runs the whole site pipeline through /start - intake (domain, competitors and the DR the owner supplies, and the technology - Next.js starter or any other), the keyword seed, then every stage and its gate in order, with a resumable ledger. Runs in the main session (it asks the owner questions and hands stages to the other agents), so use /start rather than calling it as a subagent.
 tools: Read, Write, Edit, Glob, Grep, Bash, Agent, AskUserQuestion
 ---
 

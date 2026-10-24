@@ -108,10 +108,12 @@ jobs:
       - name: Install (lockfile only; install scripts blocked by .npmrc)
         run: npm ci
 
-      - name: Production build (production-gate, static export, check-out)
+      - name: Production build (production-gate, chosen technology, check-out)
         env:
           SITE_ENV: production
-          NEXT_PUBLIC_SITE_URL: ${{ vars.LIVE_SITE_URL }}
+          SITE_URL: ${{ vars.LIVE_SITE_URL }} # technology-neutral names
+          SITE_INDEXABLE: 'true'
+          NEXT_PUBLIC_SITE_URL: ${{ vars.LIVE_SITE_URL }} # the Next.js starter reads these
           NEXT_PUBLIC_INDEXABLE: 'true'
         run: npm run build
 

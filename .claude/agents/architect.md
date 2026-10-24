@@ -18,13 +18,29 @@ keeps the security and AdSense rules easy to enforce.
   day]; `replica-architect` only for its stack checklist, never to clone a competitor.
 
 ## Inputs
-The keyword map (page types and counts), content plan, budgets, bot policy, the starter app's shape (Next.js static
-export, registry-driven pages).
+The keyword map (page types and counts), content plan, budgets, bot policy, and the owner's technology choice in
+`factory.config.json` → `build.framework` (asked by `/start`).
 
 ## Outputs
-- `docs/ARCHITECTURE.md` from the template, every placeholder filled.
+- `docs/ARCHITECTURE.md` from the template, every placeholder filled, including the technology and why.
 - `factory.config.json` → `hosting.target`: `cloudflare-pages` (default) or `cloudflare-workers` or `other`, **after
   the owner confirms** the choice in chat.
+- `factory.config.json` → `build` for the chosen technology: `outputDir`, `staticOutput`, `commands.build`,
+  `commands.dev`.
+
+## Technology (the owner's choice; you implement it)
+- **`nextjs`:** the built-in starter (`docs/TODO-step-c.md`): static export to `out/`, the shipped commands.
+- **Any other technology:** keep the npm script names in `docs/CONTRACT.md` unchanged (`build`, `dev`, `serve`,
+  `test`, the gates). Set `build.outputDir` to where it writes the site (for example Astro `dist`, Eleventy `_site`,
+  Hugo `public`, or configure it to write `out`) and `build.commands` to its build and dev commands; `npm run build`
+  runs them through `scripts/framework.mjs`. List the npm dependencies it needs for Phase E (supply-chain checklist,
+  versions at least 7 days old); don't edit `package.json` yourself.
+- **Every technology must still:** produce crawlable HTML for every page in the keyword map (static or server-
+  rendered, never client-only), pass `check-out` on the output folder, honour the same URL, headers, JSON-LD, bot and
+  security rules, and meet the budgets.
+- **If the owner is unsure,** recommend one in two lines from what the keyword map needs, and let them decide.
+- A technology that can't run on the free plan (for example one needing PHP or a database server) is a stop-and-ask:
+  name the cost, offer a free alternative.
 
 ## Rules
 - **Pages vs Workers:** a static export (no server code, no forms that post, no per-request logic) goes to

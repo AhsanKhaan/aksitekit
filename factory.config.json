@@ -13,6 +13,16 @@
     "productionBranch": "main",
     "freePlanOnly": true
   },
+  "build": {
+    "framework": "nextjs",
+    "rule": "Default nextjs. /start asks on every new copy whether to keep it or use another technology: \"nextjs\" uses the built-in Next.js starter (docs/TODO-step-c.md); any other technology (astro, eleventy, hugo, vite, sveltekit, remix, ...) gets commands and an output folder set by the architect. The npm script names in docs/CONTRACT.md never change.",
+    "outputDir": "out",
+    "staticOutput": true,
+    "commands": {
+      "build": "next build && node scripts/flatten-segments.mjs",
+      "dev": "next dev"
+    }
+  },
   "competitors": [],
   "research": {
     "seedFrom": "lowest-dr-competitor",

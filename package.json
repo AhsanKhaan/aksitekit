@@ -7,8 +7,8 @@
     "node": ">=24.22.0 <25"
   },
   "scripts": {
-    "dev": "node scripts/gen-public-files.mjs && next dev",
-    "build": "node scripts/production-gate.mjs && node scripts/gen-public-files.mjs && next build && node scripts/flatten-segments.mjs && node scripts/check-out.mjs",
+    "dev": "node scripts/gen-public-files.mjs && node scripts/framework.mjs dev",
+    "build": "node scripts/production-gate.mjs && node scripts/gen-public-files.mjs && node scripts/framework.mjs build && node scripts/check-out.mjs",
     "serve": "node scripts/serve-out.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -21,7 +21,7 @@
     "audit": "node scripts/audit.mjs",
     "audit:perf": "node scripts/audits/perf.mjs",
     "audit:a11y": "node scripts/audits/a11y.mjs",
-    "audit:unique": "node scripts/audits/unique-text.mjs out",
+    "audit:unique": "node scripts/audits/unique-text.mjs",
     "audit:ga": "node scripts/audits/ga-live.mjs",
     "audit:lighthouse": "npx --yes @lhci/cli@0.15.1 autorun",
     "gate:adsense": "node scripts/adsense-gate.mjs",

@@ -52,7 +52,7 @@ jobs:
       - name: Unit tests
         run: npm test
 
-      - name: Build (static export, then check-out)
+      - name: Build (chosen technology, then check-out)
         run: npm run build
 
       - name: Install Playwright Chromium

@@ -23,10 +23,21 @@ Ask the owner, in one message:
     example a free DR or authority checker. Label it [M: owner] in the ledger.
   - If the owner doesn't know a DR, the competitor waits until they do.
 - **Markets and language**, if they differ from `factory.config.json` (`project.locale`, `project.markets`).
+- **Technology:** "Build with **Next.js** (the built-in starter) or **another technology**? If another, which one
+  (for example Astro, Eleventy, Hugo, Vite, SvelteKit, Remix)?" Never choose for the owner; if they're unsure, explain
+  the trade-off in two lines and let the architect recommend one at the architecture stage, after the keyword map shows
+  what the site needs.
 
 Write what they said, and nothing they didn't:
 - `factory.config.json`: `project.domain`, `project.name`, `project.brand`, `project.locale`, `project.markets`,
   and `competitors: [{ "domain", "dr", "notes" }]`.
+- `factory.config.json` → `build`:
+  - **Next.js:** `framework: "nextjs"`; keep the shipped `outputDir: "out"` and `commands` (`next build && node
+    scripts/flatten-segments.mjs`, `next dev`). The starter is built from `docs/TODO-step-c.md`.
+  - **Another technology:** `framework: "<name>"` (lowercase). Set `outputDir` and `commands.build` / `commands.dev`
+    only if the owner gave them; otherwise leave the Next.js defaults in place and mark them for the architect, who
+    sets them at the architecture stage (the intake gate only needs a non-empty build command). Changing
+    `package.json` dependencies for the new technology is a Phase E change with the supply-chain checklist.
 - `research/inputs/competitors.csv`: header `domain,dr,notes`, one row per competitor (domains without `https://` or
   `www.`).
 

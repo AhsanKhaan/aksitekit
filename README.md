@@ -60,20 +60,37 @@ The approved design is `docs/BLUEPRINT.md`; who owns which files is `docs/CONTRA
    ```
 3. Open the folder in Claude Code. If Claude Desktop shows **Trust repository**, accept it. Sign in to the MCP servers
    you want through `/mcp` (all optional; see §6).
-4. Run **`/start`**. It asks for your domain and 2–5 competitors with their DR, picks the lowest-DR competitor as your
-   keyword seed, and tells you when to drop your Keyword Planner CSVs (§3).
+4. Run **`/start`**. It asks for your domain, 2–5 competitors with their DR, and **which technology to build with**
+   (below). It picks the lowest-DR competitor as your keyword seed and tells you when to drop your Keyword Planner CSVs
+   (§3).
 5. Answer its questions as stages finish. `/start resume` continues from the ledger (`reports/ledger.md`);
    `/start status` shows where you are. `/today` shows only today's growth task once the site is live.
 
 Requirements: Node `>=24.22.0 <25` (see `package.json` → `engines`), npm 11+, Git. Python and `pipx` only if you enable
 the Google Analytics MCP server.
 
+### Choose your technology: Next.js or anything else
+The purpose of this repository is to build **websites**, in whatever technology you choose. `/start` asks on every new
+copy:
+
+| You choose | What happens |
+|---|---|
+| **Next.js** | The built-in starter (`docs/TODO-step-c.md` §1): static export to `out/`, the shipped commands, ready to fill. |
+| **Another technology** (Astro, Eleventy, Hugo, Vite, SvelteKit, Remix, …) | The architect sets its build and dev commands and output folder in `factory.config.json` → `build`, lists the npm packages it needs (supply-chain checklist), and the coder builds the site in it. |
+| **Not sure** | The architect recommends one at the architecture stage, from what your keyword map needs, and you decide. |
+
+Whatever you pick, the rest stays the same: the agents, keyword pipeline, content and SEO rules, security checks,
+AdSense gate, budgets and CI. `npm run build` and `npm run dev` run your technology through `scripts/framework.mjs`,
+and every check reads the site from `build.outputDir`. Every page must still be crawlable HTML (static or
+server-rendered, never client-only). A technology that can't run on a free plan (for example PHP with a database
+server) is a stop-and-ask: the agent names the cost and offers a free alternative.
+
 ---
 
 ## 3. What you provide
 | Input | Where | Notes |
 |---|---|---|
-| Domain, brand, markets | `/start` writes them to `factory.config.json` | |
+| Domain, brand, markets, **technology** | `/start` writes them to `factory.config.json` | Technology: Next.js (built-in starter) or any other (§2). |
 | Competitors and their **DR** | `research/inputs/competitors.csv` (`domain,dr,notes,brands`) | You supply DR from a tool you already use; agents never look it up (it's a paid metric, and free checkers sit behind CAPTCHAs). The lowest DR becomes the seed. |
 | **Google Keyword Planner exports**, one per competitor | `research/inputs/kp/<competitor-domain>.csv` | Keyword Planner's own `.csv` (UTF-16, tab-separated) or a CSV UTF-8 re-save. **Excel `.xlsx` is refused**: save as CSV. Use the last 12 full months, so the 12 monthly columns exist. Step-by-step export guide: `research/inputs/README.md`. |
 | Keyword difficulty (optional but needed for selection) | `research/inputs/kd.csv` (`keyword,kd,source,checked`) | From the free SERP check or your own tool. Keywords without a KD wait in `research/out/kd-todo.csv`. |
@@ -226,10 +243,10 @@ this project's own preview or production hosts.
 | CSRF | Static site: no endpoint accepts POST. With server code or forms: Origin/Referer check, `SameSite` cookies, CSRF token or Turnstile, and a cross-origin POST test | A cross-origin POST succeeds |
 | Path traversal | Live probes (`/..%2f..%2fetc/passwd`, `/%2e%2e/`, `/..;/`, double-encoded, backslash); Semgrep rules on any server code | Anything other than 400/404 without file contents |
 | Rate limiting | A short capped burst against your own preview. Endpoints need Cloudflare's free rate-limiting rule and return `429` | An endpoint keeps answering 200 |
-| Private server URL exposure | Scans `out/`, bundles and source maps for private IPs, `localhost`, internal hosts, preview URLs, keys and tokens; checks headers for `x-powered-by`/version leaks; DNS for unproxied origin records | Any match |
+| Private server URL exposure | Scans the build output folder (`build.outputDir`), bundles and source maps for private IPs, `localhost`, internal hosts, preview URLs, keys and tokens; checks headers for `x-powered-by`/version leaks; DNS for unproxied origin records | Any match |
 | Served only through Cloudflare | Every response has `server: cloudflare` and `cf-ray`; every web hostname proxied; all resources same-origin or CSP-allowed | Anything bypasses Cloudflare |
 | Email spoofing | SPF (`-all` plus null MX if the domain never sends mail), DKIM when mail is used, DMARC ramped `none → quarantine → reject` on a dated schedule | SPF/DKIM/DMARC missing, or DMARC stuck at `none` past its review date |
-| Secrets and supply chain | gitleaks (full history and `out/`), `npm audit` gate, `npm audit signatures`, Semgrep, actions pinned to commit SHAs, `.npmrc` (no install scripts, exact versions, 7-day minimum release age) | A finding |
+| Secrets and supply chain | gitleaks (full history and the build output folder), `npm audit` gate, `npm audit signatures`, Semgrep, actions pinned to commit SHAs, `.npmrc` (no install scripts, exact versions, 7-day minimum release age) | A finding |
 
 Each check gets a planted failing case in its tests, to prove it fails when it should.
 
@@ -242,7 +259,7 @@ Full details, secrets and variables: `.github/README.md`.
 |---|---|---|
 | `ci.yml` | every PR and push to `main` | `npm ci` → check:repo → audit → lint → typecheck → test → build → e2e; helper self-tests |
 | `security.yml` | PRs, pushes, weekly, preview deployments | gitleaks, npm audit gate and signatures, Semgrep, ZAP baseline (previews) and full scan (weekly) |
-| `lighthouse.yml` | PRs and pushes | builds, serves `out/`, runs Lighthouse CI against the budgets |
+| `lighthouse.yml` | PRs and pushes | builds, serves the output folder, runs Lighthouse CI against the budgets |
 | `preprod.yml` | PRs to the production branch | every gate plus `check:security` and ZAP against the PR's preview |
 | `deploy-pages.yml` | by hand (or automatically, see below) | only if `hosting.target` is `cloudflare-pages`: build, `wrangler pages deploy`, `check:live` |
 | `deploy-workers.yml` | same | only if `hosting.target` is `cloudflare-workers`: build, `wrangler deploy`, `check:live` |
@@ -291,7 +308,7 @@ The names are frozen in `docs/CONTRACT.md`. "Step C" means not implemented yet (
 | Script | Does | State |
 |---|---|---|
 | `research:ingest` / `research:select` / `research:cluster` / `research:all` | The keyword pipeline (§7) | ✅ |
-| `dev`, `build`, `serve` | Site dev server, production build (with `production-gate` and `check-out`), local static server | Step C |
+| `dev`, `build`, `serve` | Dev server and production build in **your chosen technology** (`scripts/framework.mjs` runs `build.commands`; the build adds `production-gate` and `check-out`), local static server for `build.outputDir` | `framework.mjs` ✅; the rest Step C |
 | `lint`, `typecheck`, `test`, `test:e2e` | ESLint, TypeScript, Vitest, Playwright | configs in Step C; `tests/research` already runs with `npx vitest run tests/research` |
 | `check:repo`, `check:release`, `check:live`, `check:security` | Repo hygiene, publish gate, live-site check, security checks | Step C |
 | `audit`, `audit:perf`, `audit:a11y`, `audit:unique`, `audit:ga`, `audit:lighthouse` | CVE gate, lab speed, accessibility, duplicate text, GA4 privacy, Lighthouse CI | Step C (`audit:lighthouse` runs a pinned `npx @lhci/cli@0.15.1`) |

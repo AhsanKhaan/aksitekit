@@ -11,13 +11,18 @@ Labels: [M] checked on 2026-10-25 (API lookup or docs page, linked), [U] unverif
 
 ## Workflows
 
+The technology is the owner's choice at `/start` (`factory.config.json` → `build`): Next.js or any other. Builds run
+`npm run build` (which runs `build.commands.build` through `scripts/framework.mjs`), and every job reads the site from
+`build.outputDir`. Build steps set technology-neutral `SITE_URL` / `SITE_INDEXABLE` next to the Next.js
+`NEXT_PUBLIC_*` names.
+
 | File | Runs on | What it does | Decides |
 |---|---|---|---|
 | `workflows/ci.yml` | every PR, push to `main`, by hand | `npm ci` → `check:repo` → `audit` → `lint` → `typecheck` → `test` → `build` → Playwright Chromium → `test:e2e`; self-test of the helper scripts | each npm script's exit code |
 | `workflows/security.yml` | every PR, push to `main`, Mondays 04:23 UTC, `deployment_status`, by hand | **static:** gitleaks over the full git history, the `npm audit` gate (`npm run audit`: high and critical fail), `npm audit signatures`, Semgrep registry rules. **ZAP baseline** (passive) against a preview: each successful `deployment_status` event that carries a URL, or by hand with `scan: baseline` and a URL. **ZAP full scan** (active) weekly and by hand (`scan: full`) before a release | gitleaks / Semgrep exit codes; `scripts/zap-gate.mjs` for ZAP |
-| `workflows/lighthouse.yml` | every PR, push to `main`, by hand | builds, serves `out/` on port 4321, runs `npm run audit:lighthouse` (`npx @lhci/cli@0.15.1 autorun`), uploads `.lighthouseci/` | the budgets in `lighthouserc.json` (Step C) |
+| `workflows/lighthouse.yml` | every PR, push to `main`, by hand | builds, serves the output folder (`build.outputDir`) on port 4321, runs `npm run audit:lighthouse` (`npx @lhci/cli@0.15.1 autorun`), uploads `.lighthouseci/` | the budgets in `lighthouserc.json` (Step C) |
 | `workflows/preprod.yml` | PRs whose base is `hosting.productionBranch`, by hand | **gates:** `gate:adsense`, `gate:design`, `check:release`, production build (incl. check-out), gitleaks on `out/`, `test:e2e` (incl. responsive 320–1280 px), Lighthouse. **preview:** finds the PR's Cloudflare Pages preview, then `check:security` and the ZAP baseline against it | every gate; skips while `project.domain` is empty |
-| `workflows/deploy-pages.yml` | by hand from the production branch; green `ci` push run on `main` when `AUTO_DEPLOY` is `true` | only if `hosting.target` is `cloudflare-pages`: production build, `wrangler pages deploy out`, then `check:live` | the `production` environment approval (the owner's GO), then `check:live` |
+| `workflows/deploy-pages.yml` | by hand from the production branch; green `ci` push run on `main` when `AUTO_DEPLOY` is `true` | only if `hosting.target` is `cloudflare-pages`: production build, `wrangler pages deploy <build.outputDir>`, then `check:live` | the `production` environment approval (the owner's GO), then `check:live` |
 | `workflows/deploy-workers.yml` | same as above | only if `hosting.target` is `cloudflare-workers`: production build, `wrangler deploy` (Workers static assets from the project's `wrangler.jsonc`), then `check:live` | same as above |
 | `workflows/live-check.yml` | daily 05:41 UTC, by hand | `check:live` and `check:security` against `LIVE_SITE_URL` (and `LIVE_PAGES_HOST`); skips while `LIVE_SITE_URL` is unset | the scripts' exit codes |
 | `dependabot.yml` | weekly (Monday) | grouped npm and GitHub Actions updates with a 7-day cooldown (matches `.npmrc` `min-release-age=7`); security updates aren't delayed | CI on the Dependabot PR |
@@ -180,7 +185,7 @@ Dependabot bumps the actions (SHA and comment). Bump the rest by hand, about mon
 ## What these workflows expect from Step C [U]
 These are the interfaces assumed (as specified in `docs/TODO-step-c.md`). Step C confirms them or asks
 Step E to adjust the workflows:
-- `npm run serve` serves `out/` with the `_headers` rules on `PORT` (default 4321); Playwright's `webServer` does the same.
+- `npm run serve` serves `build.outputDir` (whatever technology built it) with the `_headers` rules on `PORT` (default 4321); Playwright's `webServer` does the same.
 - `lighthouserc.json` collects from `http://localhost:4321/…` (or sets `startServerCommand` / `staticDistDir`, which the
   workflows detect), and uploads to the `filesystem` target, not `temporary-public-storage` (public links).
 - Production builds in CI set `SITE_ENV=production`, `NEXT_PUBLIC_SITE_URL` (= `LIVE_SITE_URL`) and

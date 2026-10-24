@@ -68,7 +68,10 @@ function competitors() {
   if (!existsSync(abs(p))) fail(`${p} is missing`, 'run intake (/start)');
   const rows = parseCsv(readFileSync(abs(p), 'utf8'));
   const header = (rows.shift() || []).map((h) => h.toLowerCase());
-  if (header.join(',') !== 'domain,dr,notes') fail(`${p} header must be "domain,dr,notes", found "${header.join(',')}"`);
+  // `brands` is optional (research/inputs/README.md): the keyword pipeline's brand filter reads it.
+  if (!['domain,dr,notes', 'domain,dr,notes,brands'].includes(header.join(','))) {
+    fail(`${p} header must be "domain,dr,notes" or "domain,dr,notes,brands", found "${header.join(',')}"`);
+  }
   return rows.map((r) => ({ domain: normalizeDomain(r[0]), dr: r[1] === '' ? NaN : Number(r[1]), notes: r[2] || '' }));
 }
 
@@ -128,8 +131,16 @@ const CHECKS = {
     if (cfgList.length && cfgList.join() !== [...seen].sort().join()) {
       fail('factory.config.json → competitors differs from research/inputs/competitors.csv');
     }
+    const b = cfg.build || {};
+    const framework = String(b.framework || '').trim();
+    if (!framework) fail('factory.config.json → build.framework is empty', 'owner: choose Next.js (built-in starter) or another technology');
+    const out = String(b.outputDir || '');
+    if (!/^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/.test(out) || out.split('/').includes('..')) {
+      fail('factory.config.json → build.outputDir must be a relative folder inside the repo (for example "out" or "dist")');
+    }
+    if (!String(b.commands?.build || '').trim()) fail(`factory.config.json → build.commands.build is empty for "${framework}"`, 'architect: set the build command');
     const seed = [...list].sort((a, b) => a.dr - b.dr || a.domain.localeCompare(b.domain))[0];
-    return `domain ${domain}; ${list.length} competitor(s); seed ${seed.domain} (DR ${seed.dr} [M: owner])`;
+    return `domain ${domain}; ${list.length} competitor(s); seed ${seed.domain} (DR ${seed.dr} [M: owner]); technology ${framework} → ${out}/`;
   },
 
   'recon-no-copy'() {

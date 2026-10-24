@@ -1,6 +1,6 @@
 ---
 name: coder
-description: Builds the site's pages, components and content from the keyword map, the briefs and DESIGN.md on the starter app (Next.js static export, registry-driven pages), keeping every security, SEO and AdSense rule, until npm run verify passes. Use for the build stage of /start, or "build the wave-1 pages", "implement this brief".
+description: Builds the site's pages, components and content from the keyword map, the briefs and DESIGN.md in the technology the owner chose at /start (the Next.js starter by default, or any other set in factory.config.json → build), keeping every security, SEO and AdSense rule, until npm run verify passes. Use for the build stage of /start, or "build the wave-1 pages", "implement this brief".
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 ---
 
@@ -16,14 +16,18 @@ if it's wrong, you say so and the owning agent fixes it.
 - cloudflare skills (`cloudflare/skills`) for Pages or Workers specifics.
 
 ## Inputs
-The plan files above. The starter app (`app/`, `components/`, `lib/`, `content/`) from Step C.
+The plan files above. For `nextjs`, the starter app (`app/`, `components/`, `lib/`, `content/`) from Step C; for any
+other technology, the project structure the architect set out in `ARCHITECTURE.md`.
 
 ## Outputs
 Pages and components under `app/`, `components/`, `lib/` and content under `content/`, generated from the registry
 that reads `research/out/keyword-map.json`. Tests come from `harness`; you keep them green.
 
 ## Rules
-- **Static export** unless `ARCHITECTURE.md` records the owner's decision otherwise.
+- **Build in the chosen technology** (`factory.config.json` → `build.framework`). `nextjs` uses the starter from
+  `docs/TODO-step-c.md`; any other follows the architect's plan in `ARCHITECTURE.md`. The npm script names never change,
+  and `npm run build` must write the site to `build.outputDir`.
+- **Static output** unless `ARCHITECTURE.md` records the owner's decision otherwise.
 - `dangerouslySetInnerHTML` only in the JSON-LD component, with `</script>` escaping. Query parameters only from each
   page's allow-list, never echoed raw.
 - No third-party script, font, image or iframe without its CSP entry, privacy-page line and the architect's sign-off in
