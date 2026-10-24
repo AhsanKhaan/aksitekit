@@ -4,9 +4,11 @@ Every build step (A–D) works to this contract so they can run in parallel with
 **Nobody edits `package.json` or `package-lock.json` except Phase 0 and Phase E.** If a step needs a script or a
 dependency changed, it writes the request into its report instead.
 
-**Read first:** `docs/BLUEPRINT.md` (the approved plan). **Reference implementation:** `C:\Work\calculatorporch`
-(read only, never modify): port its finalized scripts, tests, agents and rules, generalized (no calculator-specific code,
-no calculatorporch domain, keys or IDs).
+**Read first:** `docs/BLUEPRINT.md` (the approved plan). Everything in this repository is generic: no project-specific
+domain, brand, keys or IDs.
+
+**Step C is deferred:** its instructions are in `docs/TODO-step-c.md`. Steps A, B and D must not depend on Step C files
+existing; they call the npm scripts named below, which Step C implements later.
 
 ## File ownership
 | Step | Owns | Must not touch |
