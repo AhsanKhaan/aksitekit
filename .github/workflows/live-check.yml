@@ -1,0 +1,66 @@
+# Daily live-site check: check:live (status codes, HTTPS, one HSTS value, redirects, canonicals, no NEL, DNSSEC, CAA)
+# and check:security (XSS, CSRF, path-traversal and capped rate-limit probes, leaks, served through Cloudflare,
+# SPF/DKIM/DMARC) against production, so drift such as a dashboard toggle or a lost header fails within a day.
+# Targets come from repo variables LIVE_SITE_URL (https://example.com) and LIVE_PAGES_HOST (<project>.pages.dev);
+# the job skips while LIVE_SITE_URL is unset (before the first production deploy).
+# Security (.github/README.md): schedule and manual runs only; actions pinned to full commit SHAs; read-only token;
+# no secrets; the targets reach the scripts through env, never interpolated into run:.
+name: live-check
+
+on:
+  schedule:
+    - cron: '41 5 * * *' # 05:41 UTC daily
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: live-check
+  cancel-in-progress: false
+
+jobs:
+  live:
+    name: live site
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      LIVE_SITE_URL: ${{ vars.LIVE_SITE_URL }}
+      LIVE_PAGES_HOST: ${{ vars.LIVE_PAGES_HOST }}
+    steps:
+      - name: Skip while LIVE_SITE_URL is unset
+        id: cfg
+        run: |
+          if [ -z "$LIVE_SITE_URL" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::LIVE_SITE_URL is not set yet (set it after the first production deploy); skipping"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.cfg.outputs.skip == 'false'
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.cfg.outputs.skip == 'false'
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - name: Install (lockfile only; install scripts blocked by .npmrc)
+        if: steps.cfg.outputs.skip == 'false'
+        run: npm ci
+
+      - name: check:live
+        if: steps.cfg.outputs.skip == 'false'
+        run: |
+          args=("$LIVE_SITE_URL")
+          if [ -n "$LIVE_PAGES_HOST" ]; then args+=(--pages "$LIVE_PAGES_HOST"); fi
+          npm run check:live -- "${args[@]}"
+
+      - name: check:security
+        if: ${{ !cancelled() && steps.cfg.outputs.skip == 'false' }}
+        run: npm run check:security -- "$LIVE_SITE_URL"

@@ -1,0 +1,18 @@
+# ZAP rules and reviewed exceptions, read by ZAP (zap-baseline.py / zap-full-scan.py -c) and by
+# .github/scripts/zap-gate.mjs, which decides pass or fail for security.yml and preprod.yml.
+#
+# The gate fails on any Medium or High alert whose rule isn't an IGNORE line below, and on any alert of a rule set to
+# FAIL. Format (TAB-separated, never spaces; ZAP's own config format):
+#   <rule id><TAB><IGNORE|INFO|WARN|FAIL><TAB>(<rule name>)<TAB><why it's safe>; reviewed YYYY-MM-DD
+# Rule ids: https://www.zaproxy.org/docs/alerts/ . OUTOFSCOPE lines aren't supported by the gate: use IGNORE.
+#
+# Adding an exception (the owner approves each one; secops-reviewer proposes):
+#   1. Confirm the alert in the scan artifact (zap-baseline / zap-full-scan: report_html.html), on this project's site.
+#   2. Fix it if a header, CSP or Cloudflare setting can. An exception is for alerts that don't apply to this site.
+#   3. Add one line: the rule id, IGNORE, the name, and the reason with today's date. The gate fails on an exception
+#      without a reason and date, and on one reviewed more than 365 days ago, so every exception gets looked at again.
+#
+# Example (not active; Cloudflare Pages behaviour [U], confirm it on the scan before using it):
+# 10098	IGNORE	(Cross-Domain Misconfiguration)	Pages sends Access-Control-Allow-Origin: * on public static files; no cookies, auth or private data; reviewed YYYY-MM-DD
+#
+# Active rules and exceptions (none yet):
