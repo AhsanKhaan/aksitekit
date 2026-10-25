@@ -186,6 +186,12 @@ Full 40-character SHAs, and the sha256 of every vendored file, are in `skills.lo
 13. **`replica-entrepreneur`** (same pinned replica-skill commit): its `reviews.py` only ranks rows you collected
     (standard library, no network), and the skill forbids scraping and fake reviews. Raw reviews stay in the
     git-ignored `reports/reviews/`; recon files quote at most 15 words.
+14. **gitleaks' 8 findings on the first CI run were false positives**, confirmed by replaying gitleaks v8.30.1's own
+    rules over the added lines. Seven were sha256 file hashes in `skills.lock.json` next to file names containing
+    "api", "token", "credential", "secret", "access" or "auth"; one was Cloudflare's fake `sk-live-abc123...` example
+    in `workers-best-practices`. `.gitleaks.toml` keeps every default rule and allows only those two shapes, each tied
+    to one rule and one path (a test fails if an allowlist gets wider). CI now runs gitleaks with `--verbose`, so a
+    finding names its file, line and rule while the secret stays redacted.
 
 **Still true from the first review:**
 1. **gitleaks-action is not open source since v2.** It runs under the Gitleaks-Action EULA, and repositories owned by a
@@ -224,4 +230,6 @@ Merging the pull request that changes a status is the owner's yes. Fill a row fo
    Update `commit`, `commitDate`, `reviewed`, `skills`, `usedBy` and `vendored.<name>.usedBy`.
 5. **Wire it:** name `vendor/skills/<name>/` in each agent file that uses it, then run `npm run check:skills` and
    `npm test`, and update this page in the same pull request.
-6. **Packages** (npm, PyPI) follow the same 7-day rule (`npm view <pkg> time --json`).
+6. **If gitleaks flags a vendored file:** read the finding. A real key means the skill fails review. A documented fake
+   example gets its own allowlist in `.gitleaks.toml` (that rule, that path, that exact value), recorded here.
+7. **Packages** (npm, PyPI) follow the same 7-day rule (`npm view <pkg> time --json`).
