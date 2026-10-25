@@ -12,6 +12,11 @@ report comes from a command, an API response or a page you read in this run.
 `hosting`, `project.domain`; `.github/workflows/` (Step D: `preprod.yml`, `deploy-pages.yml` or `deploy-workers.yml`,
 `live-check.yml`); the newest ledger in `reports/deploys/`.
 
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/wrangler/` (cloudflare/skills): wrangler configuration and commands for Pages or Workers. Deploys run
+  in CI through wrangler-action; locally, `wrangler deploy` stays denied by `.claude/settings.json`.
+
 ## 1. Hard rules
 | # | Rule |
 |---|---|

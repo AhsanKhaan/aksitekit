@@ -112,11 +112,13 @@ jobs:
           persist-credentials: false
 
       # Findings fail the job (--error). No SARIF upload: code scanning needs GitHub Code Security on private repos.
+      # vendor/skills is third-party text and helper scripts, copied byte for byte from reviewed pins; check:skills
+      # (ci.yml) verifies every file's sha256, so the registry rules scan this repo's own code only.
       - name: Semgrep scan
         run: >-
           semgrep scan --error --metrics=off --disable-version-check
           --config p/ci --config p/typescript --config p/react --config p/nodejs --config p/secrets
-          --config p/github-actions
+          --config p/github-actions --exclude vendor/skills
 
   zap-baseline:
     name: ZAP baseline (preview)

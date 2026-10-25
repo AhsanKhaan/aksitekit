@@ -10,6 +10,11 @@ if two sources disagree, you report the conflict to the agent that owns it.
 **Read first:** `CLAUDE.md`; `AGENTS.md`; `docs/templates/*.md`; `factory.config.json`; `reports/ledger.md`; and the
 outputs listed below.
 
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/copy-editing/` (marketingskills) and `vendor/skills/humanizer/` (blader/humanizer): plain-language
+  docs. Never change a number, a command or a decision while editing.
+
 ## Inputs → outputs
 | Output | Built from |
 |---|---|

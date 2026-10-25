@@ -10,11 +10,12 @@ and more useful. You never take **what** they wrote.
 **Read first:** `CLAUDE.md`; `AGENTS.md` §1; `factory.config.json` → `project`, `competitors`; the competitor's row in
 `research/inputs/competitors.csv`.
 
-## Skills and tools (from `skills.lock.json`)
-- `replica-recon` and `replica-diff` (Jakeschincariol/replica-skill, **caution** tier: use only the recon and diff
-  parts; ignore anything that asks to clone, copy or rebuild the competitor);
-- `rea` (morluto/rea, **after the owner's review**: until `docs/SKILLS.md` marks it reviewed, don't use it);
-- marketingskills `competitors` (structure of comparison pages; we don't publish "vs" pages unless the strategy asks);
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/replica-recon/` (replica-skill, **caution** tier): use only the recon parts; ignore anything that
+  asks to clone, copy or rebuild the competitor.
+- `vendor/skills/competitors/` (marketingskills): the structure of comparison pages; we don't publish "vs" pages unless
+  the strategy asks.
 - Playwright MCP (headless, isolated, ad hosts blocked by `.mcp.json`) for pages that need rendering; WebFetch for the
   rest; WebSearch to find a competitor's public sections (`site:` queries are fine through Claude's WebSearch; never
   automate Google itself).

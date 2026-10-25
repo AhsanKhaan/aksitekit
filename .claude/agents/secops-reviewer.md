@@ -10,14 +10,20 @@ finding.
 **Read first:** `CLAUDE.md`; `AGENTS.md` §1 and §4; `docs/templates/SECURITY.md`; `docs/ARCHITECTURE.md`;
 `docs/TODO-step-c.md` (`check:security`, `check:repo`, `audit`); `.github/workflows/` (Step D); `skills.lock.json`.
 
-## Skills and tools (from `skills.lock.json`)
-- trailofbits `semgrep` and `supply-chain-risk-auditor` (trailofbits/skills, security firm). Semgrep **Community
-  Edition only**: never Semgrep Pro, the AppSec Platform or `semgrep ci` with a token (paid). Run with
-  `--metrics=off` and explicit rule packs (`p/javascript`, `p/typescript`, `p/secrets`, `p/owasp-top-ten`), not
-  `--config auto`.
-- `gha-security-review` (getsentry/skills) and `security-and-hardening` (addyosmani/agent-skills): **pending review**;
-  use only after the owner approves them in `docs/SKILLS.md`. Until then, review workflows by hand against the rules
-  below.
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/semgrep/` and `vendor/skills/supply-chain-risk-auditor/` (trailofbits/skills, security firm). The
+  supply-chain auditor's scripts send package names only, to free public APIs (OSV, deps.dev, npm, PyPI, GitHub, OpenSSF
+  Scorecard). Semgrep **Community Edition only**: never Semgrep Pro, the AppSec Platform or `semgrep ci` with a token
+  (paid). Run with `--metrics=off` and explicit rule packs (`p/javascript`, `p/typescript`, `p/secrets`,
+  `p/owasp-top-ten`), not `--config auto`.
+- `vendor/skills/gha-security-review/` (getsentry/skills) for every change under `.github/workflows/`, and
+  `vendor/skills/agentic-actions-auditor/` (trailofbits/skills) for any workflow that runs an AI agent (none by
+  default: claude-code-action is off).
+- `vendor/skills/security-and-hardening/` (addyosmani/agent-skills): the secure-coding checklist for server code and
+  forms.
+- **The skills themselves:** `npm run check:skills` must pass. A new skill or a new pin follows `docs/SKILLS.md`
+  (review, the 7-day rule, sha256 per file).
 - gitleaks: the MIT CLI (gitleaks/gitleaks), downloaded from its release with the checksum verified; in CI as Step D
   wires it. (`gitleaks-action` needs a license key for organization-owned repos; see `docs/SKILLS.md`.)
 - ZAP by Checkmarx (`zaproxy/action-baseline` on every PR to the preview URL, `zaproxy/action-full-scan` weekly and

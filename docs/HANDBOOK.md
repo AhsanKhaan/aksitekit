@@ -140,23 +140,23 @@ All 18 live in `.claude/agents/`; `AGENTS.md` §2 has the full map.
 | Agent | Job | Main skills and tools |
 |---|---|---|
 | orchestrator | Runs `/start`: intake, stage order, gates, ledger | `/goal`, gate runner |
-| competitor-recon | Maps competitors' public sites: page types, URLs, templates, UX gaps | Replica (recon, diff), rea (after review), marketingskills `competitors`, Playwright MCP |
-| keyword-researcher | Keyword Planner CSVs → selected keywords → keyword map | the Step B scripts, claude-seo `seo-cluster`, searchfit `keyword-clustering`, `programmatic-seo` |
-| content-strategist | Content plan, page briefs, JSON-LD and schema plan, `llms.txt` | searchfit `content-strategy`/`content-brief`, marketingskills `schema`/`ai-seo`, claude-seo `seo-geo`/`seo-schema` |
+| competitor-recon | Maps competitors' public sites: page types, URLs, templates, UX gaps | `replica-recon`, marketingskills `competitors`, Playwright MCP |
+| keyword-researcher | Keyword Planner CSVs → selected keywords → keyword map | the Step B scripts, `keyword-research`, `serp-analysis`, claude-seo `seo-cluster`, `programmatic-seo` |
+| content-strategist | Content plan, page briefs with voice notes, JSON-LD and schema plan, `llms.txt` | marketingskills `content-strategy`/`copywriting`/`schema`/`ai-seo`, claude-seo `seo-content-brief`/`seo-geo`/`seo-schema`, `humanizer` |
 | growth-strategist | The 90-day ADHD-friendly growth plan (§12) | marketing-loops, marketing-ideas, marketing-council (Hormozi lens), customer-research |
-| architect | Static or server code; Cloudflare Pages or Workers; `ARCHITECTURE.md` | system-design, site-architecture, Cloudflare skills, Cloudflare docs MCP |
-| designer | Visual identity as `DESIGN.md`: palette, SEO-friendly fonts, components, motion; UI/UX gaps vs competitors | **ui-ux-pro-max**, **awesome-design-md** (reference), **design.md** format, **genjutsu** (motion), design-system, replica-design |
-| coder | Builds pages from the keyword map, briefs and `DESIGN.md` | anthropics `frontend-design`, Cloudflare skills |
+| architect | Static or server code; Cloudflare Pages or Workers; URL and internal-link plan; `ARCHITECTURE.md` | `site-architecture`, `site-structure-optimizer`, claude-seo `seo-sitemap`/`seo-programmatic`, Cloudflare skills, Cloudflare docs MCP |
+| designer | Visual identity as `DESIGN.md`: palette, SEO-friendly fonts, components, motion; UI/UX gaps vs competitors | **ui-ux-pro-max**, Vercel `web-design-guidelines` (pinned rules), `accessibility`, **awesome-design-md** (reference), **design.md** format, `replica-design` |
+| coder | Builds pages and their text from the keyword map, briefs and `DESIGN.md` | anthropics `frontend-design`, Vercel `react-best-practices` (Next.js), `copywriting`, `copy-editing`, `humanizer`, Cloudflare skills |
 | harness | Unit and e2e tests with a planted failing case per gate; wires them into CI | anthropics `webapp-testing`, Playwright MCP |
-| reconciler | Cross-checks keyword map, pages, design and briefs; parity vs competitors | ECC (after review), replica-diff |
-| seo-auditor | On-page, technical, AEO/GEO and AI-search SEO | claude-seo suite |
+| reconciler | Cross-checks keyword map, pages, design and briefs; parity vs competitors | `replica-diff` |
+| seo-auditor | On-page, technical, AEO/GEO and AI-search SEO; prose that reads as human | marketingskills `seo-audit`, claude-seo suite, `humanizer` |
 | adsense-gatekeeper | GO / NO-GO against AdSense policies; scans the codebase for required pages and forbidden code | `gate:adsense` |
-| secops-reviewer | All §9 security checks; supply-chain review of every skill or action before use | Trail of Bits skills, Semgrep, gitleaks, ZAP, gha-security-review |
+| secops-reviewer | All §9 security checks; supply-chain review of every skill or action before use | Trail of Bits `semgrep`/`supply-chain-risk-auditor`/`agentic-actions-auditor`, Sentry `gha-security-review`, `security-and-hardening`, gitleaks, ZAP, `check:skills` |
 | cloudflare-reviewer | Free-plan Cloudflare checklist; only when you choose Cloudflare | Cloudflare MCP (reads; every write needs your yes) |
-| responsive-checker | Every page type from 320 to 1280 px | Playwright |
-| performance-auditor | Lighthouse and Core Web Vitals budgets | Lighthouse CI, Chrome DevTools MCP |
-| devsecops-deployer | Pre-prod checks on the production branch → your GO → deploy → live check → rollback | wrangler-action, `deploy-production` skill |
-| doc-generator | Writes PRD, DESIGN, ARCHITECTURE and SECURITY docs that any agent can read | `docs/templates/` |
+| responsive-checker | Every page type from 320 to 1280 px | Vercel `web-design-guidelines` (pinned rules), Playwright |
+| performance-auditor | Lighthouse and Core Web Vitals budgets | `core-web-vitals`, `accessibility`, Cloudflare `web-perf`, Lighthouse CI, Chrome DevTools MCP |
+| devsecops-deployer | Pre-prod checks on the production branch → your GO → deploy → live check → rollback | Cloudflare `wrangler`, wrangler-action, `deploy-production` skill |
+| doc-generator | Writes PRD, DESIGN, ARCHITECTURE and SECURITY docs that any agent can read | `docs/templates/`, `copy-editing`, `humanizer` |
 
 ---
 
@@ -174,13 +174,19 @@ All 18 live in `.claude/agents/`; `AGENTS.md` §2 has the full map.
 **Trusted sources** (`skills.lock.json`, explained in `docs/SKILLS.md`): every external skill, plugin, MCP server and
 GitHub Action, with its tier, licence, purpose, the agents that use it, and a pinned commit.
 
+**Vendored skills** (`vendor/skills/<name>/`): the 44 external skills the agents use, plus one pinned rules file. Each
+is copied byte for byte from a reviewed commit at least 7 days old, with the sha256 of every file in the lock. Agents
+read them by path, so a personal skill of the same name or a newer upstream version can't change what they follow.
+`npm run check:skills` (CI and `verify`) fails on any changed, extra or missing file, hidden Unicode, a missing licence,
+an unapproved source or an agent naming an unlocked skill. `docs/SKILLS.md` lists the skills by agent and how to add one.
+
 | Tier | Sources |
 |---|---|
-| Official | `anthropics/skills`, `anthropics/claude-plugins-official`, `cloudflare/skills`, Cloudflare MCP servers, `github/github-mcp-server`, `microsoft/playwright-mcp`, `ChromeDevTools/chrome-devtools-mcp`, `googleanalytics/google-analytics-mcp`, `GoogleChrome/lighthouse-ci`, `cloudflare/wrangler-action`, gitleaks, Semgrep, ZAP actions, `actions/*` |
+| Official | `anthropics/skills`, `cloudflare/skills`, `vercel-labs/agent-skills`, `vercel-labs/web-interface-guidelines`, Cloudflare MCP servers, `github/github-mcp-server`, `microsoft/playwright-mcp`, `ChromeDevTools/chrome-devtools-mcp`, `googleanalytics/google-analytics-mcp`, `GoogleChrome/lighthouse-ci`, `cloudflare/wrangler-action`, gitleaks, Semgrep, ZAP actions, `actions/*` |
 | Security firm | `trailofbits/skills` |
-| Community (review, then pinned) | `nextlevelbuilder/ui-ux-pro-max-skill`, `VoltAgent/awesome-design-md`, `google-labs-code/design.md`, `AThevon/genjutsu`, `morluto/rea`, `affaan-m/ECC`, `AgriciDaniel/claude-seo`, `coreyhaines31/marketingskills`, and others listed in the lock |
-| Caution | `Jakeschincariol/replica-skill` (young project) |
-| Excluded | `zacker-tech/hormozi-skills`, `mrgoonie/claudekit-skills` (no licence) |
+| Community (reviewed, then pinned) | `coreyhaines31/marketingskills`, `AgriciDaniel/claude-seo`, `aaron-he-zhu/aaron-marketing-skills`, `blader/humanizer`, `nextlevelbuilder/ui-ux-pro-max-skill`, `getsentry/skills`, `addyosmani/agent-skills`, `addyosmani/web-quality-skills`, `VoltAgent/awesome-design-md`, `google-labs-code/design.md` |
+| Caution | `Jakeschincariol/replica-skill` (young project; structure and parity only) |
+| Excluded | `searchfit/searchfit-seo`, `morluto/rea`, `affaan-m/ECC`, `AThevon/genjutsu`, `every-app/open-seo`, `aaron-he-zhu/seo-geo-claude-skills`, `zacker-tech/hormozi-skills`, `mrgoonie/claudekit-skills` (reasons in `docs/SKILLS.md`) |
 
 Star counts are not treated as proof of safety. Anything not in the lock needs your yes, after the secops-reviewer
 checks it.

@@ -10,10 +10,18 @@ check their outputs, and explain the result.
 **Read first:** `CLAUDE.md`; `AGENTS.md` §1 and §4; `docs/CONTRACT.md` → data formats; `factory.config.json` →
 `research`; `.claude/skills/keyword-pipeline/SKILL.md`; the recon files in `research/out/recon/`.
 
-## Skills and tools (from `skills.lock.json`)
-- claude-seo `seo-cluster` (SERP-overlap clustering method; use its *method*, not its paid data sources);
-- searchfit `keyword-clustering` (**pending review**: only after the owner approves the source in `docs/SKILLS.md`);
-- marketingskills `programmatic-seo` (when a cluster suits template pages; it must still pass the thin-content rules);
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/keyword-research/` (aaron-marketing-skills): the method. Scope, seed, expand, classify intent, score,
+  check AI-answer fit, cluster, deliver, with its intent taxonomy and prioritisation framework. Map its evidence labels to
+  ours (Measured → [M], Estimated or Proxy → [P], Unknown → [U]). Never run its helper scripts (one calls an unofficial
+  Google Autocomplete endpoint, one sends queries to Firecrawl), and write nothing to its `memory/` paths.
+- `vendor/skills/serp-analysis/` (aaron-marketing-skills): how to read a results page (who ranks, page types, SERP
+  features, intent) for the free KD estimate in step 2 of the method below.
+- `vendor/skills/seo-cluster/` (claude-seo): SERP-overlap clustering, to sanity-check the groups `cluster.mjs`
+  makes. WebSearch only; its DataForSEO path stays off.
+- `vendor/skills/programmatic-seo/` (marketingskills): when a cluster suits template pages; it must still pass the
+  thin-content rules.
 - Claude's WebSearch for the free SERP check. No other search or keyword API.
 
 ## Inputs

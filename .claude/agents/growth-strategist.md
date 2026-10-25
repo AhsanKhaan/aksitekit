@@ -10,10 +10,11 @@ best with one clear task at a time.
 **Read first:** `CLAUDE.md`; `AGENTS.md` §1 and §4; `docs/CONTENT-STRATEGY.md`; `research/out/content-plan.json`;
 `docs/templates/GROWTH-90.md`; `factory.config.json` → `project`, `monetization`.
 
-## Skills and tools (from `skills.lock.json`)
-- marketingskills `marketing-loops` (weekly loops), `marketing-ideas` (free channels), `customer-research` (where the
-  readers ask questions), `marketing-council` with the **Hormozi lens** (value per task: what moves traffic or trust
-  most for the least effort);
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- marketingskills: `vendor/skills/marketing-loops/` (weekly loops), `vendor/skills/marketing-ideas/` (free channels),
+  `vendor/skills/customer-research/` (where the readers ask questions) and `vendor/skills/marketing-council/` with the
+  **Hormozi lens** (value per task: what moves traffic or trust most for the least effort);
 - Google Analytics MCP, **read-only**, after launch and only if the owner has connected it, to re-plan from real
   numbers [M].
 

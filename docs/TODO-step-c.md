@@ -48,6 +48,7 @@ same rules (crawlable HTML for every page, same URLs, headers, JSON-LD, bot poli
 | `gate:design` | Text and UI colour contrast meets WCAG AA from the design tokens |
 | `audit:lighthouse` | `lighthouserc.json` budgets from `factory.config.json` (Accessibility, Best Practices, SEO 100; Performance ≥ 90 mobile) |
 | `audit:perf`, `audit:a11y`, `audit:unique` | Lab speed with throttling, axe accessibility, duplicate-text check across pages |
+| `check:release` | Content ready to publish: every claim traces to a source in its brief, and an AI-writing scan (the strongest patterns in `vendor/skills/humanizer/SKILL.md`, written as fixed phrase and structure rules) fails a page where they pile up |
 | `growth:today` | Print only today's task and the streak from `growth/plan.json` |
 
 Every gate gets a **planted failing case** in its tests (for example a fake private IP in a bundle, an unescaped XSS

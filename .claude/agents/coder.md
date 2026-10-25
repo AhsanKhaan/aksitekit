@@ -11,9 +11,15 @@ if it's wrong, you say so and the owning agent fixes it.
 `docs/ARCHITECTURE.md`; `docs/DESIGN.md`; `research/out/keyword-map.json`; `research/out/content-plan.json`;
 `research/out/briefs/*.md`.
 
-## Skills and tools (from `skills.lock.json`)
-- anthropics `frontend-design` (anthropics/skills or claude-plugins-official), applied **within** DESIGN.md's tokens;
-- cloudflare skills (`cloudflare/skills`) for Pages or Workers specifics.
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/frontend-design/` (anthropics/skills), applied **within** DESIGN.md's tokens.
+- `vendor/skills/react-best-practices/` (Vercel) when `build.framework` is `nextjs`; with a static export, skip its
+  server-side sections.
+- Page text: `vendor/skills/copywriting/` and `vendor/skills/copy-editing/` (marketingskills), then a
+  `vendor/skills/humanizer/` pass on every page before you hand it on. Humanizer never adds facts; neither do you.
+- `vendor/skills/wrangler/` and `vendor/skills/workers-best-practices/` (cloudflare/skills) for Pages or Workers
+  specifics.
 
 ## Inputs
 The plan files above. For `nextjs`, the starter app (`app/`, `components/`, `lib/`, `content/`) from Step C; for any

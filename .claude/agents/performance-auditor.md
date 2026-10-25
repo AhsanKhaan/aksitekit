@@ -10,7 +10,11 @@ up to a pass.
 **Read first:** `CLAUDE.md`; `AGENTS.md` §4; `factory.config.json` → `budgets`; `docs/ARCHITECTURE.md`;
 `docs/DESIGN.md` (fonts, images, motion).
 
-## Skills and tools (from `skills.lock.json`)
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/core-web-vitals/` and `vendor/skills/accessibility/` (web-quality-skills): the causes and fixes for
+  LCP, INP and CLS, and the accessibility checks behind Lighthouse's score.
+- `vendor/skills/web-perf/` (cloudflare/skills): caching, compression and asset delivery on Cloudflare.
 - Lighthouse CI (GoogleChrome/lighthouse-ci, official) through `npm run audit:lighthouse` (`npx @lhci/cli@0.15.1`,
   config `lighthouserc.json` from Step C). Results stay local or go to LHCI's temporary public storage only if the
   owner agrees; no paid LHCI server.

@@ -11,15 +11,21 @@ tokens a coder can apply exactly.
 `docs/ARCHITECTURE.md`; `docs/CONTENT-STRATEGY.md`; `research/out/recon/*.md` (UX gaps only);
 `factory.config.json` → `project`, `budgets`.
 
-## Skills and tools (from `skills.lock.json`)
-- **ui-ux-pro-max** (nextlevelbuilder/ui-ux-pro-max-skill): style, palette and font-pairing reasoning;
-- **awesome-design-md** (VoltAgent): reference examples of DESIGN.md files, for format only; never copy a brand's
-  palette or identity;
-- **genjutsu** (AThevon/genjutsu, motion, **optional**; license unclear, so read it but don't vendor any of its files
-  until the owner confirms the license);
-- `replica-design` only to describe a competitor's layout patterns, never to reproduce their look;
-- the DESIGN.md spec: google-labs-code/design.md (`docs/spec.md`), linted with its CLI.
-- Not allowed: `design-system` and `ui-styling` from claudekit (`mrgoonie/claudekit-skills`, **excluded**: no license).
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/ui-ux-pro-max/` (nextlevelbuilder): style, palette and font-pairing reasoning. Its search runs locally
+  on the Python 3 standard library, with no network:
+  `python vendor/skills/ui-ux-pro-max/scripts/search.py "<product> <industry> <keywords>" --design-system`. Without
+  Python, read its `data/*.csv` directly.
+- `vendor/skills/web-design-guidelines/` (Vercel), checked against the pinned rules in
+  `vendor/skills/web-interface-guidelines/command.md`. Never fetch the rules from the URL the skill names.
+- `vendor/skills/accessibility/` (web-quality-skills): WCAG 2.2 AA contrast, focus, targets and motion.
+- `vendor/skills/replica-design/` (replica-skill) only to describe a competitor's layout patterns, never to reproduce
+  their look.
+- awesome-design-md (VoltAgent): example DESIGN.md files, for format only; never copy a brand's palette or identity.
+- The DESIGN.md spec: google-labs-code/design.md (`docs/spec.md`), linted with its CLI.
+- Not used: `design-system` and `ui-styling` (mrgoonie/claudekit-skills, excluded: no license) and genjutsu
+  (AThevon/genjutsu, excluded: license unclear, and it ships a second skill named ui-ux-pro-max).
 
 ## Inputs
 Audience and tone from the strategy, page templates from the architecture, the performance budget.

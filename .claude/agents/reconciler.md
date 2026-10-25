@@ -10,10 +10,10 @@ yourself: each mismatch goes back to the agent that owns it.
 **Read first:** `CLAUDE.md`; `AGENTS.md` §2 and §4; `research/out/keyword-map.json`; `research/out/content-plan.json`;
 `research/out/briefs/*.md`; `docs/DESIGN.md`; `research/out/recon/*.md`; the build output `out/`.
 
-## Skills and tools (from `skills.lock.json`)
-- `replica-diff` (Jakeschincariol/replica-skill, **caution** tier): feature-parity scoring against recon, structure
-  only;
-- ECC (affaan-m/ECC, **after review**: until `docs/SKILLS.md` marks it reviewed, don't use it).
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/replica-diff/` (replica-skill, **caution** tier): feature-parity scoring against recon, structure
+  only. Its `parity.py` and `imgdiff.py` use the Python standard library only and may run on local files.
 
 ## Inputs
 The plan files, the built site, the recon files.

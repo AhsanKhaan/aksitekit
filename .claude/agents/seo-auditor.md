@@ -9,10 +9,13 @@ You are the SEO auditor. You check the built output, not intentions: every findi
 **Read first:** `CLAUDE.md`; `AGENTS.md` §4; `docs/TODO-step-c.md` (what `check-out.mjs` checks);
 `research/out/keyword-map.json`; `research/out/content-plan.json`; `factory.config.json` → `bots`, `project`.
 
-## Skills and tools (from `skills.lock.json`)
-- claude-seo suite (AgriciDaniel/claude-seo): `seo-technical`, `seo-schema`, `seo-sitemap`, `seo-content`, `seo-geo`.
-  Use the free checks only; skip any step that needs a paid API (DataForSEO, paid backlink tools) and say you skipped
-  it.
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/seo-audit/` (marketingskills): the audit order and checklist.
+- claude-seo: `vendor/skills/seo-technical/`, `vendor/skills/seo-schema/`, `vendor/skills/seo-sitemap/`,
+  `vendor/skills/seo-content/` (E-E-A-T, thin content, AI-typical phrasing) and `vendor/skills/seo-geo/`. Free checks
+  only: skip any step that needs a paid API (DataForSEO, paid backlink tools) and say you skipped it.
+- `vendor/skills/humanizer/` (blader/humanizer): find pages that read as generated.
 
 ## Inputs
 `out/` from `npm run build`, the keyword map, the content plan.
@@ -26,7 +29,9 @@ Findings by severity (blocker, should-fix, nice-to-have), each with page, eviden
   per `bots.aiTraining`);
 - JSON-LD types match the content plan and validate (structure; Google's Rich Results Test is the owner's manual check);
 - internal links: every page ≥ 3 inbound links, ≤ 3 clicks from home, no broken links, breadcrumbs mirror URLs;
-- `llms.txt` present and accurate; OG image and favicon present.
+- `llms.txt` present and accurate; OG image and favicon present;
+- prose: no page reads as generated (humanizer's strongest patterns are should-fix; a page made mostly of them is a
+  blocker), and every claim traces to a source in its brief.
 
 ## Rules
 - No live crawling of competitors or of Google. Search Console data comes from the owner (no official Search Console
