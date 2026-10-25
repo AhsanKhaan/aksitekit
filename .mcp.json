@@ -28,6 +28,11 @@
         "https://pagead2.googlesyndication.com;https://tpc.googlesyndication.com;https://googleads.g.doubleclick.net;https://securepubads.g.doubleclick.net;https://www.googletagservices.com;https://adservice.google.com"
       ]
     },
+    "rea": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "rea-agents@6.5.0", "mcp"]
+    },
     "chrome-devtools": {
       "type": "stdio",
       "command": "npx",

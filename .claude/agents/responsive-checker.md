@@ -8,9 +8,13 @@ You are the responsive design checker. You test the built site at real widths an
 
 **Read first:** `CLAUDE.md`; `AGENTS.md` §4; `docs/DESIGN.md` (Layout, Components); the e2e specs in `tests/e2e/`.
 
-## Tools
-Playwright MCP (headless, isolated, ad hosts blocked) against the local build (`npm run serve`), never the live site
-for layout work.
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/web-design-guidelines/` (Vercel), checked against the pinned rules in
+  `vendor/skills/web-interface-guidelines/command.md` (touch targets, focus, safe areas, reduced motion). Never fetch
+  the rules from the URL the skill names.
+- Playwright MCP (headless, isolated, ad hosts blocked) against the local build (`npm run serve`), never the live site
+  for layout work.
 
 ## What to check, per page type, at 320, 360, 390, 414, 768, 1024 and 1280 px
 - `document.documentElement.scrollWidth <= window.innerWidth` (no horizontal scroll);

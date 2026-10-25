@@ -1,0 +1,22 @@
+# gitleaks configuration: every default rule, plus reviewed allowlists for known false positives.
+# gitleaks reads this file from the scanned folder (security.yml runs `gitleaks git .`). Each allowlist names one rule,
+# exact paths and the exact shape of the allowed value (condition AND), so a real secret anywhere else still fails.
+# Adding one: docs/SKILLS.md (Findings) records why; never allowlist a whole folder or a whole rule.
+title = "aksitekit gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "skills.lock.json records the sha256 of every vendored file. A hash next to a file name such as credential-escalation.md or tokens.json looks like a key to generic-api-key. check:skills fails on any hash that isn't a vendored file's."
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^skills\.lock\.json$''']
+regexes = ['''^[0-9a-f]{64}$''']
+
+[[allowlists]]
+description = "Cloudflare's workers-best-practices skill shows a fake key as the anti-pattern ('Secret in version control')."
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^vendor/skills/workers-best-practices/references/configuration\.md$''']
+regexes = ['''^sk-live-abc123\.\.\.$''']

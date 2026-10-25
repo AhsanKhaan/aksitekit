@@ -10,10 +10,16 @@ the most useful answer, without padding and without copying anyone.
 **Read first:** `CLAUDE.md`; `AGENTS.md` §1 and §4; `research/out/keyword-map.json`; `research/out/selected.json`;
 `research/out/recon/*.md`; `docs/templates/CONTENT-STRATEGY.md`; `factory.config.json` → `project`, `bots`.
 
-## Skills and tools (from `skills.lock.json`)
-- searchfit `content-strategy` and `content-brief` (**pending review**: only after the owner approves the source);
-- marketingskills `schema` (JSON-LD types) and `ai-seo` (answer-first structure, citations);
-- claude-seo `seo-geo` and `seo-schema`;
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/content-strategy/` (marketingskills): pillars, hub and spokes, waves, priority by intent and effort.
+- `vendor/skills/seo-content-brief/` (claude-seo): the brief's structure (reader question, outline, entities, sources,
+  internal links). Skip its DataForSEO and Ahrefs sections.
+- `vendor/skills/copywriting/` (marketingskills) and `vendor/skills/humanizer/` (blader/humanizer): each brief's voice.
+  Plain words, the answer first, specific claims, and none of the AI-writing patterns humanizer lists.
+- `vendor/skills/schema/` (marketingskills) and `vendor/skills/seo-schema/` (claude-seo): the JSON-LD types.
+- `vendor/skills/ai-seo/` (marketingskills) and `vendor/skills/seo-geo/` (claude-seo): passages AI search can quote.
+  The paid tracking tools they mention stay off.
 - WebSearch and WebFetch to check facts against primary sources. Never cite a source you didn't open.
 
 ## Inputs
@@ -35,7 +41,9 @@ The keyword map (URLs, types, primaries, secondaries, intents, clusters), recon 
 - `research/out/briefs/<slug>.md` for every wave-1 URL, where `<slug>` is the URL path without its outer slashes and
   with `/` replaced by `--` (`/` itself is `home`). Each brief: primary and secondary keywords, intent, the reader's
   question, the answer in one sentence, outline (H1, H2s), what makes it better than what ranks (from recon), facts to
-  verify with their primary sources, internal links in and out, the JSON-LD types, word range (tool pages 600–1,500,
+  verify with their primary sources, internal links in and out, the JSON-LD types, voice notes (who the reader is, words to use and to avoid), the
+  first-hand detail that makes the page more than a summary of what ranks (a worked example, a measured number, a real
+  photo), word range (tool pages 600–1,500,
   guides 800–1,500 [P]; never pad to reach it).
 
 ## Rules
@@ -43,6 +51,8 @@ The keyword map (URLs, types, primaries, secondaries, intents, clusters), recon 
 - Every claim in a brief needs a primary source to check; YMYL topics (health, finance, legal, safety) get a flag for
   the owner and stay out of wave 1 unless the owner decides otherwise.
 - No copied text from competitors; recon tells you structure and gaps only.
+- **Written for a person.** A brief that only a model could have written (generic outline, no first-hand detail, no
+  clear reader) isn't done. The voice notes are what the coder and humanizer work from.
 - `llms.txt` is generated at build time from `llms` (Step C, `gen-public-files.mjs`); you only supply its content.
 - Label numbers ([M]/[R]/[P]/[U]).
 

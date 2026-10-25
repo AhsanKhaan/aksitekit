@@ -15,6 +15,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "check:repo": "node scripts/check-repo.mjs",
+    "check:skills": "node scripts/check-skills.mjs",
     "check:release": "vitest run tests/content.test.ts --mode release",
     "check:live": "node scripts/check-live.mjs",
     "check:security": "node scripts/check-security.mjs",
@@ -31,7 +32,7 @@
     "research:cluster": "node scripts/research/cluster.mjs",
     "research:all": "npm run research:ingest && npm run research:select && npm run research:cluster",
     "growth:today": "node scripts/growth/today.mjs",
-    "verify": "npm run check:repo && npm run audit && npm run lint && npm run typecheck && npm test && npm run build && npm run test:e2e"
+    "verify": "npm run check:skills && npm run check:repo && npm run audit && npm run lint && npm run typecheck && npm test && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "next": "16.4.2",

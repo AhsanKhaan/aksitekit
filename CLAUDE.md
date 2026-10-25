@@ -18,6 +18,9 @@ ownership, npm script names and data formats. `docs/BLUEPRINT.md` is the approve
 - **Trusted sources only.** Skills, plugins, MCP servers and GitHub Actions come from `skills.lock.json`, pinned to the
   commit recorded there. Tiers and review rules: `docs/SKILLS.md`. Anything not listed, or listed as `excluded` or
   `pending-review`, needs the owner's yes before use.
+- **Skills are read from `vendor/skills/`,** by path, as `AGENTS.md` → Skills says: reviewed copies, at least 7 days
+  old, hashed file by file. Never install a skill or plugin to replace one, and never edit a vendored file; run
+  `npm run check:skills` after any change there.
 - **Label every number** in docs, reports and content: **[M]** measured, **[R]** range, **[P]** proxy or estimate,
   **[U]** unverified. Say where a measured number came from.
 - **Before saying a change is done, run** `npm run verify`. If a script it calls doesn't exist yet, say so and point to
@@ -59,6 +62,7 @@ ownership, npm script names and data formats. `docs/BLUEPRINT.md` is the approve
 | Project inputs and thresholds | `factory.config.json` |
 | Owner inputs | `research/inputs/competitors.csv`, `research/inputs/kp/*.csv`, optional `research/inputs/kd.csv` |
 | Trusted sources, pinned | `skills.lock.json`, explained in `docs/SKILLS.md` |
+| Vendored skills the agents read (reviewed, hashed) | `vendor/skills/<name>/`, checked by `npm run check:skills` |
 | MCP servers | `.mcp.json` (free, official), explained in `docs/MCP.md` |
 | Doc templates | `docs/templates/` (PRD, DESIGN, ARCHITECTURE, SECURITY, CONTENT-STRATEGY, GROWTH-90) |
 | Starter app and most gates (deferred) | `docs/TODO-step-c.md` |

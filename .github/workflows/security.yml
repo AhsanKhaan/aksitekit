@@ -62,8 +62,10 @@ jobs:
           echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tgz" | sha256sum -c -
           tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP" gitleaks
 
+      # --verbose names each finding (file, line, commit, rule) with the secret itself redacted; reviewed false
+      # positives are allowlisted narrowly in .gitleaks.toml, which gitleaks reads from the scanned folder.
       - name: Secret scan (redacted output)
-        run: '"$RUNNER_TEMP/gitleaks" git --redact --no-banner --exit-code 1 .'
+        run: '"$RUNNER_TEMP/gitleaks" git --redact --verbose --no-banner --exit-code 1 .'
 
   npm-audit:
     name: npm audit gate
@@ -112,11 +114,13 @@ jobs:
           persist-credentials: false
 
       # Findings fail the job (--error). No SARIF upload: code scanning needs GitHub Code Security on private repos.
+      # vendor/skills is third-party text and helper scripts, copied byte for byte from reviewed pins; check:skills
+      # (ci.yml) verifies every file's sha256, so the registry rules scan this repo's own code only.
       - name: Semgrep scan
         run: >-
           semgrep scan --error --metrics=off --disable-version-check
           --config p/ci --config p/typescript --config p/react --config p/nodejs --config p/secrets
-          --config p/github-actions
+          --config p/github-actions --exclude vendor/skills
 
   zap-baseline:
     name: ZAP baseline (preview)

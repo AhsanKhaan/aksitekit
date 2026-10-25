@@ -44,6 +44,9 @@ aksitekit/
 ```
 
 ## Agents and gates (each agent writes a file; a script decides)
+> **Updated 2026-10-25:** the skills below are the plan as approved. The skills each agent uses now are vendored and
+> hashed; the current list, and why some planned ones were excluded, is in `docs/SKILLS.md`.
+
 | # | Agent | Uses (skills / MCP) | Gate that decides |
 |---|---|---|---|
 | 1 | **orchestrator** (`/start`) | `/goal`, the ledger | Each stage's gate passed before the next starts |
@@ -82,6 +85,9 @@ aksitekit/
 These run as `npm run check:security` (local, against a URL) and as jobs in `security.yml` / `preprod.yml`. Probes only ever target the project's own preview or production hosts.
 
 ## Trusted sources (`skills.lock.json`, checked on GitHub 2026-10-25)
+> **Updated 2026-10-25:** the skills below are the plan as approved. The skills each agent uses now are vendored and
+> hashed; the current list, and why some planned ones were excluded, is in `docs/SKILLS.md`.
+
 - **Official:**
   - `anthropics/skills` and `anthropics/claude-plugins-official`;
   - `anthropics/claude-code-action` (optional, paid);

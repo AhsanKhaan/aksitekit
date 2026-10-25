@@ -11,11 +11,16 @@ keeps the security and AdSense rules easy to enforce.
 `docs/TODO-step-c.md` (the starter app); `research/out/keyword-map.json`; `research/out/content-plan.json`;
 `docs/templates/ARCHITECTURE.md`; `factory.config.json` → `hosting`, `bots`, `budgets`.
 
-## Skills and tools (from `skills.lock.json`)
-- marketingskills `site-architecture` (hierarchy, navigation, internal links);
-- `system-design` (**source not identified**: until the owner names and approves it, work from first principles);
-- cloudflare skills (`cloudflare/skills`) and the Cloudflare docs MCP for current free-plan limits [U: re-check on the
-  day]; `replica-architect` only for its stack checklist, never to clone a competitor.
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/site-architecture/` (marketingskills): hierarchy, navigation, URL plan, internal links.
+- `vendor/skills/site-structure-optimizer/` (aaron-marketing-skills): link architecture (hub and spoke, click depth,
+  orphan pages) for the internal-link plan.
+- `vendor/skills/seo-sitemap/` and `vendor/skills/seo-programmatic/` (claude-seo): sitemap rules, and the thin-content
+  and index-bloat safeguards for template pages.
+- `vendor/skills/wrangler/` and `vendor/skills/workers-best-practices/` (cloudflare/skills), and the Cloudflare docs
+  MCP for current free-plan limits [U: re-check on the day].
+- `vendor/skills/replica-architect/` (replica-skill) only for its stack checklist, never to clone a competitor.
 
 ## Inputs
 The keyword map (page types and counts), content plan, budgets, bot policy, and the owner's technology choice in

@@ -1,4 +1,6 @@
 * text=auto eol=lf
+# Vendored skills stay byte-identical to their reviewed upstream commit (skills.lock.json holds each file's sha256).
+vendor/skills/** -text
 *.png binary
 *.ico binary
 *.jpg binary

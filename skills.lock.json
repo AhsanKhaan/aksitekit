@@ -1,6 +1,6 @@
 {
-  "$comment": "Trusted sources for skills, plugins, MCP servers and GitHub Actions. Explained in docs/SKILLS.md. commit = the default branch HEAD from GET https://api.github.com/repos/{owner}/{repo}/commits/HEAD on the reviewed date. For GitHub Actions, workflows pin release.commit (the newest release tag) by full SHA.",
-  "lockVersion": 1,
+  "$comment": "Trusted sources for skills, plugins, MCP servers and GitHub Actions. Explained in docs/SKILLS.md. commit = the commit reviewed on the reviewed date. vendored = the skill folders copied byte for byte from that commit into vendorDir, with the sha256 of every file; npm run check:skills verifies them. For GitHub Actions, workflows pin release.commit (the newest release tag) by full SHA.",
+  "lockVersion": 2,
   "reviewed": "2026-10-25",
   "statuses": {
     "approved": "Agents may use it, at the pinned commit",
@@ -29,7 +29,33 @@
       "defaultBranch": "main",
       "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
       "commitDate": "2026-10-09T18:45:49Z",
-      "reviewed": "2026-10-25"
+      "reviewed": "2026-10-25",
+      "vendored": {
+        "frontend-design": {
+          "usedBy": [
+            "coder"
+          ],
+          "upstreamPath": "skills/frontend-design",
+          "files": {
+            "LICENSE.txt": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+            "SKILL.md": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
+          }
+        },
+        "webapp-testing": {
+          "usedBy": [
+            "harness"
+          ],
+          "upstreamPath": "skills/webapp-testing",
+          "files": {
+            "examples/console_logging.py": "ea46877289acb82da7e7ce59d0bc37c8977cd57e2a006d0c88d7a1c625bf95da",
+            "examples/element_discovery.py": "d63c89604a22f8845d724e95dda45db49b1bf57c25ce0a83afbb7b8da3d402f0",
+            "examples/static_html_automation.py": "9d533aafb875ee3ab8b8ebf8f5b9003ac8d999da3d09b285cce252e623140064",
+            "LICENSE.txt": "bc6b3af2f331cbc7fb0da1344efb2cbe5877a31498b4d70dbc7000f3405a1362",
+            "scripts/with_server.py": "b0dcf4918935b795f4eda9821579b9902119235ff4447f687a30286e7d0925fd",
+            "SKILL.md": "51b7349e77ec63b7744a6f63647e7566a0b4d2e301121cc10e8c2113af6556a2"
+          }
+        }
+      }
     },
     {
       "repo": "anthropics/claude-plugins-official",
@@ -39,16 +65,12 @@
       "status": "approved",
       "license": "Apache-2.0",
       "purpose": "Anthropic's official plugin marketplace",
-      "skills": [
-        "frontend-design"
-      ],
-      "usedBy": [
-        "coder"
-      ],
+      "usedBy": [],
       "defaultBranch": "main",
       "commit": "58267944f92187b7d6a1c822165c96c81c864806",
       "commitDate": "2026-10-23T18:21:26Z",
-      "reviewed": "2026-10-25"
+      "reviewed": "2026-10-25",
+      "notes": "Not used: frontend-design is vendored from anthropics/skills, its source."
     },
     {
       "repo": "anthropics/claude-code-action",
@@ -78,18 +100,61 @@
       "license": "Apache-2.0",
       "purpose": "Cloudflare platform skills (Pages, Workers, Wrangler)",
       "skills": [
-        "wrangler",
+        "web-perf",
         "workers-best-practices",
-        "web-perf"
+        "wrangler"
       ],
       "usedBy": [
         "architect",
-        "coder"
+        "coder",
+        "devsecops-deployer",
+        "performance-auditor"
       ],
       "defaultBranch": "main",
       "commit": "86505e44f87d801aa1864a3c4109e9a8ae5c409f",
       "commitDate": "2026-10-15T21:19:27Z",
-      "reviewed": "2026-10-25"
+      "reviewed": "2026-10-25",
+      "vendored": {
+        "web-perf": {
+          "usedBy": [
+            "performance-auditor"
+          ],
+          "upstreamPath": "skills/web-perf",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "SKILL.md": "79c531e95ca4d96a7de920c28c127c2c09ec55cd452a92222267d2954580be23"
+          }
+        },
+        "workers-best-practices": {
+          "usedBy": [
+            "architect",
+            "coder"
+          ],
+          "upstreamPath": "skills/workers-best-practices",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "references/configuration.md": "cdb5c9cd5168231373523332c0e7a5cf8811dc244c48298823e3ccc5eb7157c1",
+            "references/platform-apis.md": "9ca9f5a7a82f92de45d310f5e2ee05aa464ddb7a63a737529caa17fff3660f28",
+            "references/runtime-patterns.md": "704ce8d4ff62c7655eb1d15f804ad566ed2012d11c2086e0d94bd3addb4d2c07",
+            "SKILL.md": "039c2a70aac53e00da20adc3d527bd3fc9b727be90c28b94c81c5e10092339ef"
+          }
+        },
+        "wrangler": {
+          "usedBy": [
+            "architect",
+            "coder",
+            "devsecops-deployer"
+          ],
+          "upstreamPath": "skills/wrangler",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "SKILL.md": "7884f560509c08ac29ee0d3cfe1b5259855fd6790acf0c5292f4d1c54db7c191"
+          }
+        }
+      }
     },
     {
       "repo": "cloudflare/mcp-server-cloudflare",
@@ -402,6 +467,7 @@
       "license": "CC-BY-SA-4.0",
       "purpose": "Trail of Bits security skills",
       "skills": [
+        "agentic-actions-auditor",
         "semgrep",
         "supply-chain-risk-auditor"
       ],
@@ -409,10 +475,74 @@
         "secops-reviewer"
       ],
       "defaultBranch": "main",
-      "commit": "196a9073ab10d35bacf111f945e02c00b2c6883a",
-      "commitDate": "2026-10-23T09:26:17Z",
+      "commit": "5c99c03fb8a9ea568432ecbcba5d86e9f4ac2bf0",
+      "commitDate": "2026-10-15T18:16:40Z",
       "reviewed": "2026-10-25",
-      "notes": "The semgrep skill can use Semgrep Pro when available; we never do (paid)."
+      "notes": "The semgrep skill can use Semgrep Pro when available; we never do (paid).",
+      "vendored": {
+        "agentic-actions-auditor": {
+          "usedBy": [
+            "secops-reviewer"
+          ],
+          "upstreamPath": "plugins/agentic-actions-auditor/skills/agentic-actions-auditor",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "agents/openai.yaml": "e0e73b657e0414fc844cf000fb3a930e7c801db193a16d19620f764538100072",
+            "assets/trail-of-bits-mark.svg": "4bf74c789b38dcf6ad762c136b6832363d27ae19fbaa9a18ec18d66ecce6ca05",
+            "LICENSE": "7abe19ec9bb73b36141b999b861d24ad855e808bafe0f81e84cce28556f6c297",
+            "references/action-profiles.md": "bbfaf6abe69b57e6289948340aa649482378b53f752a25cba92e7d4a740c4324",
+            "references/cross-file-resolution.md": "b7d0d31fa24f1b987953ef0c11dc22ad48e81675b34de65c65ff79a74a3e6084",
+            "references/foundations.md": "722ee7ea1dc06af8fa8cbb6cacb62f3c7c70139c8ed402752dd12c851a195d0e",
+            "references/vector-a-env-var-intermediary.md": "7903992f54409760aae64ddb45bb3c26032223443f746ac6e3d8fd281bda877d",
+            "references/vector-b-direct-expression-injection.md": "be6e5baff68d6770665ce6c7b7995c92dfdec3866b96ea21330c94b340499631",
+            "references/vector-c-cli-data-fetch.md": "f11d2333f2b3800215311047c0b0ad35a1020c79dbb77614ff66a8c1fef16252",
+            "references/vector-d-pr-target-checkout.md": "fc029037bb219aed5e130708eb4911ad235e47f1394e2155b5e40175ddb2d187",
+            "references/vector-e-error-log-injection.md": "2c93623d96f49c4ab70bc2dd92e111b2cfca68ff70aaf579efd86812b0df15a9",
+            "references/vector-f-subshell-expansion.md": "d6ede1d6a7769e1b75faed3dfeba7d212e0115fb9ddb09d39145bf65d062ba7f",
+            "references/vector-g-eval-of-ai-output.md": "b9a47a41dd1470cc469cc030cd6cd6059b35741c78ba9f494c1d18b2fd65b686",
+            "references/vector-h-dangerous-sandbox-configs.md": "892cb478d91c2e155b4084c5cf707bea5045bb4e2a11c7a5a1131b6212690b86",
+            "references/vector-i-wildcard-allowlists.md": "68a4cd774ad829e535a8ec15ee492caefbae8e46f115f345b7f2bf2fecf88f86",
+            "SKILL.md": "b2bdb88d559bc37e6c2c8314e28e7a2eb47e7cdd9da51e77da347d3517326dc0"
+          }
+        },
+        "semgrep": {
+          "usedBy": [
+            "secops-reviewer"
+          ],
+          "upstreamPath": "plugins/static-analysis/skills/semgrep",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "agents/openai.yaml": "b200a52900687f8176cb5d8230a29e5e80c8317337efcdcf87754e892129cd89",
+            "assets/trail-of-bits-mark.svg": "4bf74c789b38dcf6ad762c136b6832363d27ae19fbaa9a18ec18d66ecce6ca05",
+            "LICENSE": "7abe19ec9bb73b36141b999b861d24ad855e808bafe0f81e84cce28556f6c297",
+            "references/rulesets.md": "e641bf7b2f32cd81b2623759f72a560dd96f6747f1295157f2984fe8ebac3f74",
+            "references/scan-modes.md": "99ed0ffb9e9ee68bcb175da469f1310f28f96e356c69c65918a0afc430027d3d",
+            "scripts/merge_sarif.py": "8b6094e18a0e4d36250c72c81903edac914552df7eb2a7eebd1ac449d105f7ba",
+            "scripts/run-scans.sh": "ac3d815dbd5cdfa0419596411058378ab659bd243c7dc87495114e773aa40347",
+            "SKILL.md": "52162605593f871cf45f48f9cf00b7c2d7e0759ccb7507981088442b7cc5d76c",
+            "workflows/scan-workflow.md": "fef44f3abb2ebc050e96daaefa71d9b94a0d0082278d6d958f366dff04d9064d"
+          }
+        },
+        "supply-chain-risk-auditor": {
+          "usedBy": [
+            "secops-reviewer"
+          ],
+          "upstreamPath": "plugins/supply-chain-risk-auditor/skills/supply-chain-risk-auditor",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "agents/openai.yaml": "7d79ce0a77aaa1e2c72939b02b285b13a84d9da85ffb965a9d1489c358cd27ab",
+            "assets/trail-of-bits-mark.svg": "4bf74c789b38dcf6ad762c136b6832363d27ae19fbaa9a18ec18d66ecce6ca05",
+            "LICENSE": "7abe19ec9bb73b36141b999b861d24ad855e808bafe0f81e84cce28556f6c297",
+            "scripts/collect.py": "fd75cffad628980a6da521b5d3a40fb5dd16c5bb9ad63a25245e5208d08abff7",
+            "scripts/model.py": "78a20954b76e81216991b57453ceddbdb867035a0d6993b98cfa05a7f8d008d3",
+            "scripts/pyproject.toml": "a79ec30039ce3bc90544b9d833f7edc128232821575736f659d2b2ca0a601f3b",
+            "scripts/render.py": "9d6091645c8a8edf5c50d24bd70ff881efa30b920d93b46ea1775ee2dd328bc7",
+            "scripts/sources.py": "4eb66952dca285b4790d1193b39f240e8015025ee054a215f4c696cbba2478e2",
+            "scripts/uv.lock": "99598cc397a42c945abbc9d839d1c61f1852f414660ce41e2e68bd9cdf664100",
+            "SKILL.md": "a1254b7f8d3a1731a9a7e1f9cd6c67b59cf84ed6ef7c7fb455db9a14c528ceb4"
+          }
+        }
+      }
     },
     {
       "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
@@ -429,9 +559,68 @@
         "designer"
       ],
       "defaultBranch": "main",
-      "commit": "d14efff8ed1faa4187f004f79926f428c8074ec7",
-      "commitDate": "2026-10-23T10:06:30Z",
-      "reviewed": "2026-10-25"
+      "commit": "56ea9cf174ed86786187daa9de0e6247cb0747e4",
+      "commitDate": "2026-10-15T02:04:34Z",
+      "reviewed": "2026-10-25",
+      "vendored": {
+        "ui-ux-pro-max": {
+          "usedBy": [
+            "designer"
+          ],
+          "upstreamPath": ".claude/skills/ui-ux-pro-max",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "data/app-interface.csv": "331e7cf2c0b222d80c566c5f255c63cb339f65bfd02e471a720f28e4864a9f08",
+            "data/catalog-summary.json": "6638da97231c07fb5cef3cd9d3ce483ca7b2f9748980f8c27490eb03968d8894",
+            "data/charts.csv": "4115cf1120680f2cedef0676cb648f30c7ef4699e2a947535d4113e71ed3b12a",
+            "data/colors.csv": "8162429222bce22df62b564085946a30d07cc9722c58d0a3a494bd0d1d00841c",
+            "data/data-provenance.json": "e82fb33ed49375a300e93d9c11ccd1c1493c999e84ee7ee295e527634786e2e0",
+            "data/google-font-licenses.json": "35688523f2955795caa1a47c53b83099e60c1708461476f9cc3a050cf3b0148a",
+            "data/google-fonts.csv": "1c8c3b2ea1faf6a1012da463756def8b3889db33f2226f0343bb4daa80307d03",
+            "data/icons.csv": "50816c6012030178195a16ee481ebf58b47bd985d70e8ec58886cc83f6eddafc",
+            "data/landing.csv": "9a2edd3bb676c2a58f00ade7a062e285222d4297bfd847c8d5b056f0dbbf52d0",
+            "data/motion.csv": "381affe8df8ea1f66fbbda2598827f9f54299107bbe6a1b4e9b68f6b62091ceb",
+            "data/phosphor-icons-upstream.json": "2399325233b277b5c97a80e6a5e8941154f5d057beee4e7613db87c87d700236",
+            "data/products.csv": "42473f75e8dde5987bdf89ce55d8c168091b80a356cae691dd60247d80720b70",
+            "data/react-performance.csv": "3d925802539abac5afeb63ae8aa1960b7229ad271b3a47caed40ab2d97ad0734",
+            "data/stacks/angular.csv": "704be83f2bad30c7e6de01afb113ffa01e0c458762f48b7102f31ba2367b5553",
+            "data/stacks/astro.csv": "2c2f55fadaafc05e04cc321c8194a1a28b656e6757fe2ba316f41b16428299c6",
+            "data/stacks/avalonia.csv": "442fca14675a020683473e7e49f08abb27b9df0765c80efe54aef61f1a4ac258",
+            "data/stacks/flutter.csv": "64dba0ac17349f28bce517a0f5f48c54d9ed2e487ec0c0258303463b382f41a0",
+            "data/stacks/html-tailwind.csv": "d05a581d20af57b8ca0104a6d31d90a07c437d500662a96c3029fc2f9a4678ee",
+            "data/stacks/javafx.csv": "2e819b8d5abdd23ad4dae0991650fdb57af497aabd68b37463aa9c442944c869",
+            "data/stacks/jetpack-compose.csv": "699de218b286948eaec7d15767b6e1350ee299167e49bf476d82e3ff58724e0a",
+            "data/stacks/laravel.csv": "854ea4daa5fc61292d22235ad33b49ba3fe22423c3de8d3cb03758ffed3b59f9",
+            "data/stacks/nextjs.csv": "ecd2c27b2ea0127d203ae726060efcdd7335b5e83f96b99e4f3befbbfeebd5a4",
+            "data/stacks/nuxt-ui.csv": "fce682a338cfcdbf35d318d20e5befbe7b5d81b05abc37f87677a6d9cde84dc6",
+            "data/stacks/nuxtjs.csv": "3d9b54ed2d151bd9c86e9e5609b8a6f88a00c4c52fa601a30af96c49b2c4d176",
+            "data/stacks/react-native.csv": "ba31dd9c0c04da6bc02a74448bf121f9c0728ae5ba3b4d47b487778b0a1135b5",
+            "data/stacks/react.csv": "4dd176a9787e5c6306b5df94158d75955adcdc6edab41ce5286641a5842303c1",
+            "data/stacks/shadcn.csv": "e56cfde5b74907836ac3582a4779d5b7f3d206a702ab81b8669a1b668c3eeb51",
+            "data/stacks/svelte.csv": "f6e379ba802941ba26b01d4ffbe3cd39120f2587659a1d93851c707f66bc13db",
+            "data/stacks/swiftui.csv": "bdd9231ff3ad658f4e7c063e1eb49df2fd09ac8d90631a86df899b39833b9623",
+            "data/stacks/threejs.csv": "155d583b9c64da0df4b6c6cb060c02eab222505e0734d6353da02c9e2b5d982b",
+            "data/stacks/uno.csv": "a0474363e4225b5367214d5675fd3e075f137026f9500f0d04357882ef4f6d48",
+            "data/stacks/uwp.csv": "c409f08c1fbba1f1029f1acaa554e7b4471cc85517a5751c9f2e62465badcd5c",
+            "data/stacks/vue.csv": "b655f1ebb9dff2652d15981f31b1784c8a6d4759efd2815a14f3088257569f95",
+            "data/stacks/winui.csv": "e676dc1c13ee6c205c40b0746f1335150a346c7a49a0616d2545bc3d2c930c85",
+            "data/stacks/wpf.csv": "9781a9950b20333637b30a02e498b7efca21b618a3eeb8665836f3ac6e974da7",
+            "data/styles.csv": "a93a4d9d7025856575d7b7583bda020be9043013432c5af7c58af9dbdfb206b7",
+            "data/typography.csv": "321fc446e89024488ebae96dda93efc4d2307bd8bddb240857ad51364f6782c8",
+            "data/ui-reasoning.csv": "f0774dd741cecdad5eec842034bd6d5e9ea50e9f220a1910069748daa0bb8e9a",
+            "data/ux-guidelines.csv": "ff81ec613f70ba9fc3fcce52dbe4ae35d44b2079dbe6dc066d2d6e38c28facd5",
+            "LICENSE": "738f69dfa83db5c347c678fb9d90e560877059f0de93a327c39001bff92dc014",
+            "references/pro-rules.md": "d28442d61c310b49c054a4ea736f89fb3008beebdbbc38c4b3a540b8f7fadf23",
+            "references/quick-reference.md": "0609bc7c89dacb40472465d8fc14257b56b2c43439660fc8d6fa3b8c022e1876",
+            "scripts/core.py": "c3be4b23e7150e6b45095213158cfa3c8ad96502f01dde3f6ffff9de64a4f481",
+            "scripts/design_system.py": "e7d1c94c4b2eada17c5551157668362659ccf9626d34dbd58e68142410f90103",
+            "scripts/reasoning_contract.py": "b8bac1af82aa280d3e06f00aabaeac4337e632996b07fed874e2b6ee6e9c5913",
+            "scripts/search.py": "d54e648fe0ec2932cac66684220cc17be4bd4b4eba1d23d3195d509d398db374",
+            "scripts/validate_data.py": "a599aa256049cf30954d1f164721b99e453eb7e4cb8241bcab2d5573e6cf58b8",
+            "SKILL.md": "ea087c341bfb5b23195c7302027268ede86da802554c18a5c4896a6017b439f9"
+          }
+        }
+      }
     },
     {
       "repo": "VoltAgent/awesome-design-md",
@@ -470,55 +659,70 @@
       "repo": "AThevon/genjutsu",
       "url": "https://github.com/AThevon/genjutsu",
       "kind": "skills",
-      "tier": "community",
-      "status": "approved-with-limits",
+      "tier": "excluded",
+      "status": "excluded",
       "license": "unclear (NOASSERTION)",
       "purpose": "Motion design (optional)",
-      "skills": [
-        "genjutsu"
-      ],
-      "usedBy": [
-        "designer"
-      ],
+      "usedBy": [],
       "defaultBranch": "main",
       "commit": "1f518a71378b15d423389e546e767cffc86e14c3",
       "commitDate": "2026-10-05T23:55:58Z",
       "reviewed": "2026-10-25",
-      "notes": "License unclear (GitHub reports NOASSERTION): read it, but vendor nothing until the owner confirms the license."
+      "notes": "Excluded 2026-10-25: license unclear (NOASSERTION), no skill named genjutsu exists, and it ships its own copy of a skill named ui-ux-pro-max that would shadow the reviewed one if installed."
     },
     {
       "repo": "morluto/rea",
       "url": "https://github.com/morluto/rea",
       "kind": "skills",
-      "tier": "community",
-      "status": "pending-review",
+      "tier": "caution",
+      "status": "approved-with-limits",
       "license": "MIT",
-      "purpose": "Recon helper",
+      "purpose": "REA (reverse engineer anything): its website tools inspect a competitor's public pages (DOM and accessibility structure, scripts, resources, network metadata) and parse its JavaScript bundles statically (routes, vendor fingerprints)",
       "usedBy": [
         "competitor-recon"
       ],
       "defaultBranch": "main",
-      "commit": "22b88300d0ec2930060789e97fbd1371a20e9f5e",
-      "commitDate": "2026-10-24T20:12:53Z",
+      "commit": "3b79af28e80785afce9f5998d8f03289402a1847",
+      "commitDate": "2026-10-14T12:31:45Z",
       "reviewed": "2026-10-25",
-      "notes": "The blueprint allows it after review. Not used until the owner records the review in docs/SKILLS.md."
+      "notes": "Approved with limits by the owner in chat on 2026-10-25, after review. The commit is the rea-agents 6.5.0 release, which .mcp.json runs. Website tools only (competitor-recon's tools list names six), against public pages in a throwaway Chrome profile; never native binaries, apps, APKs or anything behind a login. Never run rea setup, doctor, update or rea-agents@latest: setup writes a user-wide registration and an unpinned skill. Record structure, stack and third-party scripts only, never code. Caution tier: one maintainer, created 2026-07-12, a major release every few days, about 40 runtime dependencies (no install scripts; build provenance attested on npm). No telemetry or automatic update in the MCP server (checked in its source).",
+      "skills": [
+        "reverse-engineer-anything"
+      ],
+      "vendored": {
+        "reverse-engineer-anything": {
+          "usedBy": [
+            "competitor-recon"
+          ],
+          "upstreamPath": ".agents/skills/reverse-engineer-anything",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "798f9e4d18e49b30bf2f12696c8ced73dc4e1413da375a333d01281543a1ea8b",
+            "references/android-applications.md": "412d9cb462d85b07f6fdbc2453dd741ca3da2c0dbba627867d5624df94afa74c",
+            "references/connection-and-recovery.md": "a33760c84ae100f6ffd27d666e515956c5014ac33a6ee2414807833ae666a2b1",
+            "references/evidence-workflows.md": "2bdee98a843d018cf850c706111bb74c459ba8640da00799e9208122e4d5ab80",
+            "references/javascript-applications.md": "b3e5e999833baac828addbb6b7a4ed859f0c68befd465812597bf19c27aa7a0b",
+            "references/native-and-artifacts.md": "1d2ac5f64feb5ad6ef8b98d803d570e1c48aa588281ff91a4bbf50d40f924450",
+            "references/runtime-observation.md": "fea85e2005a8fd1c86a946eeede24c20e57592a1deb36576b45216e9854803c8",
+            "SKILL.md": "278a5826b004ebd33b83c9534f3081d8e4c0eae514be96a0124ceb6f3081d21c"
+          }
+        }
+      }
     },
     {
       "repo": "affaan-m/ECC",
       "url": "https://github.com/affaan-m/ECC",
       "kind": "plugins",
-      "tier": "community",
-      "status": "pending-review",
+      "tier": "excluded",
+      "status": "excluded",
       "license": "MIT",
       "purpose": "Claude Code configuration collection",
-      "usedBy": [
-        "reconciler"
-      ],
+      "usedBy": [],
       "defaultBranch": "main",
       "commit": "90606c8315ee09cafc303515c5f33024db6b9882",
       "commitDate": "2026-10-20T21:28:23Z",
       "reviewed": "2026-10-25",
-      "notes": "The blueprint allows it after review. Not used until the owner records the review in docs/SKILLS.md."
+      "notes": "Excluded 2026-10-25: a collection of over 1,000 skills, too broad to review as one source, and the reconciler needs none of it."
     },
     {
       "repo": "AgriciDaniel/claude-seo",
@@ -530,22 +734,135 @@
       "purpose": "SEO audit and planning skills",
       "skills": [
         "seo-cluster",
+        "seo-content",
+        "seo-content-brief",
         "seo-geo",
+        "seo-programmatic",
         "seo-schema",
-        "seo-technical",
         "seo-sitemap",
-        "seo-content"
+        "seo-technical"
       ],
       "usedBy": [
-        "keyword-researcher",
+        "architect",
         "content-strategist",
+        "keyword-researcher",
         "seo-auditor"
       ],
       "defaultBranch": "main",
-      "commit": "6be93f45064ffbadced572b5d5c95f55fd263af0",
-      "commitDate": "2026-10-22T16:47:38Z",
+      "commit": "4b99de2f7de7e7d5247042e5fb5b4ea9368ef734",
+      "commitDate": "2026-10-04T23:40:56Z",
       "reviewed": "2026-10-25",
-      "notes": "Free checks only: skip the sub-agents that need paid APIs (DataForSEO and other paid sources)."
+      "notes": "Free checks only: skip the sub-agents that need paid APIs (DataForSEO and other paid sources).",
+      "vendored": {
+        "seo-cluster": {
+          "usedBy": [
+            "keyword-researcher"
+          ],
+          "upstreamPath": "skills/seo-cluster",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
+            "references/execution-workflow.md": "7e5e067689a2ebe82d0a949a4b9b9c6568fc283e31a6b6e928fbb7677438f0db",
+            "references/hub-spoke-architecture.md": "5553d9fd80145362073fde96c0c615df4ed9a000bf6f928a71641ec52e85c39b",
+            "references/serp-overlap-methodology.md": "a0c02dcd394a0cfe4636c02ce03da4ff58dc68b6f55ee0b3b9e36e10f20f7662",
+            "SKILL.md": "9041eee8c40d60394790f27486aca9a424cb8b26971715fff7f6b07f701ff773",
+            "templates/cluster-map.html": "73d50e0bcab7855b4c50b182b46ad2f38965aa2fc854bc41de5acdd611a6d8c9"
+          }
+        },
+        "seo-content": {
+          "usedBy": [
+            "seo-auditor"
+          ],
+          "upstreamPath": "skills/seo-content",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
+            "LICENSE.txt": "5c617ae0aa59b995e19b3e774fcc2f2ba91b864e0b4c3e18475b139526a2da1e",
+            "SKILL.md": "c2b2d458f010e6dd38597eff24370046bb5dc67983af97945cda1aac0741e21f"
+          }
+        },
+        "seo-content-brief": {
+          "usedBy": [
+            "content-strategist"
+          ],
+          "upstreamPath": "skills/seo-content-brief",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
+            "LICENSE.txt": "25bc881ab74d06a365261e004f44c445a78a5241ee322cdeeb4ba7d7669be9b1",
+            "references/excluded-domains.md": "17b3fb0c9f0cd979c949d54a3e88eb7b39b5d3514baaaa0560022b16c3ed32b8",
+            "references/keyword-density.md": "5f66b7516fda29ca43b4db64874ad445390a3eacfe3c6e99bee2f45b3c7ab348",
+            "references/page-type-templates.md": "ac638c16ee6ef871d07d8d8172e23a491e11e5e9734f5a5f9ac070631156fd6d",
+            "SKILL.md": "bdca005f46877fcab89bcedb3fa3cab40240e51a1617ad5a13ede7edd200ed16"
+          }
+        },
+        "seo-geo": {
+          "usedBy": [
+            "content-strategist",
+            "seo-auditor"
+          ],
+          "upstreamPath": "skills/seo-geo",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
+            "LICENSE.txt": "5c617ae0aa59b995e19b3e774fcc2f2ba91b864e0b4c3e18475b139526a2da1e",
+            "references/google-ai-optimization-guide.md": "587dfbe3a298b625341883cffe389441f6acff61fb4e12be7586c7e1cf455348",
+            "references/llmstxt-evidence.md": "6cc60538738ddabdb6da0657d43cd187d63f377140a3d4deed52dac634c344a1",
+            "SKILL.md": "881fffb9e1d09cfbc608e93514a8b5534b42e74ebc3d0d63a365cedb48e717f7"
+          }
+        },
+        "seo-programmatic": {
+          "usedBy": [
+            "architect"
+          ],
+          "upstreamPath": "skills/seo-programmatic",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
+            "LICENSE.txt": "5c617ae0aa59b995e19b3e774fcc2f2ba91b864e0b4c3e18475b139526a2da1e",
+            "SKILL.md": "a987a228640cd917cf145d92772b1f45ca7d3486cf83dd1a7677b1999fff1ee4"
+          }
+        },
+        "seo-schema": {
+          "usedBy": [
+            "content-strategist",
+            "seo-auditor"
+          ],
+          "upstreamPath": "skills/seo-schema",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
+            "LICENSE.txt": "5c617ae0aa59b995e19b3e774fcc2f2ba91b864e0b4c3e18475b139526a2da1e",
+            "references/deprecated-types-2024-2026.md": "a8e0deb70032e8807182d64d407822acbc24946154d29b3551312340f7e1a6f9",
+            "SKILL.md": "91a5a7b33cd1dca1c1e948556735352696c1e77e63af56f01cd723eac7bd519a"
+          }
+        },
+        "seo-sitemap": {
+          "usedBy": [
+            "architect",
+            "seo-auditor"
+          ],
+          "upstreamPath": "skills/seo-sitemap",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
+            "LICENSE.txt": "5c617ae0aa59b995e19b3e774fcc2f2ba91b864e0b4c3e18475b139526a2da1e",
+            "SKILL.md": "9b56ca83f957a8f573b52794aa35a883040f4cb87e16ad3f04b30b0b22657066"
+          }
+        },
+        "seo-technical": {
+          "usedBy": [
+            "seo-auditor"
+          ],
+          "upstreamPath": "skills/seo-technical",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
+            "LICENSE.txt": "5c617ae0aa59b995e19b3e774fcc2f2ba91b864e0b4c3e18475b139526a2da1e",
+            "SKILL.md": "37ccc4b03e5ad813f337150217fff7568cb3eab15b937ea1e37fa975f825b1cc"
+          }
+        }
+      }
     },
     {
       "repo": "coreyhaines31/marketingskills",
@@ -556,27 +873,230 @@
       "license": "MIT",
       "purpose": "Marketing and SEO skills",
       "skills": [
+        "ai-seo",
         "competitors",
+        "content-strategy",
+        "copy-editing",
+        "copywriting",
+        "customer-research",
+        "marketing-council",
+        "marketing-ideas",
+        "marketing-loops",
         "programmatic-seo",
         "schema",
-        "ai-seo",
-        "site-architecture",
-        "marketing-loops",
-        "marketing-ideas",
-        "marketing-council",
-        "customer-research"
+        "seo-audit",
+        "site-architecture"
       ],
       "usedBy": [
-        "competitor-recon",
-        "keyword-researcher",
-        "content-strategist",
         "architect",
-        "growth-strategist"
+        "coder",
+        "competitor-recon",
+        "content-strategist",
+        "doc-generator",
+        "growth-strategist",
+        "keyword-researcher",
+        "seo-auditor"
       ],
       "defaultBranch": "main",
-      "commit": "e85f3cbc2e4a79bf33b2a12e9bdd9087d414735b",
-      "commitDate": "2026-10-19T21:29:53Z",
-      "reviewed": "2026-10-25"
+      "commit": "e43fe6f03ceffed8bd79147de98d1c0c33227021",
+      "commitDate": "2026-10-15T23:59:36Z",
+      "reviewed": "2026-10-25",
+      "vendored": {
+        "ai-seo": {
+          "usedBy": [
+            "content-strategist"
+          ],
+          "upstreamPath": "skills/ai-seo",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/agent-readiness.md": "5bd756468ff8a067ce507cd3c0a4c77e18ded9b6edc4e56253e5fff6a110e421",
+            "references/citations-vs-recommendations.md": "4cb2f9ac93273daa4eb3a554ce6ddb7cbcb1d2e1e5fcb49cba898b566579ebf3",
+            "references/content-patterns.md": "8adcfcc020a3529eda71f783e4893d3e39e8b0f503fd2fa126e8b75a80963824",
+            "references/content-types.md": "2323104990cb3057f3ce135c2b7bac71e5369992d5aeb24cec009c8f6d841d0b",
+            "references/format-volatility.md": "235858ee4d820dd0b89d3c7ffc65f4f59c7904f63feef7d2fff78cc6818caddf",
+            "references/linkedin-ai-citations.md": "2bd191703b543fc5f3ae36f5e367ed6d5504ad38e7446797cd3c5fe23ababd4b",
+            "references/okf.md": "4abcab5b8ee90b63c5d09c98387a8ec3cdb8f5df33e75d3b4b91eb817283bfd8",
+            "references/platform-ranking-factors.md": "15749a32496750d930df8a53b39d225127583dacd73042b0012b8fc208bcaec6",
+            "references/positioning-and-consensus.md": "b7618247e57a4560c3785155c34de77adc232784b7dd91b2c44a77a73617b9b4",
+            "references/youtube-ai-citations.md": "eee24cd9f377db5f59933c775a740f5ff7ece9f238b051157ba72531d9507a99",
+            "SKILL.md": "6d3c9bcc5ad19fa0425766de8a3127ecd9e0806c4ede281fdc4df9cc9c1b55d4"
+          }
+        },
+        "competitors": {
+          "usedBy": [
+            "competitor-recon"
+          ],
+          "upstreamPath": "skills/competitors",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/content-architecture.md": "893b0bf30a630753bff02345029a96959ac359a5221467132d553d8e09a2d433",
+            "references/templates.md": "138f4367a45fc9cc775f9fd67324f8a6f1e1f5c3c1a90bd952db4731f080844f",
+            "SKILL.md": "ff77b76dfe43158b2fc248bb8c41fe94745d1264abb0a0c665b2c55318287a35"
+          }
+        },
+        "content-strategy": {
+          "usedBy": [
+            "content-strategist"
+          ],
+          "upstreamPath": "skills/content-strategy",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/content-distribution.md": "1861a1aab0627ab29c279000879a9889242da1ba85e677acdc759c66a6241778",
+            "references/headless-cms.md": "c0a7b87f47c8f7af907ce73facf1ed4721ade811e53f86ddf22f4bc0d7ca324e",
+            "SKILL.md": "0ad572d607884c561668810f77cd21bbe3e0508c64090f2997661a728360f946"
+          }
+        },
+        "copy-editing": {
+          "usedBy": [
+            "coder",
+            "doc-generator"
+          ],
+          "upstreamPath": "skills/copy-editing",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/checklist.md": "b7779e6a33a752076825ea4304ed56b57a24eacd00d65be873297ca9365323a2",
+            "references/content-refresh.md": "8a3a2d301bb2b8b2a780f5bef43093ab42295041b2fea2a9caeca2421ef3c79b",
+            "references/plain-english-alternatives.md": "df4f820d4c63ae8a517c64a243c101658352cd07d002355bf3c97de0a00f3775",
+            "SKILL.md": "1c86fafd6667132bef4902578aee741fc6adc97953c0d9830b29e2e1ef52f8e3"
+          }
+        },
+        "copywriting": {
+          "usedBy": [
+            "coder",
+            "content-strategist"
+          ],
+          "upstreamPath": "skills/copywriting",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/ai-tells.md": "048a436d35d011313a4dd49dd1c6a6fb9f05203a2e40b8970ff88e7a2c548591",
+            "references/copy-frameworks.md": "352122944bf9e891ceb0e003adce41591d111e9d97057700626249919dfe430d",
+            "references/natural-transitions.md": "9bd61b0de5be2c4de4ce130c68236b4f290b12737823827a458bb2b4c8584683",
+            "SKILL.md": "78c0a09b78a41995ba055d6549bbd7db3fe958673d039b9121e7a2e32bb4bb06"
+          }
+        },
+        "customer-research": {
+          "usedBy": [
+            "growth-strategist"
+          ],
+          "upstreamPath": "skills/customer-research",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/interviews-and-surveys.md": "56adecdc40af1242464937100349fc1a161627394909551720494bc5ee537076",
+            "references/source-guides.md": "56682ea98d781060396fd4009739d071671b3489a0d4c81f0a0ef3078cb5c9ee",
+            "SKILL.md": "ae4769147f63dd5aea1308a0fddd85473601164893f58111dce738738226317e"
+          }
+        },
+        "marketing-council": {
+          "usedBy": [
+            "growth-strategist"
+          ],
+          "upstreamPath": "skills/marketing-council",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/advisor-template.md": "e748d9f91d5b663c3cc0165c83a117833b0392fbf6c77b5a2107c49b0edd3c51",
+            "references/advisors/alex-hormozi.md": "18975ae41e73d1a95779f0bcffde5bd42f91bbb96a208d55a3fa4c0095a421da",
+            "references/advisors/ann-handley.md": "b0ad24ef9ee2965a1ee35a2208ea65897ef684baafb65557e2cc3b0aa9e5ca4e",
+            "references/advisors/april-dunford.md": "7abc28f3d3043f72bf8ca710c0390de4014486cffb1e6e82029581aa7ef5212f",
+            "references/advisors/byron-sharp.md": "fe99260a03ca0123ae1075108cb6466b0bd60ccac1b0b8d64d7b7bf1a78e17af",
+            "references/advisors/claude-hopkins.md": "93366c6d6b51407fdf33308537f31e7e8667a89fecd9fa1b8ea9ac398fb80942",
+            "references/advisors/david-ogilvy.md": "868d96f850eff22a923224bf7f3b5344abdb5d4c130b77e46e4142c630c6edba",
+            "references/advisors/eugene-schwartz.md": "fef9cc5ece0ad84d5542721f9346b18e5aa44e9f1a10e62f1ed5b7e05f6ba5a5",
+            "references/advisors/gary-halbert.md": "0db92e69da50a6372a5dc1feae2a6824fff9f1b53df92094745810c3d8375d8b",
+            "references/advisors/gary-vaynerchuk.md": "256f5425b602375c83d4a6e677c7ecc97e60f3dead83f8192802b6c0c65e57e4",
+            "references/advisors/rory-sutherland.md": "07a726d3f66def9722b5b3c52acc37173edc50ac880f8d1cb072424bd9b5f235",
+            "references/advisors/russell-brunson.md": "ae0cb018f48a734ec64fd087fd469a7e8170f5d2a2fea7623dfd58f35cfe739e",
+            "references/advisors/seth-godin.md": "02cb1b64b1fff7eecc6ff9769b60c23ef68b03017fd3d82b1a5b544009dd79c0",
+            "SKILL.md": "0b94358427c344e1f5f50169770cce44e0b065ec8b05fc887a800daed008ac31"
+          }
+        },
+        "marketing-ideas": {
+          "usedBy": [
+            "growth-strategist"
+          ],
+          "upstreamPath": "skills/marketing-ideas",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/guerrilla-marketing.md": "07b0534b579ce1916a60e79ab426cd936e78b4b261802d6486ad145f7bf552ae",
+            "references/ideas-by-category.md": "8b6aa55b3255616ea80c0ea45eca8f2bb70e528510ed76f6392e71475dd0c09b",
+            "SKILL.md": "d5ea46d2d2eb2fb039494e8b545550a6bd5b5b9aedc5e65a228ac514deb018ff"
+          }
+        },
+        "marketing-loops": {
+          "usedBy": [
+            "growth-strategist"
+          ],
+          "upstreamPath": "skills/marketing-loops",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/loop-catalog.md": "1b3116585d8098157606c8e93cc05ef23d947537364f487331c05b85bb7bbd4e",
+            "references/loop-guardrails.md": "a93cdb67d28773d72e789c937a26f3062129c8a0076018ac24269d52e7a31e46",
+            "references/loop-orchestration.md": "9b09e6c8ed7d6f9c1e035d110b1d2289d89c2102247acf5ba6bcc959a62b628a",
+            "references/loop-state.md": "ecb863ecc44944afe7dbb789d4b16a1ea80f045713b8d443bdcb414a4d17547e",
+            "references/loop-template.md": "695fde57b9b0735e49b5fc718b0e8eb726808c08b19bea89056f8913cf1bff26",
+            "SKILL.md": "db4ba419ee74c7ef4c6dacffdf92fa4038e720640a4b4b95e8766ad9ff269898"
+          }
+        },
+        "programmatic-seo": {
+          "usedBy": [
+            "keyword-researcher"
+          ],
+          "upstreamPath": "skills/programmatic-seo",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/playbooks.md": "b2b3fd7c58c686f0670b94cf7192ff79436ccf0d602650b33a83a9d01102f11d",
+            "SKILL.md": "15cb5979cab5263ede902a830e03342869256ece17905bff240eef498e27cde1"
+          }
+        },
+        "schema": {
+          "usedBy": [
+            "content-strategist"
+          ],
+          "upstreamPath": "skills/schema",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/schema-examples.md": "5d55c96ae9859a5fb84cb18828c4a96dcd468e7aeec667c88fdf9032558ab318",
+            "SKILL.md": "d8b7aa7bcd9727a87fb5470a6c9ee252b99a7ccb84f637d7c67c5d155b507e0b"
+          }
+        },
+        "seo-audit": {
+          "usedBy": [
+            "seo-auditor"
+          ],
+          "upstreamPath": "skills/seo-audit",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/ai-writing-detection.md": "f1e273f56ce7e2215ff218bf903680ddcec0fd026ab90c3ebfb3439ed0edfaa4",
+            "references/international-seo.md": "d2fc76f40eccc422ae0f1d7e5b770095e89a045f38e1d0370811203da57996ff",
+            "SKILL.md": "9420a6c1ffcf7212766bcb618c28766ecb084631bed8045f3115d42b1230d368"
+          }
+        },
+        "site-architecture": {
+          "usedBy": [
+            "architect"
+          ],
+          "upstreamPath": "skills/site-architecture",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/mermaid-templates.md": "362190c7d3f419d5f445170f1fb17beecc163937d2068922893b7a69eeb25f0f",
+            "references/navigation-patterns.md": "2efa772709b753e33d5018c007147ca30aaa95a04b04dc0df6227ea5a053078b",
+            "references/site-type-templates.md": "3c3cd7ce5e31c502dc071baf82bb58cb30f5edf4a2fd8ca052fbc8f3777db140",
+            "SKILL.md": "a47f693c6a4f45db89276d8c341b3aa3054090cc8002dd4a2635448d7d152492"
+          }
+        }
+      }
     },
     {
       "repo": "Jakeschincariol/replica-skill",
@@ -585,31 +1105,100 @@
       "tier": "caution",
       "status": "approved-with-limits",
       "license": "MIT",
-      "purpose": "App recon and parity scoring",
+      "purpose": "Competitor recon, stack description, feature parity scoring and reader research",
       "skills": [
-        "replica-recon",
-        "replica-diff",
+        "replica-architect",
         "replica-design",
-        "replica-architect"
+        "replica-diff",
+        "replica-entrepreneur",
+        "replica-recon"
       ],
       "usedBy": [
+        "architect",
         "competitor-recon",
-        "reconciler",
         "designer",
-        "architect"
+        "reconciler"
       ],
       "defaultBranch": "main",
       "commit": "77c9436fb3d18c3d58169efb8caf4fe906b0dc51",
       "commitDate": "2026-10-03T12:07:14Z",
       "reviewed": "2026-10-25",
-      "notes": "Young repository (about 3 weeks old at the blueprint check). Structure and parity only: ignore every step that clones, copies or rebuilds a competitor."
+      "notes": "Young repository. Structure, parity and reader research only: ignore every step that clones, copies, rebuilds, rebrands or launches a competitor's product. replica-entrepreneur reads reviews like a person (no scraping of G2, Capterra or Trustpilot), keeps no reviewer names, and quotes at most 15 words in recon files.",
+      "vendored": {
+        "replica-architect": {
+          "usedBy": [
+            "architect",
+            "competitor-recon"
+          ],
+          "upstreamPath": "replica-architect",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "architecture.md": "3e45dc5523f00448d78853ece7d0c5240c1a35f2300c0d9511001b24d9e61460",
+            "LICENSE": "857c8d5276809c8196b3cd7cb3300324768bfc562b2b6281b06d6865058e186c",
+            "SKILL.md": "411c429c9b3e6858d85e0c57b1378b235dd622fd565e9cc0af677ab7ccc2992f"
+          }
+        },
+        "replica-design": {
+          "usedBy": [
+            "designer"
+          ],
+          "upstreamPath": "replica-design",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "contrast.py": "2c4b57890fddb799d227cef5cbd9f92f11580376c161f99bf08c86517599101f",
+            "LICENSE": "857c8d5276809c8196b3cd7cb3300324768bfc562b2b6281b06d6865058e186c",
+            "SKILL.md": "34f0375bef33a713267e8543b4c4ffd669c59cf0a0b9999c7fb70451b2a5f4d4",
+            "tokens.json": "1dc9afb9f860ab9089ed7ad762878d9e5754570d081a0d2f2cb63382260ec63e"
+          }
+        },
+        "replica-diff": {
+          "usedBy": [
+            "competitor-recon",
+            "reconciler"
+          ],
+          "upstreamPath": "replica-diff",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "imgdiff.py": "ee939cddf30c8fb95eb32461131c7cb4eeb58806e3f86a44d1a872ad84eb6a26",
+            "LICENSE": "857c8d5276809c8196b3cd7cb3300324768bfc562b2b6281b06d6865058e186c",
+            "parity.py": "208a2bd1d4168da24ddc1c29d5d011a8a22a90587cb0d430bd442165fe3c9c28",
+            "SKILL.md": "bd9fc956c347233fb17698fd5ed22caabfc0a35a210b90b9eea874f033ef1c30"
+          }
+        },
+        "replica-entrepreneur": {
+          "usedBy": [
+            "competitor-recon"
+          ],
+          "upstreamPath": "replica-entrepreneur",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "857c8d5276809c8196b3cd7cb3300324768bfc562b2b6281b06d6865058e186c",
+            "reviews.py": "4e48d770727d6229ebdc398824bb947b919b5e267c5fcc23a11ab1be63995beb",
+            "SKILL.md": "041724878b4c40b1a92e9d077cb31c5f551b85ca7beb3db99b03fe8c772a7d9b",
+            "themes.json": "008d337c9dd3c33adb1aad24bb4c35feed776c5370b6b295cd67f306aaa3d754"
+          }
+        },
+        "replica-recon": {
+          "usedBy": [
+            "competitor-recon"
+          ],
+          "upstreamPath": "replica-recon",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "features.csv": "7903cc4887fc8f8a3b5d47de5d038b3fd05e79f2d990527b9d3b6123c3985ab0",
+            "LICENSE": "857c8d5276809c8196b3cd7cb3300324768bfc562b2b6281b06d6865058e186c",
+            "recon-map.md": "5864395958d147ef8a9b96019591fdd3943a230e7ee4d977e7a7b053728b4d3e",
+            "SKILL.md": "b1fd6a60cf0bcd481f6828453da24b9d9f0935ec6e883741e5f620259f13ff40"
+          }
+        }
+      }
     },
     {
       "repo": "getsentry/skills",
       "url": "https://github.com/getsentry/skills",
       "kind": "skills",
       "tier": "community",
-      "status": "pending-review",
+      "status": "approved",
       "license": "Apache-2.0",
       "purpose": "GitHub Actions security review",
       "skills": [
@@ -619,17 +1208,39 @@
         "secops-reviewer"
       ],
       "defaultBranch": "main",
-      "commit": "d12f250460ffd961f549dbebf7eeb0cf4afd4c2e",
-      "commitDate": "2026-10-23T21:17:27Z",
+      "commit": "f57ada2d0b640406ea7e25b11d636c530e77c58b",
+      "commitDate": "2026-10-15T13:25:46Z",
       "reviewed": "2026-10-25",
-      "notes": "Named in the blueprint's agent table but missing from its trusted list. Needs the owner's yes."
+      "notes": "Reviewed 2026-10-25: Markdown only (attack examples are documentation). Use it to review .github/workflows.",
+      "vendored": {
+        "gha-security-review": {
+          "usedBy": [
+            "secops-reviewer"
+          ],
+          "upstreamPath": "skills/gha-security-review",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "96e78a9ce85795b117c8929887bdb78f88bf23f7b85a31f0872cde4dff7e92cd",
+            "references/ai-prompt-injection-via-ci.md": "9177d24968ac5b8d719b9f6748f91751d5e157ae0afa4d41cd0bb760356f23a2",
+            "references/comment-triggered-commands.md": "243526302999b7cbcbff4bbdd01c7d16377b1c60a86ee8877326c2b2b040a0b3",
+            "references/credential-escalation.md": "7febad6c0e4073dabfb338ee4646c2dd484251ad7d18b500ea83ad6fd9ac1a1d",
+            "references/expression-injection.md": "f701049355e4758207f77efc53c8e4a42f377eaa15240a2c867446154041d4f0",
+            "references/permissions-and-secrets.md": "6b6837c5f37ff85cf18c1f611f882202ce0ce41cb006b55dd49c4da52f976779",
+            "references/pwn-request.md": "6dd84c91ce77d57883059edf95c2f1c64ea1ec39551c5c8208e0cadb9c3ca673",
+            "references/real-world-attacks.md": "761260977a220264a1ee30e0b961618495723c2e6cc4e91893b7d9d4a9408718",
+            "references/runner-infrastructure.md": "cb427fa29c34c10aef18766441e0be8e0123632bb87c307bdb8d1c40b47fc81e",
+            "references/supply-chain.md": "1f80df872a1be8f70ccf1be0bb25b2e24ee1ec2ac6a9f3d7a53800cb361bfa86",
+            "SKILL.md": "b75c6c43ff99c82b3cf44519bd30723917de97064f225e392ecfd6fdcd7455bd"
+          }
+        }
+      }
     },
     {
       "repo": "addyosmani/agent-skills",
       "url": "https://github.com/addyosmani/agent-skills",
       "kind": "skills",
       "tier": "community",
-      "status": "pending-review",
+      "status": "approved",
       "license": "MIT",
       "purpose": "Secure-coding practices",
       "skills": [
@@ -642,30 +1253,36 @@
       "commit": "aeac41d4d005999432bb7312f7ff06383a91d59d",
       "commitDate": "2026-10-13T20:21:06Z",
       "reviewed": "2026-10-25",
-      "notes": "Named in the blueprint's agent table but missing from its trusted list. Needs the owner's yes."
+      "notes": "Reviewed 2026-10-25: Markdown only. Only security-and-hardening is used.",
+      "vendored": {
+        "security-and-hardening": {
+          "usedBy": [
+            "secops-reviewer"
+          ],
+          "upstreamPath": "skills/security-and-hardening",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "6f202f8bd568cd730dbb2b0d1f8e243bc74c2fa1f64dbce9b2c7ea08bd5c9fd7",
+            "references/hardening-patterns.md": "2e1b93a502b4cdb0258404441f3aab029b0cce4003fbbcc61af9a2de18bab9ab",
+            "SKILL.md": "2e3fc60eed5aba97fe416f3f3c9317fdb014a682925ec70a733c3ff99e4b9858"
+          }
+        }
+      }
     },
     {
       "repo": "searchfit/searchfit-seo",
       "url": "https://github.com/searchfit/searchfit-seo",
       "kind": "plugins",
-      "tier": "community",
-      "status": "pending-review",
+      "tier": "excluded",
+      "status": "excluded",
       "license": "MIT",
       "purpose": "Keyword clustering and content planning",
-      "skills": [
-        "keyword-clustering",
-        "content-strategy",
-        "content-brief"
-      ],
-      "usedBy": [
-        "keyword-researcher",
-        "content-strategist"
-      ],
+      "usedBy": [],
       "defaultBranch": "main",
       "commit": "c324a2e87c4dd84fe6bd6d55e45272acdd090afd",
       "commitDate": "2026-09-10T04:15:40Z",
       "reviewed": "2026-10-25",
-      "notes": "Named in the blueprint's agent table but missing from its trusted list. Needs the owner's yes."
+      "notes": "Excluded 2026-10-25: thin generic prompts written as an ad for SearchFit.ai; superseded by claude-seo seo-cluster and seo-content-brief, marketingskills content-strategy and aaron-marketing-skills keyword-research."
     },
     {
       "repo": "zacker-tech/hormozi-skills",
@@ -700,6 +1317,360 @@
       "commitDate": "2026-04-03T06:19:25Z",
       "reviewed": "2026-10-25",
       "notes": "No repository license (some SKILL.md files claim MIT, but the repo has none). The blueprint names design-system for the designer; it comes from here, so the designer must not use it."
+    },
+    {
+      "repo": "blader/humanizer",
+      "url": "https://github.com/blader/humanizer",
+      "kind": "skills",
+      "tier": "community",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "Removes AI-writing patterns (based on Wikipedia's \"Signs of AI writing\") without changing what the text says",
+      "usedBy": [
+        "coder",
+        "content-strategist",
+        "doc-generator",
+        "seo-auditor"
+      ],
+      "defaultBranch": "main",
+      "commit": "8c307f367c91bd974002f10f2be2965d642c13df",
+      "commitDate": "2026-10-16T19:12:03Z",
+      "reviewed": "2026-10-25",
+      "notes": "One SKILL.md, no code. It treats the text as material to edit, never as instructions, and forbids adding facts.",
+      "skills": [
+        "humanizer"
+      ],
+      "vendored": {
+        "humanizer": {
+          "usedBy": [
+            "coder",
+            "content-strategist",
+            "doc-generator",
+            "seo-auditor"
+          ],
+          "upstreamPath": "SKILL.md",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96",
+            "SKILL.md": "0612f1dfb1672b0ea9b97e139bf1f06cabe98d8b27424fe8ff01e1fb4cc99cad"
+          }
+        }
+      }
+    },
+    {
+      "repo": "aaron-he-zhu/aaron-marketing-skills",
+      "url": "https://github.com/aaron-he-zhu/aaron-marketing-skills",
+      "kind": "skills",
+      "tier": "community",
+      "status": "approved-with-limits",
+      "license": "Apache-2.0",
+      "purpose": "Keyword research method (8 phases, intent taxonomy, opportunity scoring, evidence labels), SERP reading and link architecture",
+      "usedBy": [
+        "architect",
+        "keyword-researcher"
+      ],
+      "defaultBranch": "main",
+      "commit": "0120b62d9c5b7714e32f2fce1591af4e2cfdde72",
+      "commitDate": "2026-10-17T19:59:13Z",
+      "reviewed": "2026-10-25",
+      "notes": "Method and references only. Never run its helper scripts (not vendored): suggest.py calls an unofficial Google Autocomplete endpoint (we never automate Google) and firecrawl.py sends queries to a third party. Write results to this repo's files, not its memory/ folder. Its old home, aaron-he-zhu/seo-geo-claude-skills, is now a signpost.",
+      "skills": [
+        "keyword-research",
+        "serp-analysis",
+        "site-structure-optimizer"
+      ],
+      "vendored": {
+        "keyword-research": {
+          "usedBy": [
+            "keyword-researcher"
+          ],
+          "upstreamPath": "seo-geo/survey/keyword-research",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "664cd12e1c315650bf14cb1385359d13d4724ac03940ac10918390ef78e4f5e7",
+            "references/example-report.md": "40214f13ab403309a65c07b510f0335c808f9ece427587d327c106b13c65e7de",
+            "references/instructions-detail.md": "fcbf70ef164650fec1d914408f0b6f62e9a66ffd565891a8857b88a0fcd7826f",
+            "references/keyword-intent-taxonomy.md": "762f9919aba2e2837c4b860e931c14389486f19bedd539f4165a600e462549df",
+            "references/keyword-prioritization-framework.md": "e1cc7c3b8c1f8c32a0c8adc0a2870e20c622c8a8997f1b61fec8d66ac8a28d0e",
+            "references/topic-cluster-templates.md": "0da2b2baa789f0fd02e29299b16af3fa87a6160c12086944654883e3c1e836aa",
+            "SKILL.md": "2b47555b8ce9f6a05499bc065e1cf41b9c558f039dc237efe07cee53a8c976b9"
+          }
+        },
+        "serp-analysis": {
+          "usedBy": [
+            "keyword-researcher"
+          ],
+          "upstreamPath": "seo-geo/survey/serp-analysis",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "664cd12e1c315650bf14cb1385359d13d4724ac03940ac10918390ef78e4f5e7",
+            "references/analysis-templates.md": "fc781d52549575b2e04dc7facd4051bf00edccc57413d7597069ffa1a41bcd9c",
+            "references/example-report.md": "e3d14464fc33657655da7d01c6a4d3e2048b3b0e68c877785cea00cefc5f6cd5",
+            "references/serp-feature-taxonomy.md": "13ea2d135bd0067df01e4ccc33190fece5d1ebd42e745c2421ed867d8d85cf15",
+            "SKILL.md": "2b23cae5a675bdfe9872b6d21b68b6650b8edc9c8d3561c0423c2b6f097470c4"
+          }
+        },
+        "site-structure-optimizer": {
+          "usedBy": [
+            "architect"
+          ],
+          "upstreamPath": "seo-geo/tune/site-structure-optimizer",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "664cd12e1c315650bf14cb1385359d13d4724ac03940ac10918390ef78e4f5e7",
+            "references/link-architecture-patterns.md": "3f370936f77dd13389e2e85b6b1311c09da2515f9952285eb77e168a98e58bbf",
+            "references/linking-example.md": "829fca26a6aa323be0cdf203eb26b43da51d495364c853d4a2d4cf2fa4bf7cda",
+            "references/linking-templates.md": "05f77d9fbc76137e062df1c502eb8a386b065bc01d6aae9bf79c7c83e2316c15",
+            "references/mermaid-templates.md": "71b453792bb537fdd3b1611fab97c24ff50c29ecb7c1b16aba54af2b441500a7",
+            "references/site-type-patterns.md": "2faa3b6d0d11a097dcacecc38f28976d744bf19fdcb208e7e155211ad1ed8d3f",
+            "SKILL.md": "391ad255c156c311094548b44a969ed1cce81d29cf4077f55aa2831495b99c50"
+          }
+        }
+      }
+    },
+    {
+      "repo": "vercel-labs/agent-skills",
+      "url": "https://github.com/vercel-labs/agent-skills",
+      "kind": "skills",
+      "tier": "official",
+      "status": "approved-with-limits",
+      "license": "MIT (stated in its README; the repository has no LICENSE file)",
+      "purpose": "Vercel's React and Next.js performance rules, and the web-interface review skill",
+      "usedBy": [
+        "coder",
+        "designer",
+        "responsive-checker"
+      ],
+      "defaultBranch": "main",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "commitDate": "2026-08-28T13:36:07Z",
+      "reviewed": "2026-10-25",
+      "notes": "web-design-guidelines tells the agent to fetch its rules from the guidelines repository's main branch on every run, which would make unpinned text the instructions. Never fetch: read the pinned copy in vendor/skills/web-interface-guidelines/command.md. react-best-practices applies only when build.framework is nextjs.",
+      "skills": [
+        "react-best-practices",
+        "web-design-guidelines"
+      ],
+      "vendored": {
+        "react-best-practices": {
+          "usedBy": [
+            "coder"
+          ],
+          "upstreamPath": "skills/react-best-practices",
+          "added": [
+            "NOTICE.md"
+          ],
+          "files": {
+            "AGENTS.md": "fc93e7421177bbf869cce892bc60a6c83a4517d974bc3bf65c4e2c1e58a6ccf6",
+            "metadata.json": "c4e18bac3290fbe1b471a605867d4df68b03144ea26b8befdbe8f9d8fd124354",
+            "NOTICE.md": "55edda5864714b79ec6f1e2481310afd055151c2fe17418e030346588190e4b3",
+            "README.md": "9eafb2123d3b8b2aef41fba0db2648a3f4f49996f8c7c8bb2c86263befd8b48a",
+            "rules/_sections.md": "01c59969e4e867f0708c8f8ef9c6d87fab9a07d0586244f429ff84013db8a115",
+            "rules/_template.md": "99df2a3ea088c6c22de2484ddc7e964d0e9923846f44c63380343ecc64455442",
+            "rules/advanced-effect-event-deps.md": "55ed8f9f27a1bff803d6fa55828176207714b02123cbb97ddb8a90d88024a723",
+            "rules/advanced-event-handler-refs.md": "a3097edeecfb2ff6851cd66ed8cdf0617c3c88180504bee824aa6e75a215bbbc",
+            "rules/advanced-init-once.md": "3e4dc22173eb0e2b6dcf583e3babd862b8696328f8f59aee7c4d746c5bc05f6c",
+            "rules/advanced-use-latest.md": "8a3f64dfe5a77d1564248faf17fe662ae75b55d497a243cb30b38eb07ccbbf9a",
+            "rules/async-api-routes.md": "523338540d73427dc14c0cbb19f2741ebccdf8b105a7b2c1b33d2905cf237a42",
+            "rules/async-cheap-condition-before-await.md": "03107c1f70a293cd58a8abc5474c5548e20ea4efdf01b6d45aae7ad0ac1cb32c",
+            "rules/async-defer-await.md": "f3c142d090615abdcc99d31c123be37b31f0f1ed8d9ec9f7789a3bc6883ae0fb",
+            "rules/async-dependencies.md": "16ef469f877e30c6b8e1e1b4bc3e527312fa3c6318cb785a4eca186ea236131a",
+            "rules/async-parallel.md": "6d2f841896279e976dfcdc1ac89e70771ac188baadfd43c096b5706cb838b961",
+            "rules/async-suspense-boundaries.md": "de05fedac2eb7ae563b887b5a424464ec3dfaf84e5b7797467ebe2a796ac8afc",
+            "rules/bundle-analyzable-paths.md": "62090b5c815fd71bf1133dce754f51abc16a9456d0ccd025fd627de27726e92a",
+            "rules/bundle-barrel-imports.md": "e648f6d54525f07a691357040ca5bff6ea3424788a91ff63812adb29622a671b",
+            "rules/bundle-conditional.md": "09c8259c3efb04fc0abb8e412ccbda217c222ae8118516283e571c995fe3a7d4",
+            "rules/bundle-defer-third-party.md": "3719fb47b191e8db4fe22686ec88448ad5af9e6838585425abbe103d0b642e37",
+            "rules/bundle-dynamic-imports.md": "401817a7369f315fc5a68a1095742ff7d53d0461906880dc9d64a41495ee1986",
+            "rules/bundle-preload.md": "d1f7cc28da7cd5ab249acd287edc5b761afcfb194e9cb62cd44c5f3543db2de2",
+            "rules/client-event-listeners.md": "242a873349febc1ce685e85617994784dbab92c2eaa68aed7fed5a83e7680e93",
+            "rules/client-localstorage-schema.md": "0fb7cdf9dc93fdf22f87e3669f953fb9d4ac9b0be42eec4a29fe9a2560610b88",
+            "rules/client-passive-event-listeners.md": "1f35016f9053de69e884ee9be00654e37979c2ca85f5e57764dc2626ff7acb4b",
+            "rules/client-swr-dedup.md": "644652c39c6cc00de8d1c77a7273612e868dc3f7edda30764164c12ec0f764a3",
+            "rules/js-batch-dom-css.md": "480b891b9eaf96e929dc1e964274a4828e3a78009b7d00ccd965a0d425215959",
+            "rules/js-cache-function-results.md": "3daaa11d24f4295cb6be8bc6f407f2ce83cc7b5bd1f0e68891ea8ab835721dc7",
+            "rules/js-cache-property-access.md": "73e47431e74878a927061bf0ddc7cd91a7556cb35d2573f3421e82300d9ae311",
+            "rules/js-cache-storage.md": "11b826b0433898c1ece2d3547010d8e77db9fb240185748c45db91493de9b6cc",
+            "rules/js-combine-iterations.md": "71add08aeeb43091d4ff4c0b2842cce8b4bdef8ad3e732cc034bb5a84827e746",
+            "rules/js-early-exit.md": "925ce5ce87f3347186ca62212f29cc6baa2b8c85a96d2720ad07c3d0abf781c0",
+            "rules/js-flatmap-filter.md": "9e5b166a41914d975bef7635467f8fb32cd98b5c3126c0bc6f163490812fb5f0",
+            "rules/js-hoist-regexp.md": "f9e9aef2f7c2307dd7310f283df85dcada45fc43e9bb941b0c3aa414dec21ec4",
+            "rules/js-index-maps.md": "5df1bdc2cfabb2c98abd55d26762e5c18189535c2e686184f426082e62920391",
+            "rules/js-length-check-first.md": "8b54a311c826b299272f29187fc58bc55772a04c4a72eeb29456ee96dc9fc624",
+            "rules/js-min-max-loop.md": "87dfb67e2f39df6ad8bcfb5b78c5fb364d3c07554ad188a202408d99f3763421",
+            "rules/js-request-idle-callback.md": "ee08f83905b4011abbc33d594033157d77561b5bbd9b36b04f0f409581ffec32",
+            "rules/js-set-map-lookups.md": "a7fd781a6ba9ad49065961b6f9a90ef486bf6b648390e1a08704025f98e1642b",
+            "rules/js-tosorted-immutable.md": "d0a5e1b0fec48a0a81397957e2f068e224329f7c42cb5feeed8aae6fa64025e8",
+            "rules/rendering-activity.md": "1e5e7eaf3555e61d6a2e900089c676527d26259501db5594f59544b6c664f85a",
+            "rules/rendering-animate-svg-wrapper.md": "9c6ae0ca7a51434e803887c64cded760956579a1452ccb80a461a03f9c937c77",
+            "rules/rendering-conditional-render.md": "2ec2fa23c4148285144687050c52369adba3da2fbe3d486f8d3e0aad8f06f2bc",
+            "rules/rendering-content-visibility.md": "64eee6d5b916fe74df33363994b27fc7f71bea3bcedc7ee04bda23107ca3e6e4",
+            "rules/rendering-hoist-jsx.md": "93b229560fae92005ed9a2a829064607b39b2e984e92d221d05b2d41df2b7c0e",
+            "rules/rendering-hydration-no-flicker.md": "dc7ab358c67c177bca6e6f360fbc935ebe4efa928c0ba3ebd3f9f3d9e2000ca3",
+            "rules/rendering-hydration-suppress-warning.md": "915bacb934e2927d84b37a3f3d225a47b309ac8f9e494ed2bcb66ce07c5676a2",
+            "rules/rendering-resource-hints.md": "351b1095d641717b930f1b2253282b7120af3023bc74e06c17675168d4286864",
+            "rules/rendering-script-defer-async.md": "4cea07b7875ba7fc2c7465ff23b63a2bb334f90aaf2d9293d38d67b05fdb32ab",
+            "rules/rendering-svg-precision.md": "ed468533f6e95f622859c884b122cf21f9f593ed6bb3d500a54de4b9f9bcb9fb",
+            "rules/rendering-usetransition-loading.md": "3a1249c3f13026b6f54ab5712c388df219d6af01b12aa542749acd99a46f4bc1",
+            "rules/rerender-defer-reads.md": "234050a77faf50cb306be10a9e15bd4421134ab5907e75f13e6d78e2bd262dc9",
+            "rules/rerender-dependencies.md": "17eb5830956fb56486fd3cfc7431f5849d39751730c05ad9e77dd4f0c27169c5",
+            "rules/rerender-derived-state-no-effect.md": "cb11ec76f50aa7b6847269f02d79b120c889a30d9ecd2c1d578f75144419c77a",
+            "rules/rerender-derived-state.md": "1c326bb67b01fb084eb00c8911b0a7cff54681c2315b629f88e49b64eaa6481d",
+            "rules/rerender-functional-setstate.md": "5e68df6b2ae8058e67f476ff1ac67bde159f5a9d18df439e46eabcdeb7b52e58",
+            "rules/rerender-lazy-state-init.md": "4ae844740f266fc8cbf050701230286624a2440ec5be67b9a63d9edc3c580573",
+            "rules/rerender-memo-with-default-value.md": "81c47476564ad8a79fc68fc442734255ca7d6829424359464503fda0a9f9a0dd",
+            "rules/rerender-memo.md": "1f258990c2f27ff6256b3cc5c43300631bb3f0d81f749aed08d07fcdcc131dd1",
+            "rules/rerender-move-effect-to-event.md": "abc2cbf167bee056743023351e96806a411d3398da8802093620aecf0721f029",
+            "rules/rerender-no-inline-components.md": "1cc32907a770272524ba682eef9e7efdd8ad4533b6f89b718a1fcd7d1d0eb6a3",
+            "rules/rerender-simple-expression-in-memo.md": "5bdcf2d1558ba5204e643c887b7b4060f89630969425651eb68e96427d97f800",
+            "rules/rerender-split-combined-hooks.md": "6f45d703343484ef9acef9388397f3642966ae6a5a258899a0cf1f9977cfbf6c",
+            "rules/rerender-transitions.md": "60f4033909a62df5e5b8c601494f9e50a562e2f8c1c2d81eac24f38142265f1c",
+            "rules/rerender-use-deferred-value.md": "8c3579576a61a949884167745dcfaf1d5426ba305cc61fd0a79602d70fda4909",
+            "rules/rerender-use-ref-transient-values.md": "f1a649af9d1d0b5c762f6c9c4c1c70c90d7df82aa10296ee87aadb78c1b76c54",
+            "rules/server-after-nonblocking.md": "d0b8d24a3db9f0f65f9e2bddbf230b0e03a5f60e1229d93a4a18f5e7a991c7c2",
+            "rules/server-auth-actions.md": "a2ca8aa102839251c7971ec784560fab943c20b36fe6f80365d4110c13260c23",
+            "rules/server-cache-lru.md": "1924b64561841923b88a657085097a0aeba3e0ba2d5470b9f5c15cc10d6ae70f",
+            "rules/server-cache-react.md": "fddeea6c870bb3da4134b61d54b7d09b83d2603f929b7547cd3dc1dc269edd5c",
+            "rules/server-dedup-props.md": "c2747424cdac46be62f835f245a0aa887b0090b416d28e2ac8676702645eeb37",
+            "rules/server-hoist-static-io.md": "5abea4dd882b13661bd5f7dfb93f9e547d5f08176c61c448ade91b210ed5d49f",
+            "rules/server-no-shared-module-state.md": "4d869bf1cd2f1632e5ca4c0e64b1cf0e71c5f5a0f940bc8a22174d205e735ed7",
+            "rules/server-parallel-fetching.md": "569a2e9fc04f9606686cd75c5894ef8781b502786a7fffe241396846c7733472",
+            "rules/server-parallel-nested-fetching.md": "ad5d9656984d4a959997a2367bf59cc6632297b4634a1dd13a087939d83f30b3",
+            "rules/server-serialization.md": "f4c7d68b29c82381baad059c4a7f09e868e71ec9c3115a26ad3ae7d24c0dfe1f",
+            "SKILL.md": "71ed7794962fa6e803ee83030517b5b93a9f70fbfeb431ec4535c5480a8d8355"
+          }
+        },
+        "web-design-guidelines": {
+          "usedBy": [
+            "designer",
+            "responsive-checker"
+          ],
+          "upstreamPath": "skills/web-design-guidelines",
+          "added": [
+            "NOTICE.md"
+          ],
+          "files": {
+            "NOTICE.md": "f54556f43bf2992014ae8e294d7bddb6741c8fde1e03c8b9cc3519e42ea450a9",
+            "SKILL.md": "f4647ca866a3accf763777f83e7682954f0187cd6bea7eea0399796652414e8f"
+          }
+        }
+      }
+    },
+    {
+      "repo": "vercel-labs/web-interface-guidelines",
+      "url": "https://github.com/vercel-labs/web-interface-guidelines",
+      "kind": "reference",
+      "tier": "official",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "The rules file web-design-guidelines reviews against (accessibility, focus, forms, touch, performance), pinned",
+      "usedBy": [
+        "designer",
+        "responsive-checker"
+      ],
+      "defaultBranch": "main",
+      "commit": "434b7f91364665f2f733b310ec54809bf8f37937",
+      "commitDate": "2026-10-05T20:49:16Z",
+      "reviewed": "2026-10-25",
+      "notes": "Only command.md is vendored; install.sh is not.",
+      "skills": [
+        "web-interface-guidelines"
+      ],
+      "vendored": {
+        "web-interface-guidelines": {
+          "usedBy": [
+            "designer",
+            "responsive-checker"
+          ],
+          "upstreamPath": "command.md",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "command.md": "d246b026f4f29b5823a9cc857f9edf3d2507002e055e32040cadeaf3b38e0234",
+            "LICENSE": "6cd1609c9c12233507cdd2ce0d32e9a721e3c27494951be06b90090deeeb7af2"
+          }
+        }
+      }
+    },
+    {
+      "repo": "addyosmani/web-quality-skills",
+      "url": "https://github.com/addyosmani/web-quality-skills",
+      "kind": "skills",
+      "tier": "community",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "Core Web Vitals and accessibility audits (Lighthouse-aligned)",
+      "usedBy": [
+        "designer",
+        "performance-auditor"
+      ],
+      "defaultBranch": "main",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "commitDate": "2026-08-24T21:07:33Z",
+      "reviewed": "2026-10-25",
+      "notes": "No code.",
+      "skills": [
+        "accessibility",
+        "core-web-vitals"
+      ],
+      "vendored": {
+        "accessibility": {
+          "usedBy": [
+            "designer",
+            "performance-auditor"
+          ],
+          "upstreamPath": "skills/accessibility",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "c122223ac43e86421958e18623979942c21b642951e2e3736dcb63eff13587c3",
+            "references/A11Y-PATTERNS.md": "f10e238dd4dd3c4f51134c2056bc02d3dd4f8fb6ccc9145c2c1ba7aab4d58140",
+            "references/WCAG.md": "16683e025e3833d931c9d880645d98a448827f97e10189b6c8f12c832e7a2361",
+            "SKILL.md": "267fb2a0707d6142f2871f22688203a42ba21291a2aa200fb740936e41362b5d"
+          }
+        },
+        "core-web-vitals": {
+          "usedBy": [
+            "performance-auditor"
+          ],
+          "upstreamPath": "skills/core-web-vitals",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "c122223ac43e86421958e18623979942c21b642951e2e3736dcb63eff13587c3",
+            "references/CLS.md": "c4fa0cd6311720b413018471a6ac9240e87db52af3b6e306ffb6684491f15898",
+            "references/INP.md": "7d40cf6053e9bb8a8a77e02da7c6b25aa8e6c1c092b48d8f9c8f30e9b25cf3a7",
+            "references/LCP.md": "522054d44b7a55409cbde511e8d365f7fa52399dd1e72b8d6b44a92ecddca81f",
+            "SKILL.md": "731aa78c0347e8b3e191b75962175bee058ce73817278e610ac0fe546e685914"
+          }
+        }
+      }
+    },
+    {
+      "repo": "every-app/open-seo",
+      "url": "https://github.com/every-app/open-seo",
+      "kind": "skills",
+      "tier": "excluded",
+      "status": "excluded",
+      "license": "MIT",
+      "purpose": "Keyword research and clustering through the OpenSEO MCP",
+      "usedBy": [],
+      "defaultBranch": "main",
+      "commit": "236761ad848716077cd10d8503713bb690971b3b",
+      "commitDate": "2026-10-25T10:44:06Z",
+      "reviewed": "2026-10-25",
+      "notes": "Excluded: every research step calls the OpenSEO MCP, which spends paid credits. Free tools only."
+    },
+    {
+      "repo": "aaron-he-zhu/seo-geo-claude-skills",
+      "url": "https://github.com/aaron-he-zhu/seo-geo-claude-skills",
+      "kind": "skills",
+      "tier": "excluded",
+      "status": "excluded",
+      "license": "Apache-2.0",
+      "purpose": "SEO and GEO skills (old home)",
+      "usedBy": [],
+      "defaultBranch": "main",
+      "commit": "3a1578a63cdde8037ee16d32a3ea9f808eae6bd0",
+      "commitDate": "2026-09-04T04:50:53Z",
+      "reviewed": "2026-10-25",
+      "notes": "Excluded: a signpost repository now; its skills moved to aaron-he-zhu/aaron-marketing-skills, which is pinned instead."
     }
   ],
   "packages": [
@@ -749,6 +1720,16 @@
       "source": "GoogleChrome/lighthouse-ci",
       "license": "Apache-2.0",
       "usedIn": "npm run audit:lighthouse"
+    },
+    {
+      "name": "rea-agents",
+      "registry": "npm",
+      "version": "6.5.0",
+      "published": "2026-10-14",
+      "source": "morluto/rea",
+      "license": "MIT",
+      "usedIn": ".mcp.json → rea",
+      "notes": "6.7.0 (2026-10-18) and 6.8.0 (2026-10-25) are younger than 7 days on the reviewed date. Ships with an npm provenance attestation."
     }
   ],
   "remoteMcp": [
@@ -776,11 +1757,9 @@
   "unresolved": [
     {
       "name": "system-design",
-      "usedBy": [
-        "architect"
-      ],
-      "status": "pending-review",
-      "notes": "Named in the blueprint's agent table; its source repository is not identified (a local copy credits liquidslr/system-design-notes for its notes only). The architect works without it until the owner names and approves a source."
+      "usedBy": [],
+      "status": "excluded",
+      "notes": "Excluded 2026-10-25: no source was ever identified, and the architect is covered by site-architecture, site-structure-optimizer, seo-sitemap, seo-programmatic and the Cloudflare skills."
     },
     {
       "name": "/design-code",
@@ -788,5 +1767,6 @@
       "status": "excluded",
       "notes": "Not found at the blueprint check; left out until the owner sends its source."
     }
-  ]
+  ],
+  "vendorDir": "vendor/skills"
 }

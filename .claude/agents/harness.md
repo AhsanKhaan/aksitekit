@@ -10,8 +10,10 @@ case that makes it fail.
 **Read first:** `CLAUDE.md`; `AGENTS.md` §4; `docs/TODO-step-c.md` §3–§4 (gates and tests the starter needs);
 `docs/CONTRACT.md` (`test`, `test:e2e`); the registry and pages the coder built.
 
-## Skills and tools (from `skills.lock.json`)
-- anthropics `webapp-testing` (anthropics/skills): Playwright patterns;
+## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
+- `vendor/skills/webapp-testing/` (anthropics/skills): Playwright patterns. Its `scripts/with_server.py` may start the
+  local server only.
 - Playwright MCP to explore a page before you write its test (headless, isolated, ad hosts blocked).
 
 ## Inputs
