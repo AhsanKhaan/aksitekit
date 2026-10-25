@@ -674,16 +674,40 @@
       "repo": "morluto/rea",
       "url": "https://github.com/morluto/rea",
       "kind": "skills",
-      "tier": "excluded",
-      "status": "excluded",
+      "tier": "caution",
+      "status": "approved-with-limits",
       "license": "MIT",
-      "purpose": "Recon helper",
-      "usedBy": [],
+      "purpose": "REA (reverse engineer anything): its website tools inspect a competitor's public pages (DOM and accessibility structure, scripts, resources, network metadata) and parse its JavaScript bundles statically (routes, vendor fingerprints)",
+      "usedBy": [
+        "competitor-recon"
+      ],
       "defaultBranch": "main",
-      "commit": "22b88300d0ec2930060789e97fbd1371a20e9f5e",
-      "commitDate": "2026-10-24T20:12:53Z",
+      "commit": "3b79af28e80785afce9f5998d8f03289402a1847",
+      "commitDate": "2026-10-14T12:31:45Z",
       "reviewed": "2026-10-25",
-      "notes": "Excluded 2026-10-25: it is a binary and app reverse-engineering MCP server (npx rea-agents setup), not a web recon helper; far more access than reading public pages needs."
+      "notes": "Approved with limits by the owner in chat on 2026-10-25, after review. The commit is the rea-agents 6.5.0 release, which .mcp.json runs. Website tools only (competitor-recon's tools list names six), against public pages in a throwaway Chrome profile; never native binaries, apps, APKs or anything behind a login. Never run rea setup, doctor, update or rea-agents@latest: setup writes a user-wide registration and an unpinned skill. Record structure, stack and third-party scripts only, never code. Caution tier: one maintainer, created 2026-07-12, a major release every few days, about 40 runtime dependencies (no install scripts; build provenance attested on npm). No telemetry or automatic update in the MCP server (checked in its source).",
+      "skills": [
+        "reverse-engineer-anything"
+      ],
+      "vendored": {
+        "reverse-engineer-anything": {
+          "usedBy": [
+            "competitor-recon"
+          ],
+          "upstreamPath": ".agents/skills/reverse-engineer-anything",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "798f9e4d18e49b30bf2f12696c8ced73dc4e1413da375a333d01281543a1ea8b",
+            "references/android-applications.md": "412d9cb462d85b07f6fdbc2453dd741ca3da2c0dbba627867d5624df94afa74c",
+            "references/connection-and-recovery.md": "a33760c84ae100f6ffd27d666e515956c5014ac33a6ee2414807833ae666a2b1",
+            "references/evidence-workflows.md": "2bdee98a843d018cf850c706111bb74c459ba8640da00799e9208122e4d5ab80",
+            "references/javascript-applications.md": "b3e5e999833baac828addbb6b7a4ed859f0c68befd465812597bf19c27aa7a0b",
+            "references/native-and-artifacts.md": "1d2ac5f64feb5ad6ef8b98d803d570e1c48aa588281ff91a4bbf50d40f924450",
+            "references/runtime-observation.md": "fea85e2005a8fd1c86a946eeede24c20e57592a1deb36576b45216e9854803c8",
+            "SKILL.md": "278a5826b004ebd33b83c9534f3081d8e4c0eae514be96a0124ceb6f3081d21c"
+          }
+        }
+      }
     },
     {
       "repo": "affaan-m/ECC",
@@ -1081,11 +1105,12 @@
       "tier": "caution",
       "status": "approved-with-limits",
       "license": "MIT",
-      "purpose": "App recon and parity scoring",
+      "purpose": "Competitor recon, stack description, feature parity scoring and reader research",
       "skills": [
         "replica-architect",
         "replica-design",
         "replica-diff",
+        "replica-entrepreneur",
         "replica-recon"
       ],
       "usedBy": [
@@ -1098,11 +1123,12 @@
       "commit": "77c9436fb3d18c3d58169efb8caf4fe906b0dc51",
       "commitDate": "2026-10-03T12:07:14Z",
       "reviewed": "2026-10-25",
-      "notes": "Young repository (about 3 weeks old at the blueprint check). Structure and parity only: ignore every step that clones, copies or rebuilds a competitor.",
+      "notes": "Young repository. Structure, parity and reader research only: ignore every step that clones, copies, rebuilds, rebrands or launches a competitor's product. replica-entrepreneur reads reviews like a person (no scraping of G2, Capterra or Trustpilot), keeps no reviewer names, and quotes at most 15 words in recon files.",
       "vendored": {
         "replica-architect": {
           "usedBy": [
-            "architect"
+            "architect",
+            "competitor-recon"
           ],
           "upstreamPath": "replica-architect",
           "licenceFrom": "LICENSE",
@@ -1127,6 +1153,7 @@
         },
         "replica-diff": {
           "usedBy": [
+            "competitor-recon",
             "reconciler"
           ],
           "upstreamPath": "replica-diff",
@@ -1136,6 +1163,19 @@
             "LICENSE": "857c8d5276809c8196b3cd7cb3300324768bfc562b2b6281b06d6865058e186c",
             "parity.py": "208a2bd1d4168da24ddc1c29d5d011a8a22a90587cb0d430bd442165fe3c9c28",
             "SKILL.md": "bd9fc956c347233fb17698fd5ed22caabfc0a35a210b90b9eea874f033ef1c30"
+          }
+        },
+        "replica-entrepreneur": {
+          "usedBy": [
+            "competitor-recon"
+          ],
+          "upstreamPath": "replica-entrepreneur",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "857c8d5276809c8196b3cd7cb3300324768bfc562b2b6281b06d6865058e186c",
+            "reviews.py": "4e48d770727d6229ebdc398824bb947b919b5e267c5fcc23a11ab1be63995beb",
+            "SKILL.md": "041724878b4c40b1a92e9d077cb31c5f551b85ca7beb3db99b03fe8c772a7d9b",
+            "themes.json": "008d337c9dd3c33adb1aad24bb4c35feed776c5370b6b295cd67f306aaa3d754"
           }
         },
         "replica-recon": {
@@ -1680,6 +1720,16 @@
       "source": "GoogleChrome/lighthouse-ci",
       "license": "Apache-2.0",
       "usedIn": "npm run audit:lighthouse"
+    },
+    {
+      "name": "rea-agents",
+      "registry": "npm",
+      "version": "6.5.0",
+      "published": "2026-10-14",
+      "source": "morluto/rea",
+      "license": "MIT",
+      "usedIn": ".mcp.json → rea",
+      "notes": "6.7.0 (2026-10-18) and 6.8.0 (2026-10-25) are younger than 7 days on the reviewed date. Ships with an npm provenance attestation."
     }
   ],
   "remoteMcp": [

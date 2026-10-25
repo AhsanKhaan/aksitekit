@@ -50,7 +50,7 @@ nothing newer than a week is pinned.
 |---|---|
 | `architect` | `replica-architect` (Jakeschincariol/replica-skill), `seo-programmatic` (AgriciDaniel/claude-seo), `seo-sitemap` (AgriciDaniel/claude-seo), `site-architecture` (coreyhaines31/marketingskills), `site-structure-optimizer` (aaron-he-zhu/aaron-marketing-skills), `workers-best-practices` (cloudflare/skills), `wrangler` (cloudflare/skills) |
 | `coder` | `copy-editing` (coreyhaines31/marketingskills), `copywriting` (coreyhaines31/marketingskills), `frontend-design` (anthropics/skills), `humanizer` (blader/humanizer), `react-best-practices` (vercel-labs/agent-skills), `workers-best-practices` (cloudflare/skills), `wrangler` (cloudflare/skills) |
-| `competitor-recon` | `competitors` (coreyhaines31/marketingskills), `replica-recon` (Jakeschincariol/replica-skill) |
+| `competitor-recon` | `competitors` (coreyhaines31/marketingskills), `replica-architect` (Jakeschincariol/replica-skill), `replica-diff` (Jakeschincariol/replica-skill), `replica-entrepreneur` (Jakeschincariol/replica-skill), `replica-recon` (Jakeschincariol/replica-skill), `reverse-engineer-anything` (morluto/rea) |
 | `content-strategist` | `ai-seo` (coreyhaines31/marketingskills), `content-strategy` (coreyhaines31/marketingskills), `copywriting` (coreyhaines31/marketingskills), `humanizer` (blader/humanizer), `schema` (coreyhaines31/marketingskills), `seo-content-brief` (AgriciDaniel/claude-seo), `seo-geo` (AgriciDaniel/claude-seo), `seo-schema` (AgriciDaniel/claude-seo) |
 | `designer` | `accessibility` (addyosmani/web-quality-skills), `replica-design` (Jakeschincariol/replica-skill), `ui-ux-pro-max` (nextlevelbuilder/ui-ux-pro-max-skill), `web-design-guidelines` (vercel-labs/agent-skills), `web-interface-guidelines` (vercel-labs/web-interface-guidelines) |
 | `devsecops-deployer` | `wrangler` (cloudflare/skills) |
@@ -92,11 +92,11 @@ nothing newer than a week is pinned.
 | [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md) | community | approved | MIT | Example DESIGN.md files, for format only | designer | 2026-10-25 | `3b605329240c` 2026-10-14 | — | — |
 | [google-labs-code/design.md](https://github.com/google-labs-code/design.md) | community | approved | Apache-2.0 | The DESIGN.md format spec and its linter (npm @google/design.md) | designer | 2026-10-25 | `6e5da5382f41` 2026-10-16 | — | — |
 | [AThevon/genjutsu](https://github.com/AThevon/genjutsu) | excluded | excluded | unclear (NOASSERTION) | Motion design (optional) | — | 2026-10-25 | `1f518a71378b` 2026-10-05 | — | — |
-| [morluto/rea](https://github.com/morluto/rea) | excluded | excluded | MIT | Recon helper | — | 2026-10-25 | `22b88300d0ec` 2026-10-24 | — | — |
+| [morluto/rea](https://github.com/morluto/rea) | caution | approved-with-limits | MIT | REA (reverse engineer anything): its website tools inspect a competitor's public pages (DOM and accessibility structure, scripts, resources, network metadata) and parse its JavaScript bundles statically (routes, vendor fingerprints) (`reverse-engineer-anything`) | competitor-recon | 2026-10-25 | `3b79af28e807` 2026-10-14 | 1 skill, 8 files | — |
 | [affaan-m/ECC](https://github.com/affaan-m/ECC) | excluded | excluded | MIT | Claude Code configuration collection | — | 2026-10-25 | `90606c8315ee` 2026-10-20 | — | — |
 | [AgriciDaniel/claude-seo](https://github.com/AgriciDaniel/claude-seo) | community | approved-with-limits | MIT | SEO audit and planning skills (`seo-cluster`, `seo-content`, `seo-content-brief`, `seo-geo`, `seo-programmatic`, `seo-schema`, `seo-sitemap`, `seo-technical`) | architect, content-strategist, keyword-researcher, seo-auditor | 2026-10-25 | `4b99de2f7de7` 2026-10-04 | 8 skills, 33 files | — |
 | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) | community | approved | MIT | Marketing and SEO skills (`ai-seo`, `competitors`, `content-strategy`, `copy-editing`, `copywriting`, `customer-research`, `marketing-council`, `marketing-ideas`, `marketing-loops`, `programmatic-seo`, `schema`, `seo-audit`, `site-architecture`) | architect, coder, competitor-recon, content-strategist, doc-generator, growth-strategist, keyword-researcher, seo-auditor | 2026-10-25 | `e43fe6f03cef` 2026-10-15 | 13 skills, 75 files | — |
-| [Jakeschincariol/replica-skill](https://github.com/Jakeschincariol/replica-skill) | caution | approved-with-limits | MIT | App recon and parity scoring (`replica-architect`, `replica-design`, `replica-diff`, `replica-recon`) | architect, competitor-recon, designer, reconciler | 2026-10-25 | `77c9436fb3d1` 2026-10-03 | 4 skills, 15 files | — |
+| [Jakeschincariol/replica-skill](https://github.com/Jakeschincariol/replica-skill) | caution | approved-with-limits | MIT | Competitor recon, stack description, feature parity scoring and reader research (`replica-architect`, `replica-design`, `replica-diff`, `replica-entrepreneur`, `replica-recon`) | architect, competitor-recon, designer, reconciler | 2026-10-25 | `77c9436fb3d1` 2026-10-03 | 5 skills, 19 files | — |
 | [getsentry/skills](https://github.com/getsentry/skills) | community | approved | Apache-2.0 | GitHub Actions security review (`gha-security-review`) | secops-reviewer | 2026-10-25 | `f57ada2d0b64` 2026-10-15 | 1 skill, 11 files | — |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | community | approved | MIT | Secure-coding practices (`security-and-hardening`) | secops-reviewer | 2026-10-25 | `aeac41d4d005` 2026-10-13 | 1 skill, 3 files | — |
 | [searchfit/searchfit-seo](https://github.com/searchfit/searchfit-seo) | excluded | excluded | MIT | Keyword clustering and content planning | — | 2026-10-25 | `c324a2e87c4d` 2026-09-10 | — | — |
@@ -120,6 +120,7 @@ Full 40-character SHAs, and the sha256 of every vendored file, are in `skills.lo
 | `analytics-mcp` | PyPI | 0.7.0 | 2026-07-29 | `.mcp.json` → `google-analytics` (0.8.0 was under 7 days old) |
 | `@google/design.md` | npm | 0.4.0 | 2026-07-27 | `npm run lint:design` (requested from Phase E) |
 | `@lhci/cli` | npm | 0.15.1 | 2025-06-25 | `npm run audit:lighthouse` |
+| `rea-agents` | npm | 6.5.0 | 2026-10-14 | `.mcp.json` → `rea` (6.7.0 and 6.8.0 were under 7 days old) |
 
 ## Findings from the 2026-10-25 review (owner, please read)
 **The skills audit** (found with find-skills' directory search, then read file by file at the pinned commit):
@@ -134,9 +135,9 @@ Full 40-character SHAs, and the sha256 of every vendored file, are in `skills.lo
 4. **genjutsu is excluded:** no skill named `genjutsu` exists (the designer's reference pointed at nothing), its license
    is unclear, and it ships its own skill named `ui-ux-pro-max` that would shadow the reviewed one.
 5. **searchfit is excluded:** thin generic prompts written as an ad for SearchFit.ai, superseded by stronger skills
-   below. **rea is excluded:** it's a binary reverse-engineering MCP server, far more access than reading public pages
-   needs. **ECC is excluded:** over 1,000 skills, too broad to review as a unit, and nothing the reconciler needs.
-   **system-design is excluded:** no source was ever found.
+   below. **ECC is excluded:** over 1,000 skills, too broad to review as a unit, and nothing the reconciler needs.
+   **system-design is excluded:** no source was ever found. rea was excluded at first, then approved with limits at
+   the owner's request (item 12).
 6. **Approved after review:** `gha-security-review` (Sentry) and `security-and-hardening` (Addy Osmani). Both are
    Markdown only; their attack examples are documentation.
 7. **Added for your three worries:**
@@ -148,11 +149,15 @@ Full 40-character SHAs, and the sha256 of every vendored file, are in `skills.lo
      that read as generated.
    - **SEO architecture:** `site-structure-optimizer` (link architecture), claude-seo `seo-sitemap` and
      `seo-programmatic` (thin-content and index-bloat safeguards), marketingskills `seo-audit`.
+   - **Competitor analysis** (added at the owner's request): `replica-architect`, `replica-diff` and
+     `replica-entrepreneur` join `replica-recon` in competitor-recon, which now writes a feature matrix across
+     competitors, how each site is built, and what its readers complain about. rea's website tools are optional
+     (item 12).
    - **Also:** Vercel's `react-best-practices` for Next.js, Addy Osmani's `core-web-vitals` and `accessibility`,
      Trail of Bits' `agentic-actions-auditor`.
-8. **Scan of all 348 vendored files:** no hidden Unicode; no prompt-injection text outside security skills that describe
-   attacks; code in six skills only (`webapp-testing`, `semgrep`, `supply-chain-risk-auditor`, `ui-ux-pro-max`,
-   `replica-diff`, `replica-design`), all Python standard library. The only network calls are the
+8. **Scan of all 360 vendored files:** no hidden Unicode; no prompt-injection text outside security skills that describe
+   attacks; code in seven skills only (`webapp-testing`, `semgrep`, `supply-chain-risk-auditor`, `ui-ux-pro-max`,
+   `replica-diff`, `replica-design`, `replica-entrepreneur`), all Python standard library. The only network calls are the
    supply-chain auditor's, to free public APIs (OSV, deps.dev, npm, PyPI, GitHub, OpenSSF Scorecard). Every paid tool a
    skill mentions (DataForSEO, Ahrefs, Semrush) is an optional integration that stays off because `.mcp.json` never
    connects one.
@@ -166,6 +171,21 @@ Full 40-character SHAs, and the sha256 of every vendored file, are in `skills.lo
     `superagent-ai/skills` `skill-security` (`check:skills` does this deterministically).
 11. **Semgrep skips `vendor/skills`** (`--exclude` in `security.yml`): it's third-party text and helper scripts whose
     every byte `check:skills` pins; the registry rules scan this repo's own code. gitleaks still scans everything.
+12. **rea, re-reviewed for its website tools** (approved with limits by the owner in chat, 2026-10-25):
+    - **What it is:** an MCP server (`rea-agents` on npm) for reverse engineering binaries, apps and websites. Its
+      website tools read a page you open in a browser (DOM and accessibility structure, scripts, resources, network
+      metadata) and parse JavaScript bundles statically (routes, vendor fingerprints).
+    - **Checked in its 6.5.0 source:** no telemetry, no automatic update in the MCP server (the version check runs only
+      for `rea update`), and network calls only for Hopper's optional download, a local IDA bridge, and an inspected
+      site's public source maps. No install scripts. MIT, with an npm provenance attestation.
+    - **Why caution tier:** one maintainer, created 2026-07-12, a major release every few days, and about 40 runtime
+      dependencies. Pinned to 6.5.0, the newest release at least 7 days old.
+    - **Limits:** competitor-recon's tools list names only the six website tools. They attach to a throwaway Chrome
+      profile the owner starts with ad hosts blocked (`docs/MCP.md` → rea). Never `rea setup` (a user-wide,
+      unpinned install), never binaries, apps or signed-in pages, and never code copied into the repo.
+13. **`replica-entrepreneur`** (same pinned replica-skill commit): its `reviews.py` only ranks rows you collected
+    (standard library, no network), and the skill forbids scraping and fake reviews. Raw reviews stay in the
+    git-ignored `reports/reviews/`; recon files quote at most 15 words.
 
 **Still true from the first review:**
 1. **gitleaks-action is not open source since v2.** It runs under the Gitleaks-Action EULA, and repositories owned by a
@@ -185,7 +205,7 @@ Merging the pull request that changes a status is the owner's yes. Fill a row fo
 | `getsentry/skills` | approve | 2026-10-25 | Markdown only; `gha-security-review` vendored |
 | `addyosmani/agent-skills` | approve | 2026-10-25 | Markdown only; `security-and-hardening` vendored |
 | `searchfit/searchfit-seo` | reject | 2026-10-25 | Superseded; written as an ad for SearchFit.ai |
-| `morluto/rea` | reject | 2026-10-25 | Binary reverse-engineering MCP server; wrong tool for public-page recon |
+| `morluto/rea` | approve with limits | 2026-10-25 | The owner, in chat, after the source review: website tools only, pinned to `rea-agents@6.5.0` (first reviewed as a reject: too much access for public-page recon) |
 | `affaan-m/ECC` | reject | 2026-10-25 | Over 1,000 skills; not reviewable as a unit, not needed |
 | `AThevon/genjutsu` | reject | 2026-10-25 | License unclear; ships a second `ui-ux-pro-max` |
 | `system-design` (source unknown) | reject | 2026-10-25 | No source found; covered by the architecture skills |

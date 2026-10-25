@@ -140,7 +140,7 @@ All 18 live in `.claude/agents/`; `AGENTS.md` §2 has the full map.
 | Agent | Job | Main skills and tools |
 |---|---|---|
 | orchestrator | Runs `/start`: intake, stage order, gates, ledger | `/goal`, gate runner |
-| competitor-recon | Maps competitors' public sites: page types, URLs, templates, UX gaps | `replica-recon`, marketingskills `competitors`, Playwright MCP |
+| competitor-recon | Maps competitors' public sites: page types, URLs, templates, stack, a feature matrix across competitors, what their readers complain about, UX gaps | `replica-recon`, `replica-architect`, `replica-diff`, `replica-entrepreneur`, marketingskills `competitors`, Playwright MCP, rea website tools (optional) |
 | keyword-researcher | Keyword Planner CSVs → selected keywords → keyword map | the Step B scripts, `keyword-research`, `serp-analysis`, claude-seo `seo-cluster`, `programmatic-seo` |
 | content-strategist | Content plan, page briefs with voice notes, JSON-LD and schema plan, `llms.txt` | marketingskills `content-strategy`/`copywriting`/`schema`/`ai-seo`, claude-seo `seo-content-brief`/`seo-geo`/`seo-schema`, `humanizer` |
 | growth-strategist | The 90-day ADHD-friendly growth plan (§12) | marketing-loops, marketing-ideas, marketing-council (Hormozi lens), customer-research |
@@ -174,7 +174,7 @@ All 18 live in `.claude/agents/`; `AGENTS.md` §2 has the full map.
 **Trusted sources** (`skills.lock.json`, explained in `docs/SKILLS.md`): every external skill, plugin, MCP server and
 GitHub Action, with its tier, licence, purpose, the agents that use it, and a pinned commit.
 
-**Vendored skills** (`vendor/skills/<name>/`): the 44 external skills the agents use, plus one pinned rules file. Each
+**Vendored skills** (`vendor/skills/<name>/`): the 46 external skills the agents use, plus one pinned rules file. Each
 is copied byte for byte from a reviewed commit at least 7 days old, with the sha256 of every file in the lock. Agents
 read them by path, so a personal skill of the same name or a newer upstream version can't change what they follow.
 `npm run check:skills` (CI and `verify`) fails on any changed, extra or missing file, hidden Unicode, a missing licence,
@@ -185,18 +185,20 @@ an unapproved source or an agent naming an unlocked skill. `docs/SKILLS.md` list
 | Official | `anthropics/skills`, `cloudflare/skills`, `vercel-labs/agent-skills`, `vercel-labs/web-interface-guidelines`, Cloudflare MCP servers, `github/github-mcp-server`, `microsoft/playwright-mcp`, `ChromeDevTools/chrome-devtools-mcp`, `googleanalytics/google-analytics-mcp`, `GoogleChrome/lighthouse-ci`, `cloudflare/wrangler-action`, gitleaks, Semgrep, ZAP actions, `actions/*` |
 | Security firm | `trailofbits/skills` |
 | Community (reviewed, then pinned) | `coreyhaines31/marketingskills`, `AgriciDaniel/claude-seo`, `aaron-he-zhu/aaron-marketing-skills`, `blader/humanizer`, `nextlevelbuilder/ui-ux-pro-max-skill`, `getsentry/skills`, `addyosmani/agent-skills`, `addyosmani/web-quality-skills`, `VoltAgent/awesome-design-md`, `google-labs-code/design.md` |
-| Caution | `Jakeschincariol/replica-skill` (young project; structure and parity only) |
-| Excluded | `searchfit/searchfit-seo`, `morluto/rea`, `affaan-m/ECC`, `AThevon/genjutsu`, `every-app/open-seo`, `aaron-he-zhu/seo-geo-claude-skills`, `zacker-tech/hormozi-skills`, `mrgoonie/claudekit-skills` (reasons in `docs/SKILLS.md`) |
+| Caution | `Jakeschincariol/replica-skill` (young project; structure, parity and reader research only), `morluto/rea` (website tools only, approved by the owner with limits; `docs/MCP.md`) |
+| Excluded | `searchfit/searchfit-seo`, `affaan-m/ECC`, `AThevon/genjutsu`, `every-app/open-seo`, `aaron-he-zhu/seo-geo-claude-skills`, `zacker-tech/hormozi-skills`, `mrgoonie/claudekit-skills` (reasons in `docs/SKILLS.md`) |
 
 Star counts are not treated as proof of safety. Anything not in the lock needs your yes, after the secops-reviewer
 checks it.
 
-**MCP servers** (`.mcp.json`, explained in `docs/MCP.md`): all official and free.
+**MCP servers** (`.mcp.json`, explained in `docs/MCP.md`): free; all official except `rea`, which you approved with limits.
 - `cloudflare-docs`, `cloudflare-api`: reads are free; every write asks you; deletes are refused.
 - `github`: read-only.
 - `playwright`, `chrome-devtools`: local headless browsers.
 - `google-analytics`: read-only, after launch.
 - `claude-docs`.
+- `rea` (`rea-agents@6.5.0`): competitor-recon's six website tools only, attached to a throwaway Chrome profile you
+  start (`docs/MCP.md` → rea); optional.
 
 Listed but off because they're paid: Semrush, Ahrefs, DataForSEO, Claude in CI. There's no official Google Search
 Console MCP server, so that step stays manual.

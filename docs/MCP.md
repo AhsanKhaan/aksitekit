@@ -1,7 +1,8 @@
 # MCP servers
 
-`.mcp.json` lists **official, free servers only**. Claude Code asks each person to approve a project server the first
-time it starts, so nothing connects without your yes. Accounts are always connected **by the owner** (OAuth in the
+`.mcp.json` lists **official, free servers**, plus one community server the owner approved with limits (`rea`, below).
+Claude Code asks each person to approve a project server the first time it starts, so nothing connects without your
+yes. Accounts are always connected **by the owner** (OAuth in the
 browser through `/mcp`, or an environment variable you set yourself); agents never log in or handle tokens.
 
 Checked on 2026-10-25. Versions are pinned to releases at least 7 days old (the repo's `min-release-age=7` rule).
@@ -16,6 +17,35 @@ Checked on 2026-10-25. Versions are pinned to releases at least 7 days old (the 
 | `chrome-devtools` | Google Chrome DevTools, `ChromeDevTools/chrome-devtools-mcp` | stdio `npx chrome-devtools-mcp@1.11.0 --headless --isolated --no-usage-statistics` | none | local browser | performance-auditor |
 | `google-analytics` | Google Analytics, `googleanalytics/google-analytics-mcp` | stdio `pipx run --spec analytics-mcp==0.7.0 analytics-mcp` (needs Python and pipx) | Google Application Default Credentials with the `analytics.readonly` scope, set up by the owner | **read-only** (writes need `--allow-write`, which we never pass) | growth-strategist, after launch |
 | `claude-docs` | Anthropic, Claude Code docs | HTTP `https://code.claude.com/docs/mcp` | none | read | any agent with a Claude Code question |
+
+## Enabled with limits (community, owner-approved)
+| Server (`.mcp.json` name) | Publisher and source | Transport and pin | Auth | Access | Used by |
+|---|---|---|---|---|---|
+| `rea` | morluto, `morluto/rea` (MIT, **caution** tier) | stdio `npx -y rea-agents@6.5.0 mcp` (6.5.0 is the newest release at least 7 days old; npm provenance attested) | none | local: attaches to a browser you start | competitor-recon, website tools only |
+
+**Limits.** competitor-recon's tools list names six rea tools: `list_browser_targets`, `inspect_web_page`,
+`analyze_web_bundle`, `observe_web_session`, `compare_web_captures` and `export_web_scripts`. rea's other tools
+(native binaries, Android, .NET, terminals) exist on the server but no agent may use them. In the main session they
+reach you as permission prompts: say no. Never run `rea setup`: it writes a user-wide registration and an unpinned
+skill. The pinned skill is `vendor/skills/reverse-engineer-anything/`.
+
+**Starting rea's browser (owner, only when recon needs it).** rea never launches a browser; it attaches to one on a
+loopback port. Use a throwaway profile, never your everyday one, and keep the ad hosts blocked so recon never creates
+ad impressions. Close it when recon is done.
+
+Windows (PowerShell):
+```powershell
+& "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="$env:TEMP\rea-chrome" --host-resolver-rules="MAP *.googlesyndication.com ~NOTFOUND, MAP *.doubleclick.net ~NOTFOUND, MAP www.googletagservices.com ~NOTFOUND, MAP adservice.google.com ~NOTFOUND"
+```
+
+macOS:
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222 --user-data-dir=/tmp/rea-chrome --host-resolver-rules="MAP *.googlesyndication.com ~NOTFOUND, MAP *.doubleclick.net ~NOTFOUND, MAP www.googletagservices.com ~NOTFOUND, MAP adservice.google.com ~NOTFOUND"
+```
+
+Linux: the same flags after `google-chrome` (or `chromium`). Since Chrome 136, the debugging port works only with a
+separate `--user-data-dir`, which is what keeps your signed-in profile out of reach. Don't sign in to anything in this
+window. If rea's browser isn't running, recon skips rea and uses Playwright.
 
 ### Why these flags
 - Playwright runs headless with an in-memory profile, and **blocks the main ad-serving origins** so recon and tests
@@ -65,3 +95,5 @@ never suggest connecting them; if a step seems to need one, they stop and ask, a
 ## Adding a server
 Only an official server from the publisher of the service, free to use, pinned to an exact version or a fixed URL,
 added to `skills.lock.json` (its source repo and commit) and to this file, with the owner's yes. Read-only by default.
+A community server (like `rea`) needs the owner's explicit yes after a source review, and agents get only the tools
+their file lists.
