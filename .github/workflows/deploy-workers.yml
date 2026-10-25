@@ -10,7 +10,7 @@
 # Every deploy first runs the full CI gates (ci.yml, called as a reusable workflow) on the exact commit it deploys, and
 # deploys only when they pass and a project exists (template mode deploys nothing). No workflow_run trigger: it would
 # check out code from another run with this repository's secrets in reach (Semgrep: workflow-run-target-code-checkout).
-# After the deploy, check:live runs against LIVE_SITE_URL; on failure, roll back (README) and fix forward.
+# After the deploy, check:live runs against LIVE_SITE_URL; on failure, roll back (.github/README.md, Rollback) and fix forward.
 # Security (.github/README.md): actions pinned to full commit SHAs; deploys only commits on the production branch, after
 # the CI gates pass on that exact commit; secrets only in the approved job, passed to wrangler-action
 # inputs, never to run:; no dependency cache in the job that holds secrets; one production deploy at a time.

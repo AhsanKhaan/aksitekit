@@ -1,0 +1,395 @@
+# AK Site Kit handbook (technical reference)
+
+Everything about how `aksitekit` works, in detail. To start a website, read the [README](../README.md) first. Built with [Claude Code](https://code.claude.com). Not affiliated with or endorsed by Anthropic.
+
+A **template repository** that turns keyword research into a deployed, AdSense-ready static website. A team of Claude Code
+agents does the work; deterministic scripts and CI jobs decide whether each step passed. You start a new site from a
+copy of this repository instead of a long chat.
+
+- **Agents propose, scripts decide, code acts.** Every stage writes a file, and its gate (an npm script or a CI job)
+  passes or fails it, the same way every time.
+- **Free tools only.** If a step would need a paid tool, the agent stops and asks you first; if you say no, it offers a
+  free alternative.
+- **Generic.** No niche is built in: the niche comes out of your keyword research.
+
+---
+
+## Contents
+1. [Status](#1-status)
+2. [Quick start](#2-quick-start)
+3. [What you provide](#3-what-you-provide)
+4. [The pipeline](#4-the-pipeline)
+5. [The agents](#5-the-agents)
+6. [Skills, trusted sources and MCP servers](#6-skills-trusted-sources-and-mcp-servers)
+7. [Keyword research rules](#7-keyword-research-rules)
+8. [Content, SEO and crawler rules](#8-content-seo-and-crawler-rules)
+9. [Security checks](#9-security-checks)
+10. [CI/CD and deployment](#10-cicd-and-deployment)
+11. [Quality budgets](#11-quality-budgets)
+12. [The 90-day growth plan (ADHD-friendly)](#12-the-90-day-growth-plan-adhd-friendly)
+13. [npm scripts](#13-npm-scripts)
+14. [Repository map](#14-repository-map)
+15. [Rules for agents](#15-rules-for-agents)
+16. [Research corrections built in](#16-research-corrections-built-in)
+17. [Honest limits](#17-honest-limits)
+
+---
+
+## 1. Status
+| Part | State | Where |
+|---|---|---|
+| Phase 0: scaffold, npm script contract, locked dependencies, config | ✅ done | `package.json`, `factory.config.json`, `docs/CONTRACT.md` |
+| Step A: rules, 18 agents, 5 skills, gate runner, hooks, trusted-source lock, MCP config, doc templates | ✅ done | `CLAUDE.md`, `AGENTS.md`, `.claude/`, `skills.lock.json`, `.mcp.json`, `docs/` |
+| Step B: keyword pipeline (ingest → select → cluster), 55 tests [M] | ✅ done | `scripts/research/`, `research/`, `tests/research/` |
+| Step D: GitHub Actions (CI, security, Lighthouse, pre-prod, deploys, live check), Dependabot | ✅ done (not yet run on GitHub) | `.github/` |
+| **Step C: starter website and most gates** | ⏳ **deferred** | `docs/TODO-step-c.md` |
+
+**Until Step C is built,** `npm run verify` fails locally because the scripts it calls don't exist yet. On GitHub, CI
+runs in **template mode** instead: the site jobs (build, lint, e2e, Lighthouse, pre-production, deploys) show as
+*skipped*, and the template's own checks (tests, helper self-tests, gitleaks, Semgrep, npm audit) run and pass. What
+works today: the keyword pipeline (`npm run research:all`), its tests (`npx vitest run tests/research`),
+the gate runner (`node .claude/skills/gate/gate.mjs status`) and the CI helper self-tests
+(`node .github/scripts/selftest.mjs`).
+
+The approved design is `docs/BLUEPRINT.md`; who owns which files is `docs/CONTRACT.md`.
+
+---
+
+## 2. Quick start
+1. On GitHub, click **Use this template** → create your repository. (Use the template feature, not a fork: a fork stays
+   linked to this repository.)
+2. Clone it, then install the locked dependencies:
+   ```bash
+   npm ci
+   ```
+3. Open the folder in Claude Code. If Claude Desktop shows **Trust repository**, accept it. Sign in to the MCP servers
+   you want through `/mcp` (all optional; see §6).
+4. Run **`/start`**. It asks for your domain, 2–5 competitors with their DR, and **which technology to build with**
+   (below). It picks the lowest-DR competitor as your keyword seed and tells you when to drop your Keyword Planner CSVs
+   (§3).
+5. Answer its questions as stages finish. `/start resume` continues from the ledger (`reports/ledger.md`);
+   `/start status` shows where you are. `/today` shows only today's growth task once the site is live.
+
+Requirements: Node `>=24.22.0 <25` (see `package.json` → `engines`), npm 11+, Git. Python and `pipx` only if you enable
+the Google Analytics MCP server.
+
+### Choose your technology: Next.js or anything else
+The purpose of this repository is to build **websites**, in whatever technology you choose. `/start` asks on every new
+copy:
+
+| You choose | What happens |
+|---|---|
+| **Next.js** | The built-in starter (`docs/TODO-step-c.md` §1): static export to `out/`, the shipped commands, ready to fill. |
+| **Another technology** (Astro, Eleventy, Hugo, Vite, SvelteKit, Remix, …) | The architect sets its build and dev commands and output folder in `factory.config.json` → `build`, lists the npm packages it needs (supply-chain checklist), and the coder builds the site in it. |
+| **Not sure** | The architect recommends one at the architecture stage, from what your keyword map needs, and you decide. |
+
+Whatever you pick, the rest stays the same: the agents, keyword pipeline, content and SEO rules, security checks,
+AdSense gate, budgets and CI. `npm run build` and `npm run dev` run your technology through `scripts/framework.mjs`,
+and every check reads the site from `build.outputDir`. Every page must still be crawlable HTML (static or
+server-rendered, never client-only). A technology that can't run on a free plan (for example PHP with a database
+server) is a stop-and-ask: the agent names the cost and offers a free alternative.
+
+---
+
+## 3. What you provide
+| Input | Where | Notes |
+|---|---|---|
+| Domain, brand, markets, **technology** | `/start` writes them to `factory.config.json` | Technology: Next.js (built-in starter) or any other (§2). |
+| Competitors and their **DR** | `research/inputs/competitors.csv` (`domain,dr,notes,brands`) | You supply DR from a tool you already use; agents never look it up (it's a paid metric, and free checkers sit behind CAPTCHAs). The lowest DR becomes the seed. |
+| **Google Keyword Planner exports**, one per competitor | `research/inputs/kp/<competitor-domain>.csv` | Keyword Planner's own `.csv` (UTF-16, tab-separated) or a CSV UTF-8 re-save. **Excel `.xlsx` is refused**: save as CSV. Use the last 12 full months, so the 12 monthly columns exist. Step-by-step export guide: `research/inputs/README.md`. |
+| Keyword difficulty (optional but needed for selection) | `research/inputs/kd.csv` (`keyword,kd,source,checked`) | From the free SERP check or your own tool. Keywords without a KD wait in `research/out/kd-todo.csv`. |
+| Category fixes (optional) | `research/inputs/categories.csv` | For clusters left as `uncategorized`. |
+
+Fake sample inputs live in `research/inputs/examples/` (never read by the pipeline).
+
+---
+
+## 4. The pipeline
+`/start` runs these stages in order. Each has an owner, an output, and a gate in `.claude/skills/gate/stages.json`.
+
+| # | Stage | Agent | Output | Decided by |
+|---|---|---|---|---|
+| 1 | intake | orchestrator | `factory.config.json`, `research/inputs/competitors.csv` | `gate.mjs intake` (prints the seed) |
+| 2 | recon | competitor-recon | `research/out/recon/<competitor>.md` | recon files exist; unique-text check finds no copied text |
+| 3 | keywords | keyword-researcher | `keywords.json`, `selected.json`, `keyword-map.json` | `npm run research:all` (exits 1 on any rule break) |
+| 4 | strategy | content-strategist | `docs/CONTENT-STRATEGY.md`, content plan, briefs, JSON-LD plan | briefs for wave 1 exist; schema plan per page type |
+| 5 | growth | growth-strategist | `docs/GROWTH-90.md`, `growth/plan.json` | plan validates (one task a day, ≤ 45 min, a done check each) |
+| 6 | architecture | architect | `docs/ARCHITECTURE.md`, `hosting.target` | Pages vs Workers rule applied (§10) |
+| 7 | design | designer | `docs/DESIGN.md` | `npm run gate:design` (WCAG AA contrast); fonts self-hosted |
+| 8 | build | coder | the site | `npm run verify` |
+| 9 | tests | harness | `tests/**` | `npm test`, `npm run test:e2e`, in CI too |
+| 10 | reconcile | reconciler | `reports/reconcile.md` | keyword map ↔ pages ↔ design ↔ briefs agree |
+| 11 | seo | seo-auditor | `reports/seo.md` | `check-out` in the build |
+| 12 | adsense | adsense-gatekeeper | `reports/adsense.md` | `npm run gate:adsense` |
+| 13 | security | secops-reviewer | `reports/security.md`, `docs/SECURITY.md` | §9 checks |
+| 14 | responsive | responsive-checker | `reports/responsive.md` | e2e at 320–1280 px |
+| 15 | performance | performance-auditor | `reports/performance.md` | Lighthouse and Core Web Vitals budgets (§11) |
+| 16 | preprod | orchestrator | — | `preprod.yml` green on the PR to the production branch |
+| 17 | cloudflare | cloudflare-reviewer | `reports/cloudflare.md` | only when hosting is Cloudflare; free-plan checklist |
+| 18 | go | **you** | — | your GO for that exact commit, typed in chat |
+| 19 | deploy | devsecops-deployer | — | deploy workflow, then `check:live` |
+| 20 | docs | doc-generator | `docs/PRD.md`, `DESIGN.md`, `ARCHITECTURE.md`, `SECURITY.md` | regenerated from the agents' outputs |
+
+Every gate run is recorded in `reports/ledger.md` (format in `AGENTS.md` §5), so any session can resume.
+
+---
+
+## 5. The agents
+All 18 live in `.claude/agents/`; `AGENTS.md` §2 has the full map.
+
+| Agent | Job | Main skills and tools |
+|---|---|---|
+| orchestrator | Runs `/start`: intake, stage order, gates, ledger | `/goal`, gate runner |
+| competitor-recon | Maps competitors' public sites: page types, URLs, templates, UX gaps | Replica (recon, diff), rea (after review), marketingskills `competitors`, Playwright MCP |
+| keyword-researcher | Keyword Planner CSVs → selected keywords → keyword map | the Step B scripts, claude-seo `seo-cluster`, searchfit `keyword-clustering`, `programmatic-seo` |
+| content-strategist | Content plan, page briefs, JSON-LD and schema plan, `llms.txt` | searchfit `content-strategy`/`content-brief`, marketingskills `schema`/`ai-seo`, claude-seo `seo-geo`/`seo-schema` |
+| growth-strategist | The 90-day ADHD-friendly growth plan (§12) | marketing-loops, marketing-ideas, marketing-council (Hormozi lens), customer-research |
+| architect | Static or server code; Cloudflare Pages or Workers; `ARCHITECTURE.md` | system-design, site-architecture, Cloudflare skills, Cloudflare docs MCP |
+| designer | Visual identity as `DESIGN.md`: palette, SEO-friendly fonts, components, motion; UI/UX gaps vs competitors | **ui-ux-pro-max**, **awesome-design-md** (reference), **design.md** format, **genjutsu** (motion), design-system, replica-design |
+| coder | Builds pages from the keyword map, briefs and `DESIGN.md` | anthropics `frontend-design`, Cloudflare skills |
+| harness | Unit and e2e tests with a planted failing case per gate; wires them into CI | anthropics `webapp-testing`, Playwright MCP |
+| reconciler | Cross-checks keyword map, pages, design and briefs; parity vs competitors | ECC (after review), replica-diff |
+| seo-auditor | On-page, technical, AEO/GEO and AI-search SEO | claude-seo suite |
+| adsense-gatekeeper | GO / NO-GO against AdSense policies; scans the codebase for required pages and forbidden code | `gate:adsense` |
+| secops-reviewer | All §9 security checks; supply-chain review of every skill or action before use | Trail of Bits skills, Semgrep, gitleaks, ZAP, gha-security-review |
+| cloudflare-reviewer | Free-plan Cloudflare checklist; only when you choose Cloudflare | Cloudflare MCP (reads; every write needs your yes) |
+| responsive-checker | Every page type from 320 to 1280 px | Playwright |
+| performance-auditor | Lighthouse and Core Web Vitals budgets | Lighthouse CI, Chrome DevTools MCP |
+| devsecops-deployer | Pre-prod checks on the production branch → your GO → deploy → live check → rollback | wrangler-action, `deploy-production` skill |
+| doc-generator | Writes PRD, DESIGN, ARCHITECTURE and SECURITY docs that any agent can read | `docs/templates/` |
+
+---
+
+## 6. Skills, trusted sources and MCP servers
+**Project skills** (`.claude/skills/`):
+
+| Skill | Does |
+|---|---|
+| `/start` | Runs or resumes the pipeline (§4) |
+| `/today` | Shows only today's growth task and your streak |
+| `/gate` | Runs a stage's gate: `node .claude/skills/gate/gate.mjs <stage>` or `status` |
+| `/keyword-pipeline` | Runs ingest → select → cluster with explanations |
+| `/deploy-production` | The deploy loop: gates, your GO, deploy, live check, rollback |
+
+**Trusted sources** (`skills.lock.json`, explained in `docs/SKILLS.md`): every external skill, plugin, MCP server and
+GitHub Action, with its tier, licence, purpose, the agents that use it, and a pinned commit.
+
+| Tier | Sources |
+|---|---|
+| Official | `anthropics/skills`, `anthropics/claude-plugins-official`, `cloudflare/skills`, Cloudflare MCP servers, `github/github-mcp-server`, `microsoft/playwright-mcp`, `ChromeDevTools/chrome-devtools-mcp`, `googleanalytics/google-analytics-mcp`, `GoogleChrome/lighthouse-ci`, `cloudflare/wrangler-action`, gitleaks, Semgrep, ZAP actions, `actions/*` |
+| Security firm | `trailofbits/skills` |
+| Community (review, then pinned) | `nextlevelbuilder/ui-ux-pro-max-skill`, `VoltAgent/awesome-design-md`, `google-labs-code/design.md`, `AThevon/genjutsu`, `morluto/rea`, `affaan-m/ECC`, `AgriciDaniel/claude-seo`, `coreyhaines31/marketingskills`, and others listed in the lock |
+| Caution | `Jakeschincariol/replica-skill` (young project) |
+| Excluded | `zacker-tech/hormozi-skills`, `mrgoonie/claudekit-skills` (no licence) |
+
+Star counts are not treated as proof of safety. Anything not in the lock needs your yes, after the secops-reviewer
+checks it.
+
+**MCP servers** (`.mcp.json`, explained in `docs/MCP.md`): all official and free.
+- `cloudflare-docs`, `cloudflare-api`: reads are free; every write asks you; deletes are refused.
+- `github`: read-only.
+- `playwright`, `chrome-devtools`: local headless browsers.
+- `google-analytics`: read-only, after launch.
+- `claude-docs`.
+
+Listed but off because they're paid: Semrush, Ahrefs, DataForSEO, Claude in CI. There's no official Google Search
+Console MCP server, so that step stays manual.
+
+---
+
+## 7. Keyword research rules
+Implemented in `scripts/research/` (Step B). Each script exits 1 with a message when a rule breaks.
+
+| Rule | How |
+|---|---|
+| **Keyword difficulty is real KD** | From `kd.csv` (free SERP check or your tool). Keyword Planner's "Competition" measures **advertiser bidding**; it's stored as `competitionAds`, never used as KD. |
+| **Volume** | At least `research.minVolume`. Bucketed volumes like `1K – 10K` (accounts without ad spend) are stored as ranges [R], never as fake exact numbers. |
+| **Low difficulty** | KD ≤ `research.maxKd`. No KD → queued in `kd-todo.csv`, not selected. |
+| **Not seasonal** | Seasonality = peak month ÷ median month over the 12 monthly columns. Above `research.maxSeasonality` → rejected as a seed. |
+| **No brand terms** | Keywords naming a competitor's brand are rejected. |
+| **One owner per keyword** | Every selected keyword belongs to exactly one URL, or is listed in `discarded[]` with a reason. |
+| **No keyword stuffing** | At most `research.maxSecondaryKeywordsPerPage` secondary keywords per page. |
+| **No cannibalization** | Two URLs can't share a primary keyword. |
+| **Intent decides the page type** | tool, calculator, generator, converter → tool page; how, what, why, cost, chart → guide under its tool. |
+
+The thresholds in `factory.config.json` are starting defaults [P], not research results: tune them per project.
+
+---
+
+## 8. Content, SEO and crawler rules
+- **URLs:** `/{category}/{slug}/` for tools and hubs, `/{category}/{slug}/{child}/` for guides and programmatic
+  instances; lowercase, trailing slash, at most 3 levels deep; breadcrumbs mirror the URL.
+- **Length:** tool pages 600–1,500 words of unique text; guides 800–1,500. These are floors, never targets; never pad.
+- **Programmatic SEO** only for keyword families with demand evidence (Google's scaled-content-abuse policy).
+- **Structured data:** JSON-LD per page type (WebPage, WebApplication, BreadcrumbList, FAQPage, Article,
+  CollectionPage, Organization, WebSite); no self-made ratings. `llms.txt` is generated too (cheap and optional; there's
+  no evidence Google uses it).
+- **Crawlers** (`factory.config.json` → `bots`, written into `robots.txt`):
+  - **allowed:** Googlebot, Bingbot, `AdsBot-Google`, and `Mediapartners-Google` (AdSense's crawler ignores `*`, so it
+    gets its own line);
+  - **allowed AI search bots:** `OAI-SearchBot`, `ChatGPT-User`, `Claude-SearchBot`, `Claude-User`, `PerplexityBot`;
+  - **AI training bots** (`GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`): your choice (`aiTraining`), enforced with
+    Cloudflare AI Crawl Control (free), since robots.txt is only a request.
+
+  Blocking Googlebot or Bingbot would remove the site from search, and "Gemini" isn't a crawler: AI Overviews use
+  Googlebot.
+
+---
+
+## 9. Security checks
+Run by the secops-reviewer locally (`npm run check:security`), and in `security.yml` / `preprod.yml`. Probes only target
+this project's own preview or production hosts.
+
+| Check | How (free) | Fails when |
+|---|---|---|
+| Attack scan (Burp-style) | **ZAP by Checkmarx**: baseline scan on every preview, full scan weekly and before releases. Burp Suite's automated scanner is Professional-only (paid). | A medium or high alert that isn't a reviewed exception (`.github/zap/rules.tsv`) |
+| XSS | CSP test; ESLint `no-unsanitized`; `dangerouslySetInnerHTML` only in the JSON-LD component; `</script>` escaping test; payloads injected into every allowed query parameter | A payload runs or appears unescaped |
+| CSRF | Static site: no endpoint accepts POST. With server code or forms: Origin/Referer check, `SameSite` cookies, CSRF token or Turnstile, and a cross-origin POST test | A cross-origin POST succeeds |
+| Path traversal | Live probes (`/..%2f..%2fetc/passwd`, `/%2e%2e/`, `/..;/`, double-encoded, backslash); Semgrep rules on any server code | Anything other than 400/404 without file contents |
+| Rate limiting | A short capped burst against your own preview. Endpoints need Cloudflare's free rate-limiting rule and return `429` | An endpoint keeps answering 200 |
+| Private server URL exposure | Scans the build output folder (`build.outputDir`), bundles and source maps for private IPs, `localhost`, internal hosts, preview URLs, keys and tokens; checks headers for `x-powered-by`/version leaks; DNS for unproxied origin records | Any match |
+| Served only through Cloudflare | Every response has `server: cloudflare` and `cf-ray`; every web hostname proxied; all resources same-origin or CSP-allowed | Anything bypasses Cloudflare |
+| Email spoofing | SPF (`-all` plus null MX if the domain never sends mail), DKIM when mail is used, DMARC ramped `none → quarantine → reject` on a dated schedule | SPF/DKIM/DMARC missing, or DMARC stuck at `none` past its review date |
+| Secrets and supply chain | gitleaks (full history and the build output folder), `npm audit` gate, `npm audit signatures`, Semgrep, actions pinned to commit SHAs, `.npmrc` (no install scripts, exact versions, 7-day minimum release age) | A finding |
+
+Each check gets a planted failing case in its tests, to prove it fails when it should.
+
+---
+
+## 10. CI/CD and deployment
+Full details, secrets and variables: `.github/README.md`.
+
+| Workflow | Runs on | What it does |
+|---|---|---|
+| `ci.yml` | every PR and push to `main`; called by the deploys | **always:** unit tests and helper self-tests. **Once a project exists:** check:repo → audit → lint → typecheck → build → e2e |
+| `security.yml` | PRs, pushes, weekly, preview deployments | gitleaks, npm audit gate and signatures, Semgrep, ZAP baseline (previews) and full scan (weekly) |
+| `lighthouse.yml` | PRs and pushes, once a project exists | builds, serves the output folder, runs Lighthouse CI against the budgets |
+| `preprod.yml` | PRs to the production branch | every gate plus `check:security` and ZAP against the PR's preview |
+| `deploy-pages.yml` | by hand, or on a push to `main` with `AUTO_DEPLOY` | only if `hosting.target` is `cloudflare-pages`: the CI gates on that exact commit, then build, `wrangler pages deploy`, `check:live` |
+| `deploy-workers.yml` | same | only if `hosting.target` is `cloudflare-workers`: the CI gates on that exact commit, then build, `wrangler deploy`, `check:live` |
+| `live-check.yml` | daily | `check:live` and `check:security` against `LIVE_SITE_URL` |
+| `dependabot.yml` | weekly | grouped npm and Actions updates with a 7-day cooldown |
+
+**Hosting rule:** Cloudflare **Pages** for a static export (the default); Cloudflare **Workers** static assets when the
+app needs server-side code. Both on the free plan. The architect suggests the target; you confirm. Other hosts can be
+added (`hosting.options` includes `other`).
+
+**Secrets:** `CLOUDFLARE_API_TOKEN` (scoped, with an expiry) and `CLOUDFLARE_ACCOUNT_ID`. **Variables:**
+`LIVE_SITE_URL`, `LIVE_PAGES_HOST`, and optional `AUTO_DEPLOY`.
+
+**Public vs private repository** (checked on docs.github.com, 2026-10-25 [M]): on a **private** repo with GitHub Free
+you get **no environments, no required reviewers, no environment secrets, no protected branches, and no CodeQL,
+dependency review or secret scanning**. So:
+- Keep the template **public** to get them free.
+- On a private repo, keep `AUTO_DEPLOY` unset and deploy only by hand: clicking Run workflow is then your GO.
+
+---
+
+## 11. Quality budgets
+From `factory.config.json` → `budgets`:
+- **Lighthouse:** Accessibility, Best Practices and SEO = **100**; Performance **≥ 90** on mobile (before ads; ads lower
+  it, and lab scores vary between runs, so a flat 100 isn't a stable gate).
+- **Core Web Vitals** (what Google ranks on): LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1.
+
+---
+
+## 12. The 90-day growth plan (ADHD-friendly)
+Written by the growth-strategist into `docs/GROWTH-90.md` and `growth/plan.json`:
+- **Daily:** one task, 25–45 minutes, with a clear "done when".
+- **Weekly:** a theme; Monday planning and Friday review take 10 minutes each.
+- **No overload:** at most 3 open items, plus a parking lot for new ideas.
+- **`/today`:** shows only today's task and your streak. An optional local reminder can use Claude's scheduled tasks
+  (free).
+
+It uses the marketing skills (marketing-loops, marketing-ideas, customer-research) and the marketing-council's Hormozi
+lens for offers and distribution ideas.
+
+---
+
+## 13. npm scripts
+The names are frozen in `docs/CONTRACT.md`. "Step C" means not implemented yet (`docs/TODO-step-c.md`).
+
+| Script | Does | State |
+|---|---|---|
+| `research:ingest` / `research:select` / `research:cluster` / `research:all` | The keyword pipeline (§7) | ✅ |
+| `dev`, `build`, `serve` | Dev server and production build in **your chosen technology** (`scripts/framework.mjs` runs `build.commands`; the build adds `production-gate` and `check-out`), local static server for `build.outputDir` | `framework.mjs` ✅; the rest Step C |
+| `lint`, `typecheck`, `test`, `test:e2e` | ESLint, TypeScript, Vitest, Playwright | configs in Step C; `tests/research` already runs with `npx vitest run tests/research` |
+| `check:repo`, `check:release`, `check:live`, `check:security` | Repo hygiene, publish gate, live-site check, security checks | Step C |
+| `audit`, `audit:perf`, `audit:a11y`, `audit:unique`, `audit:ga`, `audit:lighthouse` | CVE gate, lab speed, accessibility, duplicate text, GA4 privacy, Lighthouse CI | Step C (`audit:lighthouse` runs a pinned `npx @lhci/cli@0.15.1`) |
+| `gate:adsense`, `gate:design` | AdSense gate, contrast gate | Step C |
+| `growth:today` | Today's growth task | Step C |
+| `verify` | check:repo → audit → lint → typecheck → test → build → test:e2e | needs Step C |
+
+---
+
+## 14. Repository map
+```
+aksitekit/
+├── CLAUDE.md                rules for every agent
+├── AGENTS.md                agent map, pipeline, gate table, ledger format, project status
+├── README.md                this file
+├── factory.config.json      project inputs, hosting, research thresholds, bot policy, budgets, paid tools (off)
+├── skills.lock.json         trusted sources, pinned to commits
+├── .mcp.json                official, free MCP servers
+├── .npmrc                   supply-chain rules (no install scripts, exact versions, 7-day minimum age)
+├── .claude/
+│   ├── agents/              18 agents
+│   ├── skills/              start, today, gate (+ gate.mjs, stages.json), keyword-pipeline, deploy-production
+│   ├── hooks/               secret and .env guard, push guard, secret scan after edits
+│   └── settings.json        permissions and hooks
+├── .github/
+│   ├── workflows/           ci, security, lighthouse, preprod, deploy-pages, deploy-workers, live-check
+│   ├── scripts/             target-host guard, ZAP gate, preview-URL finder, self-tests
+│   ├── zap/rules.tsv        reviewed ZAP exceptions
+│   ├── dependabot.yml
+│   └── README.md            CI/CD details, secrets, variables, private-repo caveats
+├── research/
+│   ├── inputs/              your files (competitors.csv, kp/*.csv, kd.csv) + README export guide + fake examples
+│   └── out/                 generated keywords, selection, keyword map
+├── scripts/research/        ingest, select, cluster
+├── tests/research/          55 pipeline tests
+├── docs/
+│   ├── BLUEPRINT.md         the approved design
+│   ├── CONTRACT.md          file ownership, npm scripts, data formats
+│   ├── TODO-step-c.md       starter website and gates, still to build
+│   ├── SKILLS.md, MCP.md    trusted sources and MCP servers explained
+│   └── templates/           PRD, DESIGN, ARCHITECTURE, SECURITY, CONTENT-STRATEGY, GROWTH-90
+└── growth/                  90-day plan data (generated)
+```
+
+---
+
+## 15. Rules for agents
+The full list is in `CLAUDE.md`. The essentials:
+- Free tools only; ask before anything paid, and offer a free alternative if you say no.
+- Gates decide; never loosen a gate to get green. Record every gate run in the ledger.
+- Trusted sources only, pinned to commits.
+- Never commit or push to `main`, and never deploy without your GO for that exact commit.
+- Never copy competitors' text, images, code or design; recon is for structure and UX gaps only.
+- Never scrape Google, bypass CAPTCHAs, or fetch paid metrics such as DR.
+- No AdSense code or `ads.txt` before the AdSense gate passes and your account is approved.
+- Never invent facts, sources, reviews or metrics. Label numbers [M] measured, [R] range, [P] estimate, [U] unverified.
+- New npm dependencies need the supply-chain checklist and a version at least 7 days old.
+
+---
+
+## 16. Research corrections built in
+| Common assumption | What's true (checked 2026-10-25) | What the template does |
+|---|---|---|
+| Keyword Planner shows keyword difficulty | Its "Competition" is advertiser bidding (Google Ads API docs) | KD from the free SERP check or your tool |
+| Agents can fetch competitor DR | DR is a paid Ahrefs metric; free checkers use CAPTCHAs | You supply DR |
+| Only ChatGPT, Gemini and Claude should crawl | That would drop Google and Bing; AdSense needs its own crawler line | Search, AdSense and AI-search bots allowed; training bots optional |
+| Lighthouse 100 everywhere | Lab scores vary; ads lower Performance; Google ranks on field data | 100 on A11y/BP/SEO, ≥ 90 Performance, CWV limits |
+| Burp Suite in CI | Its automated scanner is paid | ZAP (free, official actions) |
+| Excel keyword files | Excel parsers have a poor security record on npm | CSV/TSV only |
+| Claude agents run in CI | Needs a paid API key | CI runs free scripts; agents run locally |
+| Cloudflare Pages for everything | Cloudflare now points new server-side projects to Workers | Pages for static, Workers for server code |
+
+---
+
+## 17. Honest limits
+- No check can guarantee AdSense approval or rankings; Google decides both.
+- DR and keyword difficulty come from you or a paid tool; the template ships neither.
+- In template mode CI checks only what exists (tests, helper self-tests, secret and code scans); the site jobs start once
+  Step C and a project exist.
+- The starter website (Step C) is a to-do; each project's look comes from its designer stage.
