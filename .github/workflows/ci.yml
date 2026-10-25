@@ -1,8 +1,10 @@
-# CI: the contract's `verify` chain (docs/CONTRACT.md) on every pull request and every push to main. A green run on a
-# push to main is what deploy-pages.yml / deploy-workers.yml wait for. Until Step C lands the scripts these steps call
-# (docs/TODO-step-c.md), this workflow fails: that's expected.
-# Security (.github/README.md): actions pinned to full commit SHAs; read-only token; no secrets; never
-# pull_request_target; install scripts blocked by .npmrc (ignore-scripts=true).
+# CI: the contract's `verify` chain (docs/CONTRACT.md) on every pull request and every push to main, and the gates the
+# deploy workflows call (workflow_call) before they deploy anything.
+# Template mode (.github/scripts/site-ready.mjs): until a project exists (/start set project.domain and Step C built the
+# scripts, docs/TODO-step-c.md), the `site` job skips instead of failing; the `tests` job (unit tests, workflow helper
+# self-tests) always runs, so the template's own CI stays meaningful.
+# Security (.github/README.md): actions pinned to full commit SHAs; read-only token; no secrets (callers pass none);
+# never pull_request_target; install scripts blocked by .npmrc (ignore-scripts=true).
 name: ci
 
 on:
@@ -10,16 +12,89 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Commit to check (deploy workflows pass the commit they are about to deploy)'
+        type: string
+        required: false
+        default: ''
+    outputs:
+      ready:
+        description: "'true' when a project exists and the site jobs ran"
+        value: ${{ jobs.ready.outputs.ready }}
 
 permissions: {}
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 jobs:
-  verify:
-    name: verify
+  ready:
+    name: project exists?
+    # Job-level groups (documented for every workflow); github.workflow is the caller's name under workflow_call,
+    # so a deploy's gates never share a group with plain CI.
+    concurrency:
+      group: ${{ github.workflow }}-ci-ready-${{ inputs.ref || github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          package-manager-cache: false
+
+      - name: Template mode or project? (factory.config.json project.domain and the site's scripts)
+        id: check
+        run: node .github/scripts/site-ready.mjs
+
+  tests:
+    name: tests and workflow helpers
+    # Job-level groups (documented for every workflow); github.workflow is the caller's name under workflow_call,
+    # so a deploy's gates never share a group with plain CI.
+    concurrency:
+      group: ${{ github.workflow }}-ci-tests-${{ inputs.ref || github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json # engines.node
+          cache: npm
+
+      - name: Install (lockfile only; install scripts blocked by .npmrc)
+        run: npm ci
+
+      - name: Unit tests (keyword pipeline, technology choice, and the site's tests once they exist)
+        run: npm test
+
+      - name: Planted cases for site-ready, target-url, preview-url and zap-gate (no dependencies)
+        run: node .github/scripts/selftest.mjs
+
+  site:
+    name: verify (site)
+    # Job-level groups (documented for every workflow); github.workflow is the caller's name under workflow_call,
+    # so a deploy's gates never share a group with plain CI.
+    concurrency:
+      group: ${{ github.workflow }}-ci-site-${{ inputs.ref || github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    needs: ready
+    if: needs.ready.outputs.ready == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -27,6 +102,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.ref || github.sha }}
           persist-credentials: false
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -49,9 +125,6 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Unit tests
-        run: npm test
-
       - name: Build (chosen technology, then check-out)
         run: npm run build
 
@@ -71,22 +144,3 @@ jobs:
             test-results/
           retention-days: 7
           if-no-files-found: ignore
-
-  workflow-helpers:
-    name: workflow helpers self-test
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: package.json
-          package-manager-cache: false
-
-      - name: Planted cases for target-url, preview-url and zap-gate (no dependencies)
-        run: node .github/scripts/selftest.mjs

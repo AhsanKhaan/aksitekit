@@ -5,11 +5,14 @@
 # Triggers:
 #   - by hand (workflow_dispatch) from the production branch: deploys its head, or `commit`, an earlier commit on it
 #     (the rollback path);
-#   - a green `ci` run on a push to the production branch, only while the repo variable AUTO_DEPLOY is 'true'. Set it
-#     only once `production` has required reviewers: without them a push would deploy with no GO.
+#   - a push to the production branch, only while the repo variable AUTO_DEPLOY is 'true'. Set it only once
+#     `production` has required reviewers: without them a push would deploy with no GO.
+# Every deploy first runs the full CI gates (ci.yml, called as a reusable workflow) on the exact commit it deploys, and
+# deploys only when they pass and a project exists (template mode deploys nothing). No workflow_run trigger: it would
+# check out code from another run with this repository's secrets in reach (Semgrep: workflow-run-target-code-checkout).
 # After the deploy, check:live runs against LIVE_SITE_URL; on failure, roll back (README) and fix forward.
-# Security (.github/README.md): actions pinned to full commit SHAs; workflow_run acts only on push runs of this
-# repository and deploys the exact commit CI tested; secrets only in the approved job, passed to wrangler-action
+# Security (.github/README.md): actions pinned to full commit SHAs; deploys only commits on the production branch, after
+# the CI gates pass on that exact commit; secrets only in the approved job, passed to wrangler-action
 # inputs, never to run:; no dependency cache in the job that holds secrets; one production deploy at a time.
 name: deploy-workers
 
@@ -20,9 +23,7 @@ on:
         description: 'Commit to deploy: a full SHA on the production branch (empty: its head). Rollback path.'
         type: string
         required: false
-  workflow_run:
-    workflows: [ci]
-    types: [completed]
+  push:
     branches: [main] # = hosting.productionBranch, checked again at run time
 
 permissions: {}
@@ -36,8 +37,7 @@ jobs:
     name: hosting target and commit
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_repository.full_name == github.repository && vars.AUTO_DEPLOY == 'true')
+      (github.event_name == 'push' && vars.AUTO_DEPLOY == 'true')
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -48,7 +48,6 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 0 # to check the commit is on the production branch
           persist-credentials: false
 
@@ -58,8 +57,8 @@ jobs:
           WANT: cloudflare-workers
           EVENT: ${{ github.event_name }}
           DISPATCH_REF: ${{ github.ref_name }}
-          RUN_BRANCH: ${{ github.event.workflow_run.head_branch }}
-          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          PUSH_BRANCH: ${{ github.ref_name }}
+          PUSH_SHA: ${{ github.sha }}
           INPUT_COMMIT: ${{ inputs.commit }}
         run: |
           set -euo pipefail
@@ -73,9 +72,9 @@ jobs:
             [ "$DISPATCH_REF" = "$branch" ] || fail "start the deploy from the production branch ($branch)"
             sha=${INPUT_COMMIT:-$(git rev-parse HEAD)}
           else
-            [ "$RUN_BRANCH" = "$branch" ] || skip "CI ran on another branch than the production branch ($branch)"
-            sha=$RUN_SHA
-            [ "$sha" = "$(git rev-parse "origin/$branch")" ] || skip "a newer commit is on $branch; its own CI run deploys it"
+            [ "$PUSH_BRANCH" = "$branch" ] || skip "push to another branch than the production branch ($branch)"
+            sha=$PUSH_SHA
+            [ "$sha" = "$(git rev-parse "origin/$branch")" ] || skip "a newer commit is on $branch; its own push deploys it"
           fi
           [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || fail "commit must be a full 40-character SHA"
           git merge-base --is-ancestor "$sha" "origin/$branch" || fail "the commit is not on the production branch ($branch)"
@@ -83,10 +82,20 @@ jobs:
             || fail "a Workers deploy needs wrangler.jsonc (or .json/.toml) with the static-assets directory; the architect writes it"
           { echo "deploy=true"; echo "sha=$sha"; } >> "$GITHUB_OUTPUT"
 
-  deploy:
-    name: deploy to Cloudflare Workers (production)
+  gates:
+    name: CI gates on the commit to deploy
     needs: config
     if: needs.config.outputs.deploy == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ needs.config.outputs.sha }}
+
+  deploy:
+    name: deploy to Cloudflare Workers (production)
+    needs: [config, gates]
+    if: needs.config.outputs.deploy == 'true' && needs.gates.outputs.ready == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment:

@@ -44,8 +44,10 @@ copy of this repository instead of a long chat.
 | Step D: GitHub Actions (CI, security, Lighthouse, pre-prod, deploys, live check), Dependabot | ✅ done (not yet run on GitHub) | `.github/` |
 | **Step C: starter website and most gates** | ⏳ **deferred** | `docs/TODO-step-c.md` |
 
-**Until Step C is built,** `npm run verify` and most CI jobs fail because the scripts they call don't exist yet. That's
-expected. What works today: the keyword pipeline (`npm run research:all`), its tests (`npx vitest run tests/research`),
+**Until Step C is built,** `npm run verify` fails locally because the scripts it calls don't exist yet. On GitHub, CI
+runs in **template mode** instead: the site jobs (build, lint, e2e, Lighthouse, pre-production, deploys) show as
+*skipped*, and the template's own checks (tests, helper self-tests, gitleaks, Semgrep, npm audit) run and pass. What
+works today: the keyword pipeline (`npm run research:all`), its tests (`npx vitest run tests/research`),
 the gate runner (`node .claude/skills/gate/gate.mjs status`) and the CI helper self-tests
 (`node .github/scripts/selftest.mjs`).
 
@@ -259,12 +261,12 @@ Full details, secrets and variables: `.github/README.md`.
 
 | Workflow | Runs on | What it does |
 |---|---|---|
-| `ci.yml` | every PR and push to `main` | `npm ci` → check:repo → audit → lint → typecheck → test → build → e2e; helper self-tests |
+| `ci.yml` | every PR and push to `main`; called by the deploys | **always:** unit tests and helper self-tests. **Once a project exists:** check:repo → audit → lint → typecheck → build → e2e |
 | `security.yml` | PRs, pushes, weekly, preview deployments | gitleaks, npm audit gate and signatures, Semgrep, ZAP baseline (previews) and full scan (weekly) |
-| `lighthouse.yml` | PRs and pushes | builds, serves the output folder, runs Lighthouse CI against the budgets |
+| `lighthouse.yml` | PRs and pushes, once a project exists | builds, serves the output folder, runs Lighthouse CI against the budgets |
 | `preprod.yml` | PRs to the production branch | every gate plus `check:security` and ZAP against the PR's preview |
-| `deploy-pages.yml` | by hand (or automatically, see below) | only if `hosting.target` is `cloudflare-pages`: build, `wrangler pages deploy`, `check:live` |
-| `deploy-workers.yml` | same | only if `hosting.target` is `cloudflare-workers`: build, `wrangler deploy`, `check:live` |
+| `deploy-pages.yml` | by hand, or on a push to `main` with `AUTO_DEPLOY` | only if `hosting.target` is `cloudflare-pages`: the CI gates on that exact commit, then build, `wrangler pages deploy`, `check:live` |
+| `deploy-workers.yml` | same | only if `hosting.target` is `cloudflare-workers`: the CI gates on that exact commit, then build, `wrangler deploy`, `check:live` |
 | `live-check.yml` | daily | `check:live` and `check:security` against `LIVE_SITE_URL` |
 | `dependabot.yml` | weekly | grouped npm and Actions updates with a 7-day cooldown |
 
@@ -388,5 +390,6 @@ The full list is in `CLAUDE.md`. The essentials:
 ## 17. Honest limits
 - No check can guarantee AdSense approval or rankings; Google decides both.
 - DR and keyword difficulty come from you or a paid tool; the template ships neither.
-- The CI workflows haven't run on GitHub yet, and most of them need Step C.
+- In template mode CI checks only what exists (tests, helper self-tests, secret and code scans); the site jobs start once
+  Step C and a project exist.
 - The starter website (Step C) is a to-do; each project's look comes from its designer stage.

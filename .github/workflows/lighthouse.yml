@@ -20,8 +20,32 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  ready:
+    name: project exists?
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          package-manager-cache: false
+
+      - name: Template mode or project? (nothing to measure until a site exists)
+        id: check
+        run: node .github/scripts/site-ready.mjs
+
   lighthouse:
     name: lighthouse budgets
+    needs: ready
+    if: needs.ready.outputs.ready == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     permissions:

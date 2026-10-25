@@ -5,6 +5,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { cloudflareState, branchAlias, pagesUrls } from './preview-url.mjs';
+import { scriptFiles, siteReady } from './site-ready.mjs';
 import { checkTarget } from './target-url.mjs';
 import { evaluate } from './zap-gate.mjs';
 
@@ -74,4 +75,19 @@ test('preview-url: branch alias and Cloudflare check parsing', () => {
   assert.equal(cloudflareState([run('completed', 'success')], {}).state, 'success');
   assert.equal(cloudflareState([{ app: { slug: 'github-actions' }, name: 'ci', status: 'completed', conclusion: 'success' }], {}).state, 'none');
   assert.equal(cloudflareState([], { statuses: [{ context: 'Cloudflare Pages', state: 'success', target_url: 'https://0a1b2c3d.example-site.pages.dev' }] }).state, 'success');
+});
+
+test('site-ready: template mode until a project exists (planted)', () => {
+  const pkg = { scripts: { 'check:repo': 'node scripts/check-repo.mjs', audit: 'node scripts/audit.mjs', lint: 'eslint .', typecheck: 'tsc --noEmit', build: 'node scripts/production-gate.mjs && node scripts/framework.mjs build', 'test:e2e': 'playwright test' } };
+  const all = () => true;
+  const none = () => false;
+  assert.deepEqual(scriptFiles('node a.mjs && node scripts/b.js build | node c.mjs'), ['a.mjs', 'scripts/b.js', 'c.mjs']);
+  assert.equal(siteReady({ config: { project: { domain: '' } }, pkg, exists: all }).ready, false); // the template itself
+  assert.match(siteReady({ config: { project: { domain: '' } }, pkg, exists: all }).reason, /project\.domain is empty/);
+  const notBuilt = siteReady({ config: { project: { domain: 'example.com' } }, pkg, exists: (f) => f !== 'scripts/production-gate.mjs' });
+  assert.equal(notBuilt.ready, false); // after /start, before Step C
+  assert.match(notBuilt.reason, /missing scripts\/production-gate\.mjs/);
+  assert.equal(siteReady({ config: { project: { domain: 'example.com' } }, pkg: { scripts: {} }, exists: all }).ready, false);
+  assert.equal(siteReady({ config: { project: { domain: 'example.com' } }, pkg, exists: none }).ready, false);
+  assert.equal(siteReady({ config: { project: { domain: 'example.com' } }, pkg, exists: all }).ready, true); // a real project
 });
