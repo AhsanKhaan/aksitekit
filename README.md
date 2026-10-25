@@ -68,6 +68,8 @@ on from there. In short: agents propose, scripts decide, you approve.
 - **Keyword research you can check.** Volumes come from your Keyword Planner files. Seasonal keywords and keywords too
   hard for a new site are dropped, with the reason recorded. Each keyword gets exactly one page, and pages carry a
   limit on secondary keywords, so nothing is stuffed.
+- **Competitor analysis without copying.** For each competitor: its page types and templates, how the site is built,
+  a feature matrix scored across all competitors, and what its readers complain about, all from public pages.
 - **Content written for a reader.** Every page gets a brief with the reader's question, an outline, the sources to
   check and voice notes. Page text gets an editing pass that removes AI-writing patterns, and the SEO review flags any
   page that still reads as generated.
@@ -94,7 +96,8 @@ The checks that run on the built site arrive with the starter site; [Status](#st
 | [Claude Code](https://code.claude.com/docs/en/setup) | Runs the agents | `claude --version` |
 | A Claude plan that includes Claude Code | Pro, Max, Team, Enterprise or a Console account (the free claude.ai plan doesn't include Claude Code) | |
 | A Google Ads account | Free access to Keyword Planner | |
-| [Python](https://www.python.org/downloads/) 3, optional | The designer's style search; without it the designer reads the data directly | `python --version` |
+| [Python](https://www.python.org/downloads/) 3, optional | The designer's style search and the competitor review ranking; without it the agents read the data directly | `python --version` |
+| [Google Chrome](https://www.google.com/chrome/), optional | rea's deeper look at JavaScript-heavy competitor sites, in a throwaway profile ([docs/MCP.md](docs/MCP.md#enabled-with-limits-community-owner-approved)) | |
 | Later: a Cloudflare account and a domain | To put the site online on the free plan | |
 
 Install Claude Code with the official installer:
@@ -351,6 +354,6 @@ CC BY-SA 4.0), included in each folder.
 
 ## Acknowledgements
 The agents read skills by Corey Haines (marketingskills), agricidaniel (claude-seo), aaron-he-zhu
-(aaron-marketing-skills), Siqi Chen (humanizer), Next Level Builder (UI UX Pro Max), Jake Schincariol (Replica), Addy
-Osmani, Trail of Bits, Sentry, Vercel, Anthropic and Cloudflare. The full list, with versions and licences, is in
-[docs/SKILLS.md](docs/SKILLS.md).
+(aaron-marketing-skills), Siqi Chen (humanizer), Next Level Builder (UI UX Pro Max), Jake Schincariol (Replica), morluto
+(REA), Addy Osmani, Trail of Bits, Sentry, Vercel, Anthropic and Cloudflare. The full list, with versions and licences,
+is in [docs/SKILLS.md](docs/SKILLS.md).
