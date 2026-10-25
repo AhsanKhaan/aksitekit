@@ -1,4 +1,6 @@
-# adsense-site-factory
+# AK Site Kit
+
+`aksitekit` · Built with [Claude Code](https://code.claude.com). Not affiliated with or endorsed by Anthropic.
 
 A **template repository** that turns keyword research into a deployed, AdSense-ready static website. A team of Claude Code
 agents does the work; deterministic scripts and CI jobs decide whether each step passed. You start a new site from a
@@ -320,7 +322,7 @@ The names are frozen in `docs/CONTRACT.md`. "Step C" means not implemented yet (
 
 ## 14. Repository map
 ```
-adsense-site-factory/
+aksitekit/
 ├── CLAUDE.md                rules for every agent
 ├── AGENTS.md                agent map, pipeline, gate table, ledger format, project status
 ├── README.md                this file

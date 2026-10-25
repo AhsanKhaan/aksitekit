@@ -1,4 +1,4 @@
-# adsense-site-factory: instructions for coding agents
+# AK Site Kit (`aksitekit`): instructions for coding agents
 
 This repository is a **template**. A new site starts from a copy ("Use this template"), then `/start` runs a pipeline of
 agents with hard gates: an agent **proposes** a file, a deterministic script or CI job **decides** pass or fail, code

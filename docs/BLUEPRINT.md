@@ -1,4 +1,4 @@
-# Plan: `adsense-site-factory`, a template repo that turns keyword research into a deployed, AdSense-ready site
+# Plan: `aksitekit` (AK Site Kit; working name `adsense-site-factory`), a template repo that turns keyword research into a deployed, AdSense-ready site
 
 ## Context
 Building calculatorporch.com this month took a long chat: dozens of decisions, corrections and checks. You want a **separate, reusable repository** so the next site starts from a copy ("Use this template") and runs as a **pipeline of dedicated agents with hard gates**, not a conversation.
@@ -12,7 +12,7 @@ Building calculatorporch.com this month took a long chat: dozens of decisions, c
 ## Decisions (yours, plus research verdicts)
 | Topic | Decision |
 |---|---|
-| Location | `C:\Work\adsense-site-factory`, its own git repo. You create the empty GitHub repo and tick **Template repository** (GitHub's way to start new projects from it; better than a fork). |
+| Location | Local folder `C:\Work\adsense-site-factory` (the working name), its own git repo; published on GitHub as `aksitekit` (renamed 2026-10-25). You create the empty GitHub repo and tick **Template repository** (GitHub's way to start new projects from it; better than a fork). |
 | Hosting | **Cloudflare Pages first** for static sites. The architect switches to **Workers static assets** when the app needs server-side features. Free plan only. The Cloudflare reviewer runs only when a Cloudflare target is chosen. |
 | Paid tools | None. Keyword Planner CSVs and competitor DR come from you. KD comes from the free SERP check (Claude's WebSearch plus your input; **no automated Google scraping**, which breaks Google's terms). |
 | KD | Keyword Planner's "Competition" is **advertiser bidding, not SEO difficulty** (Google Ads API docs). It's kept as a commercial-value signal only. |
@@ -25,7 +25,7 @@ Building calculatorporch.com this month took a long chat: dozens of decisions, c
 
 ## Repository layout (new files)
 ```
-adsense-site-factory/
+aksitekit/
   CLAUDE.md               rules: free-only, trust policy, gates, never-do (generalized from calculatorporch/CLAUDE.md)
   AGENTS.md               agent map, pipeline, gate table (read by any coding agent)
   README.md               "Use this template → open in Claude Code → /start"

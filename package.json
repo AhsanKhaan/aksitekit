@@ -1,5 +1,5 @@
 {
-  "name": "adsense-site-factory",
+  "name": "aksitekit",
   "version": "0.1.0",
   "private": true,
   "description": "Template: keyword research to a deployed, AdSense-ready static site, run by Claude Code agents with deterministic gates. Free tools only.",

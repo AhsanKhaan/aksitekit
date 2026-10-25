@@ -1,6 +1,6 @@
 ---
 name: start
-description: Start or resume the site pipeline for this copy of the adsense-site-factory template. Asks for the domain and competitors (with the DR the owner supplies), picks the lowest-DR competitor as the keyword seed, tells the owner when to drop Keyword Planner CSVs, then runs each stage and its gate in order and records the ledger. Use for "/start", "start the site", "resume the pipeline", "what's next".
+description: Start or resume the site pipeline for this copy of the AK Site Kit (aksitekit) template. Asks for the domain and competitors (with the DR the owner supplies), picks the lowest-DR competitor as the keyword seed, tells the owner when to drop Keyword Planner CSVs, then runs each stage and its gate in order and records the ledger. Use for "/start", "start the site", "resume the pipeline", "what's next".
 argument-hint: "[resume | status | <stage id>]"
 disable-model-invocation: true
 ---

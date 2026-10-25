@@ -48,7 +48,7 @@ async function github(path) {
     headers: {
       accept: 'application/vnd.github+json',
       authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-      'user-agent': 'adsense-site-factory-preprod',
+      'user-agent': 'aksitekit-preprod',
       'x-github-api-version': '2022-11-28',
     },
   });
