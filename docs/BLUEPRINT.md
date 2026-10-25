@@ -1,9 +1,9 @@
 # Plan: `aksitekit` (AK Site Kit; working name `adsense-site-factory`), a template repo that turns keyword research into a deployed, AdSense-ready site
 
 ## Context
-Building calculatorporch.com this month took a long chat: dozens of decisions, corrections and checks. You want a **separate, reusable repository** so the next site starts from a copy ("Use this template") and runs as a **pipeline of dedicated agents with hard gates**, not a conversation.
+Building the first site by hand took a long chat: dozens of decisions, corrections and checks. You want a **separate, reusable repository** so the next site starts from a copy ("Use this template") and runs as a **pipeline of dedicated agents with hard gates**, not a conversation.
 
-- **calculatorporch** stays untouched. It's the reference: its finalized verdicts (CI gates, security rules, the Cloudflare free-plan checklist, AdSense gate, SEO rules) get generalized into the template.
+- **The first site stays untouched.** It's the reference: its finalized verdicts (CI gates, security rules, the Cloudflare free-plan checklist, AdSense gate, SEO rules) get generalized into the template.
 - **The niche is generic:** it comes out of the keyword research.
 - **Cost:** free tools only.
 
@@ -26,7 +26,7 @@ Building calculatorporch.com this month took a long chat: dozens of decisions, c
 ## Repository layout (new files)
 ```
 aksitekit/
-  CLAUDE.md               rules: free-only, trust policy, gates, never-do (generalized from calculatorporch/CLAUDE.md)
+  CLAUDE.md               rules: free-only, trust policy, gates, never-do (generalized from the reference site's rules)
   AGENTS.md               agent map, pipeline, gate table (read by any coding agent)
   README.md               "Use this template → open in Claude Code → /start"
   factory.config.json     domain, hosting (pages|workers), thresholds (min volume, max KD, seasonality ratio), bot policy, locales
@@ -102,18 +102,18 @@ These run as `npm run check:security` (local, against a URL) and as jobs in `sec
 - **Not available:** an official Search Console server; that step stays manual.
 
 ## Deterministic scripts
-- **Ported from calculatorporch** (generalized; calculator-specific parts removed):
+- **Ported from the reference site** (generalized; site-specific parts removed):
   - `scripts/production-gate.mjs`, `check-out.mjs`, `check-live.mjs` (incl. CAA, DNSSEC and NEL checks) and `check-repo.mjs`;
   - `serve-out.mjs`, `flatten-segments.mjs`, `gen-public-files.mjs` (robots built from the bot policy, sitemap, `llms.txt`);
   - `audit.mjs` and `audits/{perf,a11y,unique-text,ga-live}.mjs`;
   - the `_headers` CSP tests and the consent/GA4 modules (`lib/consent.ts`, `lib/analytics.ts`, `components/Analytics.tsx`, `ConsentBanner.tsx`);
-  - the SEO and content rules from `docs/05` and `docs/10` (URL structure `/{category}/{slug}/`, depth ≤ 3; tool pages 600–1,500 words, guides 800–1,500; never pad).
+  - the SEO and content rules (URL structure `/{category}/{slug}/`, depth ≤ 3; tool pages 600–1,500 words, guides 800–1,500; never pad).
 - **New:**
   - `scripts/research/kp-ingest.mjs`: Keyword Planner CSV, which arrives as UTF-16 TSV; parsed without new dependencies.
   - `keyword-select.mjs` and `cluster.mjs`.
   - `scripts/adsense-gate.mjs`, `scripts/growth/today.mjs` and `scripts/design/contrast.mjs`.
   - Lighthouse CI config with the budgets above.
-- **Dependencies:** the calculatorporch set plus `@lhci/cli` only, installed per the security/03 checklist and the 7-day rule.
+- **Dependencies:** the reference site's tested set (Next.js, React, zod, Tailwind, Vitest, Playwright, ESLint plugins), installed per the supply-chain checklist and the 7-day rule. No new dependency for Lighthouse: it runs as a pinned `npx @lhci/cli@0.15.1` locally and in CI (refined in Phase 0 to keep the lockfile unchanged).
 
 ## CI/CD (GitHub Actions, free; every action pinned to a commit SHA)
 - **`ci.yml`:** check:repo, audit, lint, typecheck, unit, build, e2e.
@@ -145,7 +145,7 @@ These run as `npm run check:security` (local, against a URL) and as jobs in `sec
 2. Pipeline dry run: a fixture Keyword Planner CSV (clearly labelled fake data) → keywords → clusters → keyword map. Seasonal and over-KD seeds are rejected; every keyword has exactly one owner.
 3. `adsense-gate`, `check-out` and a Lighthouse run on the built starter meet the budgets. Gitleaks, Semgrep and `npm audit` are clean.
 4. CI: push to GitHub, and all workflows pass on a PR. The deploy job is checked as a dry run without a token.
-5. Cloudflare reviewer: a read-only run against the calculatorporch zone as a known-good reference (reads only).
+5. Cloudflare reviewer: a read-only run against an existing, known-good Cloudflare zone the owner names (reads only).
 6. `/start` on a blank copy reaches the "drop your CSVs" step, then completes with the fixture.
 7. Security: `npm run check:security` passes against the starter's preview deployment, and a ZAP baseline scan has no medium or high alerts. Planted test cases prove each check fails when it should:
    - a fake private IP in a bundle;
