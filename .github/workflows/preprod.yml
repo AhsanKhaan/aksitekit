@@ -7,8 +7,8 @@
 #   preview:        finds the pull request's Cloudflare Pages preview (.github/scripts/preview-url.mjs);
 #   check-security: npm run check:security against that preview;
 #   zap-baseline:   ZAP baseline against that preview, decided by zap-gate.mjs.
-# It skips while factory.config.json project.domain is empty (the template itself: nothing to release), and the
-# preview jobs skip without LIVE_PAGES_HOST or PREVIEW_URL (no Cloudflare project yet).
+# It skips in template mode (.github/scripts/site-ready.mjs: project.domain empty, or Step C's scripts not built yet:
+# nothing to release), and the preview jobs skip without LIVE_PAGES_HOST or PREVIEW_URL (no Cloudflare project yet).
 # Security (.github/README.md): actions and images pinned; read-only token (plus checks/statuses read to find the
 # preview); no secrets; never pull_request_target; event values reach scripts through env only.
 name: preprod
@@ -42,17 +42,21 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Read hosting.productionBranch and project.domain from factory.config.json
+      - name: Template mode or project?
+        id: ready
+        run: node .github/scripts/site-ready.mjs
+
+      - name: Read hosting.productionBranch from factory.config.json
         id: read
         env:
           EVENT: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
+          READY: ${{ steps.ready.outputs.ready }}
         run: |
           branch=$(node -p 'require("./factory.config.json").hosting?.productionBranch || "main"')
-          domain=$(node -p 'require("./factory.config.json").project?.domain || ""')
-          if [ -z "$domain" ]; then
+          if [ "$READY" != "true" ]; then
             echo "applies=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::factory.config.json project.domain is empty (the template, or a project before /start): nothing to release; preprod skipped"
+            echo "::notice::template mode (no project, or Step C not built yet): nothing to release; preprod skipped"
           elif [ "$EVENT" = "workflow_dispatch" ] || [ "$BASE_REF" = "$branch" ]; then
             echo "applies=true" >> "$GITHUB_OUTPUT"
           else

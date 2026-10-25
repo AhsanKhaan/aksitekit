@@ -18,11 +18,11 @@ The technology is the owner's choice at `/start` (`factory.config.json` → `bui
 
 | File | Runs on | What it does | Decides |
 |---|---|---|---|
-| `workflows/ci.yml` | every PR, push to `main`, by hand | `npm ci` → `check:repo` → `audit` → `lint` → `typecheck` → `test` → `build` → Playwright Chromium → `test:e2e`; self-test of the helper scripts | each npm script's exit code |
+| `workflows/ci.yml` | every PR, push to `main`, by hand; called by the deploy workflows (`workflow_call`) | **tests** (always): `npm test` and the helper self-tests. **site** (only once a project exists, see Template mode): `check:repo` → `audit` → `lint` → `typecheck` → `build` → Playwright Chromium → `test:e2e` | each npm script's exit code; `site` shows *skipped* in template mode |
 | `workflows/security.yml` | every PR, push to `main`, Mondays 04:23 UTC, `deployment_status`, by hand | **static:** gitleaks over the full git history, the `npm audit` gate (`npm run audit`: high and critical fail), `npm audit signatures`, Semgrep registry rules. **ZAP baseline** (passive) against a preview: each successful `deployment_status` event that carries a URL, or by hand with `scan: baseline` and a URL. **ZAP full scan** (active) weekly and by hand (`scan: full`) before a release | gitleaks / Semgrep exit codes; `scripts/zap-gate.mjs` for ZAP |
 | `workflows/lighthouse.yml` | every PR, push to `main`, by hand | builds, serves the output folder (`build.outputDir`) on port 4321, runs `npm run audit:lighthouse` (`npx @lhci/cli@0.15.1 autorun`), uploads `.lighthouseci/` | the budgets in `lighthouserc.json` (Step C) |
 | `workflows/preprod.yml` | PRs whose base is `hosting.productionBranch`, by hand | **gates:** `gate:adsense`, `gate:design`, `check:release`, production build (incl. check-out), gitleaks on `out/`, `test:e2e` (incl. responsive 320–1280 px), Lighthouse. **preview:** finds the PR's Cloudflare Pages preview, then `check:security` and the ZAP baseline against it | every gate; skips while `project.domain` is empty |
-| `workflows/deploy-pages.yml` | by hand from the production branch; green `ci` push run on `main` when `AUTO_DEPLOY` is `true` | only if `hosting.target` is `cloudflare-pages`: production build, `wrangler pages deploy <build.outputDir>`, then `check:live` | the `production` environment approval (the owner's GO), then `check:live` |
+| `workflows/deploy-pages.yml` | by hand from the production branch; a push to `main` when `AUTO_DEPLOY` is `true` | only if `hosting.target` is `cloudflare-pages`: the CI gates (`ci.yml`) on the exact commit, then production build, `wrangler pages deploy <build.outputDir>`, then `check:live` | the `production` environment approval (the owner's GO), then `check:live` |
 | `workflows/deploy-workers.yml` | same as above | only if `hosting.target` is `cloudflare-workers`: production build, `wrangler deploy` (Workers static assets from the project's `wrangler.jsonc`), then `check:live` | same as above |
 | `workflows/live-check.yml` | daily 05:41 UTC, by hand | `check:live` and `check:security` against `LIVE_SITE_URL` (and `LIVE_PAGES_HOST`); skips while `LIVE_SITE_URL` is unset | the scripts' exit codes |
 | `dependabot.yml` | weekly (Monday) | grouped npm and GitHub Actions updates with a 7-day cooldown (matches `.npmrc` `min-release-age=7`); security updates aren't delayed | CI on the Dependabot PR |
@@ -38,6 +38,18 @@ Helpers (Node, no dependencies; `ci.yml` runs their planted failing cases with `
   takes the deployment URL it reports (falls back to the branch alias).
 - `zap/rules.tsv`: ZAP's rule config and the reviewed exceptions. Each exception needs a reason and a review date;
   the gate fails on one reviewed more than 365 days ago. The owner approves every exception.
+
+## Template mode
+
+`.github/scripts/site-ready.mjs` decides whether a project exists: `factory.config.json` → `project.domain` is set (by
+`/start`) and every file the site's npm scripts run (`node scripts/…`) is in the repository (Step C,
+`docs/TODO-step-c.md`). Until then:
+- **skip** (shown as *skipped*, not failed): `ci.yml` → `site`, `lighthouse.yml`, `preprod.yml`, and the deploys;
+- **still run:** `ci.yml` → `tests` (unit tests and helper self-tests), `security.yml` (gitleaks, Semgrep, and
+  `npm audit --audit-level=high` until the project's `scripts/audit.mjs` exists).
+
+So the template repository itself, and a fresh copy before `/start` and Step C, has green CI that still checks what
+exists. Nothing needs switching on: the site jobs start running on the first push where a project exists.
 
 ## Setup (the owner, once per project)
 
@@ -56,7 +68,7 @@ No other workflow uses a secret. Secrets go to `wrangler-action` inputs, never i
 | `LIVE_PAGES_HOST` | `example-site.pages.dev` | Pages previews (`*.example-site.pages.dev`) for preprod and ZAP; the weekly ZAP full scan target (`https://example-site.pages.dev/`, the same build as production, so the attacks never hit the custom domain); `check:live --pages`. |
 | `PREVIEW_URL` (optional) | `https://staging.example.com` | A fixed preview when there is no Pages preview per PR (e.g. a Workers project). Takes priority in preprod and the full scan. |
 | `CLOUDFLARE_PAGES_PROJECT` (optional) | `example-site` | Pages project name; defaults to `factory.config.json` `project.name`. |
-| `AUTO_DEPLOY` (optional) | `true` | Deploy on every green `ci` push run on `main`. **Set it only after `production` has required reviewers** (below); otherwise a push would deploy with no GO. Unset: deploys run only by hand. |
+| `AUTO_DEPLOY` (optional) | `true` | Deploy on every push to `main`, after the CI gates pass on that commit inside the deploy workflow. **Set it only after `production` has required reviewers** (below); otherwise a push would deploy with no GO. Unset: deploys run only by hand. |
 
 ### The `production` environment (Settings → Environments → New environment → `production`)
 - **Required reviewers:** the owner. This approval is the GO for that commit (`CLAUDE.md`: never deploy without it).
@@ -144,8 +156,10 @@ and anything private out of the repository if you go public.
   license since v2) ([gitleaks-action README][gl-action]). The release binary has neither condition.
 - **Least privilege:** `permissions: {}` at workflow level, then per job; only `contents: read`, plus `checks: read` and
   `statuses: read` for the preview lookup. Nothing writes to the repository, issues or PRs (ZAP's issue writing is off).
-- **No `pull_request_target`.** `workflow_run` (deploys) acts only on `push` runs of this repository and deploys the
-  exact commit CI tested, and only if it's still the branch head.
+- **No `pull_request_target`, no `workflow_run`.** Deploys trigger only by hand or on a push to the production branch,
+  run the CI gates (`ci.yml` as a reusable workflow, no secrets passed) on the exact commit, and deploy it only if it's
+  still the branch head. `workflow_run` was removed: checking out another run's code with secrets in reach is the
+  pattern Semgrep blocks (`workflow-run-target-code-checkout`).
 - **No injection:** no `${{ … }}` inside any `run:`; event values, inputs and variables reach scripts through `env:`.
   Scan targets are validated by `target-url.mjs` before ZAP gets them.
 - **Secrets never printed:** only the deploy jobs see them, through action inputs; gitleaks runs with `--redact`;

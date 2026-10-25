@@ -85,8 +85,14 @@ jobs:
       - name: Install (lockfile only; install scripts blocked by .npmrc)
         run: npm ci
 
-      - name: Vulnerability gate (high and critical fail; reviewed exceptions in the script)
-        run: npm run audit
+      - name: Vulnerability gate (high and critical fail; reviewed exceptions in the project's script)
+        run: |
+          if [ -f scripts/audit.mjs ]; then
+            npm run audit # the project's gate (Step C), with its reviewed exceptions
+          else
+            echo "::notice::template mode: scripts/audit.mjs isn't built yet; running npm audit directly"
+            npm audit --audit-level=high
+          fi
 
       - name: Registry signatures and provenance of installed packages
         run: npm audit signatures
