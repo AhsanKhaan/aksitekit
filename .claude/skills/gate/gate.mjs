@@ -245,6 +245,49 @@ const CHECKS = {
     return 'DESIGN.md structure follows the spec';
   },
 
+  'code-review-verdict'() {
+    const p = 'reports/code-review.md';
+    const text = readFileSync(abs(p), 'utf8');
+    const verdict = text.match(/^Verdict: (PASS|CHANGES REQUESTED)\s*$/m);
+    if (!verdict) fail(`${p} has no "Verdict: PASS" or "Verdict: CHANGES REQUESTED" line`, 'code-reviewer writes it');
+    const blockers = text.match(/^Blockers: (\d+)\s*$/m);
+    if (!blockers) fail(`${p} has no "Blockers: <n>" line`, 'code-reviewer writes it');
+    const reviewed = text.match(/^Reviewed: ([0-9a-f]{7,40})\s*$/m);
+    if (!reviewed) fail(`${p} has no "Reviewed: <commit SHA>" line`, 'code-reviewer writes it');
+    const git = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' });
+    const head = git.status === 0 ? git.stdout.trim() : '';
+    if (!head) blocked('git rev-parse HEAD failed, so the review can\'t be matched to a commit', 'run the gate inside the git checkout');
+    if (!head.startsWith(reviewed[1])) fail(`${p} reviewed ${reviewed[1].slice(0, 12)}, but HEAD is ${head.slice(0, 12)}: the review is stale`, 'code-reviewer re-reviews HEAD');
+    if (verdict[1] !== 'PASS' || Number(blockers[1]) > 0) {
+      fail(`code review: ${verdict[1]}, ${blockers[1]} blocker(s) open`, 'coder fixes them, then code-reviewer re-reviews');
+    }
+    return `code review PASS at ${head.slice(0, 12)}, 0 blockers`;
+  },
+
+  'ai-search-files'() {
+    const cfg = config();
+    const out = String(cfg.build?.outputDir || 'out');
+    if (!existsSync(abs(out))) blocked(`${out}/ doesn't exist yet`, `build the site first (Step C, ${TODO_C})`);
+    const robotsPath = `${out}/robots.txt`;
+    const llmsPath = `${out}/llms.txt`;
+    for (const p of [robotsPath, llmsPath]) {
+      if (!existsSync(abs(p)) || statSync(abs(p)).size === 0) fail(`${p} is missing or empty`, `gen-public-files.mjs writes it (Step C, ${TODO_C})`);
+    }
+    const first = readFileSync(abs(llmsPath), 'utf8').split(/\r?\n/).find((l) => l.trim());
+    if (!/^# \S/.test(first || '')) fail(`${llmsPath} must start with "# <site name>" (the llms.txt format)`);
+    const groups = robotsGroups(readFileSync(abs(robotsPath), 'utf8'));
+    const bots = cfg.bots || {};
+    const problems = [];
+    if (bots.aiSearch === 'allow') {
+      for (const ua of AI_SEARCH_BOTS) if (blocksSite(groups, ua)) problems.push(`${ua} is blocked but bots.aiSearch is "allow"`);
+    }
+    if (bots.aiTraining === 'block') {
+      for (const ua of AI_TRAINING_BOTS) if (!blocksSite(groups, ua)) problems.push(`${ua} isn't blocked but bots.aiTraining is "block"`);
+    }
+    if (problems.length) fail(`${robotsPath}: ${problems.join('; ')}`, 'gen-public-files.mjs must follow factory.config.json → bots');
+    return `llms.txt starts with "${first.trim().slice(0, 60)}"; robots.txt follows bots (aiSearch ${bots.aiSearch}, aiTraining ${bots.aiTraining})`;
+  },
+
   'no-template-placeholders'(stage) {
     for (const o of expandOutputs(stage).filter((f) => !f.endsWith('/') && /\.(md|json)$/.test(f))) {
       const lines = readFileSync(abs(o), 'utf8').split(/\r?\n/);
@@ -254,6 +297,37 @@ const CHECKS = {
     return 'no template placeholders left';
   },
 };
+
+// robots.txt as groups: { agents: [lowercase user-agent], rules: [{ allow, path }] }.
+const AI_SEARCH_BOTS = ['OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot'];
+const AI_TRAINING_BOTS = ['GPTBot', 'ClaudeBot', 'Google-Extended', 'CCBot'];
+
+function robotsGroups(text) {
+  const groups = [];
+  let current = null;
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.replace(/#.*/, '').trim();
+    const m = line.match(/^([A-Za-z-]+)\s*:\s*(.*)$/);
+    if (!m) continue;
+    const key = m[1].toLowerCase();
+    if (key === 'user-agent') {
+      if (!current || current.rules.length) groups.push((current = { agents: [], rules: [] }));
+      current.agents.push(m[2].trim().toLowerCase());
+    } else if ((key === 'allow' || key === 'disallow') && current) {
+      current.rules.push({ allow: key === 'allow', path: m[2].trim() });
+    }
+  }
+  return groups;
+}
+
+// The group a crawler obeys is the one that names it, else the "*" group. It's shut out when that group disallows "/"
+// and allows nothing back.
+function blocksSite(groups, ua) {
+  const name = ua.toLowerCase();
+  const group = groups.find((g) => g.agents.includes(name)) || groups.find((g) => g.agents.includes('*'));
+  if (!group) return false;
+  return group.rules.some((r) => !r.allow && r.path === '/') && !group.rules.some((r) => r.allow && r.path.startsWith('/'));
+}
 
 function briefSlug(url) {
   const s = String(url).replace(/^https?:\/\/[^/]+/, '').replace(/^\/+|\/+$/g, '');
