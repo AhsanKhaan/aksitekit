@@ -12,7 +12,15 @@ measured (source named), **[P]** proxy or estimate, or **[U]** unverified.
   `github-actions-hardening` and `differential-review` instead.
 - **The optional skills weren't added,** because they weren't explicitly approved: `kostja94` GEO and
   `julianoczkowski` design tokens.
-- **Section 6 waits for two owner decisions:** the licence (MIT or Apache-2.0) and whether the repository goes public.
+- **Section 6 is built** (pull request `feat/v2-oss-hardening`), except the licence, which the owner will add later
+  (2026-10-28). What's in it: `SECURITY.md`, `.github/CODEOWNERS`, a CycloneDX SBOM in `security.yml`, and
+  `codeql.yml` and `scorecard.yml`, which start once the repository is public. Two things are not built:
+  - **Build provenance (`actions/attest`)** waits for the repository to be public. Its availability on private
+    repositories wasn't confirmed [U].
+  - **The `main` ruleset** is a GitHub settings change for the owner (`.github/README.md` → Setup).
+- **Found while building section 6:** the full dev tree fails npm's peer-dependency check, because ESLint 10 and
+  TypeScript 7 are newer than `eslint-config-next`'s plugins and `typescript-eslint` accept [M: `npm sbom`, 2026-10-28].
+  Step C has to settle those versions (a Phase E `package.json` change) before `npm run lint` can work.
 
 ## 1. The short answer
 The current strategy is already ahead of common practice on the part that matters most: how skills reach the agents.

@@ -1,0 +1,13 @@
+# Every change needs the owner's review once a ruleset on main requires code-owner review (.github/README.md → Setup).
+# The files that decide what agents may do and what passes are listed on their own so a later, wider rule can't
+# silently drop them.
+*                       @AhsanKhaan
+/CLAUDE.md              @AhsanKhaan
+/AGENTS.md              @AhsanKhaan
+/skills.lock.json       @AhsanKhaan
+/vendor/skills/         @AhsanKhaan
+/.claude/               @AhsanKhaan
+/.github/               @AhsanKhaan
+/scripts/               @AhsanKhaan
+/factory.config.json    @AhsanKhaan
+/seo-checks.json        @AhsanKhaan

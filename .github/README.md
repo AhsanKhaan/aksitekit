@@ -19,12 +19,15 @@ The technology is the owner's choice at `/start` (`factory.config.json` → `bui
 | File | Runs on | What it does | Decides |
 |---|---|---|---|
 | `workflows/ci.yml` | every PR, push to `main`, by hand; called by the deploy workflows (`workflow_call`) | **tests** (always): `npm test` and the helper self-tests. **site** (only once a project exists, see Template mode): `check:repo` → `audit` → `lint` → `typecheck` → `build` → Playwright Chromium → `test:e2e` | each npm script's exit code; `site` shows *skipped* in template mode |
-| `workflows/security.yml` | every PR, push to `main`, Mondays 04:23 UTC, `deployment_status`, by hand | **static:** gitleaks over the full git history, the `npm audit` gate (`npm run audit`: high and critical fail), `npm audit signatures`, Semgrep registry rules. **ZAP baseline** (passive) against a preview: each successful `deployment_status` event that carries a URL, or by hand with `scan: baseline` and a URL. **ZAP full scan** (active) weekly and by hand (`scan: full`) before a release | gitleaks / Semgrep exit codes; `scripts/zap-gate.mjs` for ZAP |
+| `workflows/security.yml` | every PR, push to `main`, Mondays 04:23 UTC, `deployment_status`, by hand | **static:** gitleaks over the full git history, the `npm audit` gate (`npm run audit`: high and critical fail), `npm audit signatures`, a CycloneDX SBOM of the production dependencies (`npm sbom`, kept as the `sbom-cyclonedx` artifact for 90 days), Semgrep registry rules. **ZAP baseline** (passive) against a preview: each successful `deployment_status` event that carries a URL, or by hand with `scan: baseline` and a URL. **ZAP full scan** (active) weekly and by hand (`scan: full`) before a release | gitleaks / Semgrep exit codes; `scripts/zap-gate.mjs` for ZAP |
 | `workflows/lighthouse.yml` | every PR, push to `main`, by hand | builds, serves the output folder (`build.outputDir`) on port 4321, runs `npm run audit:lighthouse` (`npx @lhci/cli@0.15.1 autorun`), uploads `.lighthouseci/` | the budgets in `lighthouserc.json` (Step C) |
 | `workflows/preprod.yml` | PRs whose base is `hosting.productionBranch`, by hand | **gates:** `gate:adsense`, `gate:design`, `check:release`, production build (incl. check-out and the SEO gate), gitleaks on `out/`, `test:e2e` (incl. responsive 320–1280 px), Lighthouse. **preview:** finds the PR's Cloudflare Pages preview, then `check:security` and the ZAP baseline against it | every gate; skips while `project.domain` is empty |
 | `workflows/deploy-pages.yml` | by hand from the production branch; a push to `main` when `AUTO_DEPLOY` is `true` | only if `hosting.target` is `cloudflare-pages`: the CI gates (`ci.yml`) on the exact commit, then production build, `wrangler pages deploy <build.outputDir>`, then `check:live` | the `production` environment approval (the owner's GO), then `check:live` |
 | `workflows/deploy-workers.yml` | same as above | only if `hosting.target` is `cloudflare-workers`: production build, `wrangler deploy` (Workers static assets from the project's `wrangler.jsonc`), then `check:live` | same as above |
 | `workflows/live-check.yml` | daily 05:41 UTC, by hand | `check:live`, `check:security` and `check:seo-live` against `LIVE_SITE_URL` (and `LIVE_PAGES_HOST`); skips while `LIVE_SITE_URL` is unset | the scripts' exit codes |
+| `workflows/codeql.yml` | every PR, push to `main`, Mondays 06:17 UTC | CodeQL (`security-extended`) on the repo's own JavaScript and TypeScript, `vendor/skills` excluded. **Skipped while the repo is private** (code scanning is paid there); starts by itself once it's public | CodeQL's code-scanning alerts |
+| `workflows/scorecard.yml` | push to `main`, Mondays 05:41 UTC, by hand | OpenSSF Scorecard: publishes the score and uploads its SARIF to code scanning. **Skipped while the repo is private** (needs GitHub Advanced Security there) | informational score; findings appear as code-scanning alerts |
+| `CODEOWNERS` | every PR | the owner reviews every change, with the files that decide agent behaviour and gates listed on their own | a ruleset that requires code-owner review (Setup) |
 | `dependabot.yml` | weekly (Monday) | grouped npm and GitHub Actions updates with a 7-day cooldown (matches `.npmrc` `min-release-age=7`); security updates aren't delayed | CI on the Dependabot PR |
 
 Helpers (Node, no dependencies; `ci.yml` runs their planted failing cases with `node .github/scripts/selftest.mjs`):
@@ -84,9 +87,14 @@ No other workflow uses a secret. Secrets go to `wrangler-action` inputs, never i
   ([Direct Upload docs][cf-direct]).
 
 ### Branch protection on `main` (Settings → Rules or Branches)
-Require pull requests and the checks `ci / verify`, `ci / workflow helpers self-test`, `security / *` and
-`preprod / *`; block force pushes. Protected branches need a public repo, or GitHub Pro/Team/Enterprise for a private
-one ([docs source][gh-protected]).
+Require pull requests with **review from Code Owners** (`.github/CODEOWNERS`) and the checks `ci / verify`,
+`ci / workflow helpers self-test`, `security / *` and `preprod / *` (plus `codeql / *` once the repo is public); block
+force pushes and deletion. Protected branches need a public repo, or GitHub Pro/Team/Enterprise for a private one
+([docs source][gh-protected]). This is a GitHub settings change: the owner makes it (agents never write account
+settings).
+
+### Private vulnerability reporting (Settings → Code security, public repos)
+Turn on **Private vulnerability reporting**, so the form that `SECURITY.md` points to works.
 
 ## The preview URL and `deployment_status` [U]
 
@@ -128,8 +136,10 @@ keep `AUTO_DEPLOY` unset and deploy only by hand (Run workflow is then the owner
 repository secret that any workflow can read.
 
 **Recommended: make the repository public.** Everything above is then free: the `production` approval gate,
-environment secrets, protected branches, secret scanning with push protection, and two extra free checks:
-- **CodeQL:** Settings → Code security → Code scanning → CodeQL analysis → **Default setup** (no workflow file).
+environment secrets, protected branches, secret scanning with push protection, and three extra free checks:
+- **CodeQL and OpenSSF Scorecard:** `codeql.yml` and `scorecard.yml` start by themselves (their jobs skip on a private
+  repo). Don't also turn on CodeQL's **Default setup** in Settings: GitHub refuses results from an advanced
+  (workflow) setup while default setup is on.
 - **Dependency review:** add this job to `security.yml` (it only runs on public repos):
 
   ```yaml
@@ -180,6 +190,8 @@ Then fix forward with a PR.
 | `actions/checkout` | v7.0.1 | `3d3c42e5aac5ba805825da76410c181273ba90b1` |
 | `actions/setup-node` | v7.1.0 | `949feb2413d6458794dcd2491c4babbbce0c15c1` |
 | `actions/upload-artifact` | v7.0.2 | `cf430e030ddbb5b0abf93d22962f4752f3646cd9` |
+| `ossf/scorecard-action` | v2.5.0 | `fa7117db83c52d787ae5a89f350999701505d78e` (annotated tag `46dc3187…` dereferenced); it runs `ghcr.io/ossf/scorecard-action:v2.5.0` by tag (upstream's choice) |
+| `github/codeql-action` (`init`, `analyze`, `upload-sarif`) | v4.39.0 | `6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee` (annotated tag `48870fdd…` dereferenced; v4.39.1 was under 7 days old) |
 | `cloudflare/wrangler-action` | v4.1.3 | `953926a2e2182532811c01a25e53647d93bf07c0` (annotated tag `2ef9f398…` dereferenced) |
 | `zaproxy/action-baseline` | v0.15.0 | `de8ad967d3548d44ef623df22cf95c3b0baf8b25` (annotated tag `6c5a0075…` dereferenced) |
 | `zaproxy/action-full-scan` | v0.13.0 | `3c58388149901b9a03b7718852c5ba889646c27c` (annotated tag `bee4e5be…` dereferenced) |
