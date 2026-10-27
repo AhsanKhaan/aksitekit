@@ -276,6 +276,7 @@ skills.lock.json      every outside skill, MCP server and GitHub Action, pinned
 | Keyword pipeline (Keyword Planner files → keyword map) | Ready, with tests |
 | CI and security scans | Ready (site checks wait for a project; see [Template mode](.github/README.md#template-mode)) |
 | Vetted skills | Ready |
+| On-page SEO gate: 168 checks on every page, for keyword stuffing, thin pages, titles and trust links | Ready, with tests ([docs/SEO-GATE.md](docs/SEO-GATE.md)); runs once a site is built |
 | Starter website and most site checks | Being added ([docs/TODO-step-c.md](docs/TODO-step-c.md)) |
 
 Today `/start` takes you from keyword research to a finished plan and design. The build stage waits for the starter

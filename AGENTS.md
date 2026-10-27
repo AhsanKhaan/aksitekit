@@ -16,6 +16,7 @@ names and data formats are fixed in `docs/CONTRACT.md`.
 | **"Competition" is not KD** | Keyword Planner's Competition column measures advertiser bidding. It's stored as `competitionAds`, a commercial-value signal, never as difficulty |
 | **Label every number** | **[M]** measured (say the source), **[R]** range, **[P]** proxy or estimate, **[U]** unverified |
 | **DR comes from the owner** | Agents never fetch DR or other paid metrics. The owner writes it in `research/inputs/competitors.csv` |
+| **No stuffing, no thin pages** | Every build runs the on-page SEO gate (`docs/SEO-GATE.md`). A target term over 6% of a page's meaningful words fails it. Cut repetition by naming the task, never with vague swaps ("tools"); hubs need ≥ 300 words in `<main>`, titles 30–60 characters with the URL's words; never pad |
 | **No ad code before approval** | No AdSense code, ad script or `ads.txt` until `npm run gate:adsense` passes and the owner confirms approval |
 
 ## 2. Agent map
@@ -92,7 +93,7 @@ outputs, runs the npm gates in order, and appends the result to the ledger. Scri
 | build | coder | app code | `npm run verify` (**C**) |
 | tests | harness | `tests/**` | `npm test`, `npm run test:e2e` (**C**) |
 | reconcile | reconciler | `reports/reconcile.md` | `npm run check:release`, `npm run audit:unique` (**C**) |
-| seo | seo-auditor | `reports/seo.md` | `npm run build` → `check-out.mjs` (**C**) |
+| seo | seo-auditor | `reports/seo.md` | `npm run build` → `check-out.mjs` (**C**) and `scripts/audits/seo-checks.mjs` (168 checks per page, `docs/SEO-GATE.md`); `npm run audit:seo` |
 | adsense | adsense-gatekeeper | `reports/adsense.md` | `npm run gate:adsense` (**C**) |
 | security | secops-reviewer | `reports/security.md`, `docs/SECURITY.md` | `npm run check:repo`, `npm run audit`, `npm run check:security -- <preview-url>` (**C**); CI `security.yml` |
 | responsive | responsive-checker | `reports/responsive.md` | `npm run test:e2e` (**C**) |
@@ -100,7 +101,7 @@ outputs, runs the npm gates in order, and appends the result to the ledger. Scri
 | preprod | orchestrator | PR to the production branch | `preprod.yml` green for the exact SHA (CI, Step D); recorded with `gate.mjs record preprod` |
 | cloudflare | cloudflare-reviewer (Cloudflare targets only) | `reports/cloudflare.md` | `node .claude/skills/gate/gate.mjs cloudflare` (report exists); MCP reads against the checklist |
 | go | owner | — | the owner types `GO <sha>`; recorded with `gate.mjs record go` |
-| deploy | devsecops-deployer | `reports/deploys/<date>-<sha>.md` | deploy workflow green; `npm run check:live -- https://<domain>` (**C**) |
+| deploy | devsecops-deployer | `reports/deploys/<date>-<sha>.md` | deploy workflow green; `npm run check:live -- https://<domain>` (**C**); `npm run check:seo-live -- https://<domain>` |
 | docs | doc-generator | `docs/PRD.md`, `docs/DESIGN.md`, `docs/ARCHITECTURE.md`, `docs/SECURITY.md`, `AGENTS.md` §6 | `node .claude/skills/gate/gate.mjs docs`, `npm run check:repo` (**C**) |
 
 Thresholds come from `factory.config.json`: `research.minVolume`, `maxKd`, `maxSeasonality`,

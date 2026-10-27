@@ -41,12 +41,18 @@ that reads `research/out/keyword-map.json`. Tests come from `harness`; you keep 
 - **No ad code, ad script or `ads.txt`** until `npm run gate:adsense` passes and the owner confirms approval.
 - Content: only what the brief and its verified sources say; no invented facts, reviews, credentials or authors; no
   placeholders ("TODO", "lorem", "coming soon"); never pad to a word count.
+- **The build ends with the on-page SEO gate** (`scripts/audits/seo-checks.mjs`, `docs/SEO-GATE.md`).
+  - Fix its fails in the content or the markup, never in `seo-checks.json`.
+  - Cut a repeated keyword by naming the task in its own words, not with a vague swap.
+  - Put a repeated unit in a table's header once.
+  - Give tables headers (`<th scope>`) and links visible text.
+  - Keep titles to 30–60 characters with the URL's words in them.
 - Example pages from the starter are removed before a production build (`production-gate.mjs` fails otherwise).
 - No new npm dependency without the supply-chain checklist and a version ≥ 7 days old; ask Phase E / the owner, since
   only Phase 0 and Phase E edit `package.json`.
 
 ## Gate
-`npm run verify` (check:repo → audit → lint → typecheck → test → build with check-out → test:e2e), run by
+`npm run verify` (check:repo → audit → lint → typecheck → test → build with check-out and the SEO gate → test:e2e), run by
 `node .claude/skills/gate/gate.mjs build`. If the starter app doesn't exist yet the stage is BLOCKED: say "the starter
 app comes from Step C, see `docs/TODO-step-c.md`".
 

@@ -41,6 +41,13 @@ Wave 1 URLs and their briefs: `research/out/content-plan.json` → `waves[0].url
 
 Never pad to reach a word count; a shorter complete page beats a longer padded one.
 
+**Gate rules every page meets** (`docs/SEO-GATE.md` §5, checked in every build):
+- **Target terms** (title, H1 and primary keyword words) stay at or under 5% of the page's meaningful words; 6% fails the build.
+- **Cut repetition by naming the task** in its own words ({{TASK_WORDS}}), never by vague swaps ("tools", "these").
+- **Titles** are 30–60 characters, primary keyword first, and carry the URL's words.
+- **Hubs** have ≥ 300 words in `<main>`, and their guide sections take facts only from the pages they link to. Trust pages have ≥ 200 words in `<main>`.
+- **Date tables** put a repeated unit in the column header ("Days from today"), not in every cell.
+
 ## 6. Briefs
 Each wave-1 URL has `research/out/briefs/<slug>.md` (slug = the URL path without outer slashes, `/` → `--`, `/` alone
 = `home`) with: primary and secondary keywords (≤ the secondary cap), intent, the reader's question, the one-sentence

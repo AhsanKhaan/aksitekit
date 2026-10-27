@@ -145,13 +145,14 @@
     {
       "id": "seo",
       "agent": "seo-auditor",
-      "summary": "Titles, canonicals, sitemap, schema, internal links, depth ≤ 3",
+      "summary": "Titles, canonicals, sitemap, schema, internal links, depth ≤ 3; the 168-check on-page gate (stuffing, thin pages, titles, E-E-A-T, a11y)",
       "outputs": [
         "reports/seo.md"
       ],
       "checks": [],
       "npm": [
-        "build"
+        "build",
+        "audit:seo"
       ]
     },
     {
@@ -248,10 +249,12 @@
       "outputs": [],
       "checks": [],
       "npm": [
-        "check:live"
+        "check:live",
+        "check:seo-live"
       ],
       "urlArg": [
-        "check:live"
+        "check:live",
+        "check:seo-live"
       ]
     },
     {

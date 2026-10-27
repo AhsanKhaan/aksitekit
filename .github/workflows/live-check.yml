@@ -1,6 +1,8 @@
 # Daily live-site check: check:live (status codes, HTTPS, one HSTS value, redirects, canonicals, no NEL, DNSSEC, CAA)
 # and check:security (XSS, CSRF, path-traversal and capped rate-limit probes, leaks, served through Cloudflare,
-# SPF/DKIM/DMARC) against production, so drift such as a dashboard toggle or a lost header fails within a day.
+# SPF/DKIM/DMARC) and check:seo-live (the live half of the on-page SEO gate: compression, Brotli, HTTP/3, cache, warm
+# response time, HSTS, security headers, http->https; docs/SEO-GATE.md) against production, so drift such as a
+# dashboard toggle or a lost header fails within a day.
 # Targets come from repo variables LIVE_SITE_URL (https://example.com) and LIVE_PAGES_HOST (<project>.pages.dev);
 # the job skips while LIVE_SITE_URL is unset (before the first production deploy).
 # Security (.github/README.md): schedule and manual runs only; actions pinned to full commit SHAs; read-only token;
@@ -64,3 +66,7 @@ jobs:
       - name: check:security
         if: ${{ !cancelled() && steps.cfg.outputs.skip == 'false' }}
         run: npm run check:security -- "$LIVE_SITE_URL"
+
+      - name: check:seo-live
+        if: ${{ !cancelled() && steps.cfg.outputs.skip == 'false' }}
+        run: npm run check:seo-live -- "$LIVE_SITE_URL" / /contact/

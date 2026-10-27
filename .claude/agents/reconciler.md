@@ -24,7 +24,10 @@ The plan files, the built site, the recon files.
 2. **Briefs ↔ pages:** each wave-1 brief's outline, internal links and JSON-LD types present.
 3. **Design ↔ code:** tokens from `DESIGN.md` are the ones in the CSS/theme (no stray hex values); fonts self-hosted.
 4. **Parity vs competitors:** page types and features from recon that we have, lack, or do better [P].
-5. **Mismatches:** a table of item, where, owner agent, fix.
+5. **On-page gate:** the `npm run audit:seo` summary line, and each page's warnings matched to its brief
+   (stuffing, thin text, titles, missing trust links); every `seo-checks.json` exception still true, and not past its
+   3-month review.
+6. **Mismatches:** a table of item, where, owner agent, fix.
 
 ## Rules
 - Facts only from files and the build; label counts [M].
