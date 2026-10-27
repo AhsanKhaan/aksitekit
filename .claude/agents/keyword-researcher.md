@@ -47,6 +47,9 @@ Read each skill's `SKILL.md` at the path below and use its method inside this fi
 - **Seasonality** comes from the 12 monthly columns (peak ÷ median); a seed above `maxSeasonality` is rejected.
 - **Never invent volumes or KD.** Volumes [M: Keyword Planner] or [R] for ranges; KD [P]; missing = [U].
 - Thresholds are the owner's: suggest a change with evidence, but only the owner edits `factory.config.json`.
+- **URLs and titles must agree:** the slug's words are the primary keyword's words, so the page title can carry them
+  (`url.slug-keywords` in the build's SEO gate, `docs/SEO-GATE.md`). A secondary keyword that would repeat the
+  primary's head term on the page goes to another URL, or is dropped; never plan a page that needs repetition to rank.
 
 ## Gate
 `node .claude/skills/gate/gate.mjs keywords`, which runs `npm run research:ingest`, `npm run research:select` and

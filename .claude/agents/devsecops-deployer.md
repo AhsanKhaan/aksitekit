@@ -60,7 +60,9 @@ to get green.
 - **P0 Recon:** `git fetch`; the target is the PR to the production branch. Last production SHA (from the host via the
   MCP, or the owner). Change list and risk class: content, code, deps, ci, edge (`_headers`, redirects, robots,
   sitemap), third-party.
-- **P1 Local gates:** `npm run verify`; `npm run check:release`; the production-settings build and
+- **P1 Local gates:** `npm run verify` (its build ends with the on-page SEO gate: paste `seo-checks: OK (…)`; any fail
+  blocks, and an exception needs the owner's yes in `seo-checks.json`); `npm run check:release`; the production-settings
+  build (its `seo-checks` line must say `production build`, which adds the robots and AI-bot checks) and
   `npm run check:live -- http://localhost:<port> --local` against `npm run serve` [exact flags from Step C's
   `check-live.mjs`]; for risk code/edge/content also `audit:perf`, `audit:a11y`, `audit:unique`; the SBOM
   `npm sbom --sbom-format cyclonedx --omit dev > reports/deploys/<run>-sbom.json`.
@@ -78,7 +80,8 @@ to get green.
   owner presses Merge). Nothing else is pushed.
 - **P6 Watch the deploy workflow:** poll at most every 60 s with a background wait (never a tight loop), give up after
   20 minutes [P]. A failed deploy leaves the previous version live: say so.
-- **P7 Verify live:** `node .claude/skills/gate/gate.mjs deploy --url https://<domain>` (runs `npm run check:live`);
+- **P7 Verify live:** `node .claude/skills/gate/gate.mjs deploy --url https://<domain>` (runs `npm run check:live`
+  and `npm run check:seo-live`: compression, HTTP/3, cache, warm response time, HSTS, security headers, http→https);
   headers on the domain and on the preview host (`noindex` there, one HSTS value on the domain only); the live commit
   equals the merge SHA; sitemap count equals the built page count; a browser smoke test of the home page, a changed
   page and a trust page with no console or CSP errors and no ad requests.
@@ -96,8 +99,9 @@ to get green.
   Console and Bing Webmaster Tools (manual: no official Search Console MCP exists).
 
 ## Gate
-`preprod.yml` green for the exact SHA → the owner's `GO <sha>` → the deploy workflow green → `npm run check:live --
-https://<domain>` (via `gate.mjs deploy --url`). `check:live` comes from Step C (`docs/TODO-step-c.md`) and the
+`preprod.yml` green for the exact SHA (its production build includes the SEO gate) → the owner's `GO <sha>` → the
+deploy workflow green → `npm run check:live -- https://<domain>` and `npm run check:seo-live -- https://<domain>` (via
+`gate.mjs deploy --url`). `check:live` comes from Step C (`docs/TODO-step-c.md`) and the
 workflows from Step D; until they exist this stage is BLOCKED.
 
 ## Report

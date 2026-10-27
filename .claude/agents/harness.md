@@ -24,7 +24,10 @@ Read each skill's `SKILL.md` at the path below and use its method inside this fi
 - **Unit (Vitest):** registry rules (one owner URL per keyword, URL rule, depth ≤ 3), headers and CSP, JSON-LD
   `</script>` escaping, robots policy (Mediapartners-Google's own group, training bots per `bots.aiTraining`), and each
   gate's planted case (a fake private IP in a bundle, an unescaped XSS payload, a missing DMARC record, an unproxied DNS
-  record, an ad script before approval, a placeholder in content).
+  record, an ad script before approval, a placeholder in content). The on-page SEO gate already has its planted cases
+  in `tests/audits/seo-checks.test.ts` (stuffing, brand and calendar words, canonical and H1, links, mixed content,
+  table headers, `@type`, titles, disclaimers, exceptions, the `factory.config.json` fallback); keep them green and add
+  one for every check you change.
 - **e2e (Playwright):** every page type loads with no console or CSP errors; no request to an ad host; no horizontal
   scroll from 320 to 1280 px; touch targets; consent banner behaviour; XSS payloads in allow-listed query parameters
   never run or echo raw.

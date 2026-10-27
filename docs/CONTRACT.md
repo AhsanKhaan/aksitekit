@@ -32,6 +32,7 @@ folder.
 | `lint`, `typecheck`, `test`, `test:e2e` | ESLint, `tsc`, Vitest, Playwright | C (configs), B (its own tests) |
 | `check:repo`, `check:release`, `check:live`, `check:security` | `scripts/check-repo.mjs`, `tests/content.test.ts --mode release`, `scripts/check-live.mjs`, `scripts/check-security.mjs` | C |
 | `audit`, `audit:perf`, `audit:a11y`, `audit:unique`, `audit:ga` | `scripts/audit.mjs`, `scripts/audits/*.mjs` | C |
+| `audit:seo`, `check:seo-live` | `scripts/audits/seo-checks.mjs` (built output; `--live <url> [paths]`), config `seo-checks.json`. `build` also runs it after `check-out.mjs` (`docs/SEO-GATE.md`) | E (done, ported from calculatorporch) |
 | `audit:lighthouse` | `npx @lhci/cli@0.15.1 autorun` with `lighthouserc.json` (no installed dependency) | C (config), D (CI action) |
 | `gate:adsense`, `gate:design` | `scripts/adsense-gate.mjs`, `scripts/design/contrast.mjs` | C |
 | `research:ingest`, `research:select`, `research:cluster`, `research:all` | `scripts/research/*.mjs` | B |

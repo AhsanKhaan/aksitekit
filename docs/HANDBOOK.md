@@ -227,7 +227,12 @@ The thresholds in `factory.config.json` are starting defaults [P], not research 
 ## 8. Content, SEO and crawler rules
 - **URLs:** `/{category}/{slug}/` for tools and hubs, `/{category}/{slug}/{child}/` for guides and programmatic
   instances; lowercase, trailing slash, at most 3 levels deep; breadcrumbs mirror the URL.
-- **Length:** tool pages 600–1,500 words of unique text; guides 800–1,500. These are floors, never targets; never pad.
+- **Length:** tool pages 600–1,500 words of unique text; guides 800–1,500; hubs ≥ 300 words in `<main>`; trust pages
+  ≥ 200. These are floors, never targets; never pad.
+- **Keyword stuffing and thin pages are build failures:**
+  - every build runs the on-page SEO gate (`scripts/audits/seo-checks.mjs`, 168 checks per page, `docs/SEO-GATE.md`);
+  - a target term over 6% of a page's meaningful words fails; titles must be 30–60 characters with the URL's words;
+  - cut repetition by naming the task ("fractions, gravel orders"), never with vague swaps such as "tools".
 - **Programmatic SEO** only for keyword families with demand evidence (Google's scaled-content-abuse policy).
 - **Structured data:** JSON-LD per page type (WebPage, WebApplication, BreadcrumbList, FAQPage, Article,
   CollectionPage, Organization, WebSite); no self-made ratings. `llms.txt` is generated too (cheap and optional; there's
@@ -320,9 +325,10 @@ The names are frozen in `docs/CONTRACT.md`. "Step C" means not implemented yet (
 | Script | Does | State |
 |---|---|---|
 | `research:ingest` / `research:select` / `research:cluster` / `research:all` | The keyword pipeline (§7) | ✅ |
-| `dev`, `build`, `serve` | Dev server and production build in **your chosen technology** (`scripts/framework.mjs` runs `build.commands`; the build adds `production-gate` and `check-out`), local static server for `build.outputDir` | `framework.mjs` ✅; the rest Step C |
+| `dev`, `build`, `serve` | Dev server and production build in **your chosen technology** (`scripts/framework.mjs` runs `build.commands`; the build adds `production-gate`, `check-out` and the SEO gate), local static server for `build.outputDir` | `framework.mjs` ✅; the rest Step C |
 | `lint`, `typecheck`, `test`, `test:e2e` | ESLint, TypeScript, Vitest, Playwright | configs in Step C; `tests/research` already runs with `npx vitest run tests/research` |
 | `check:repo`, `check:release`, `check:live`, `check:security` | Repo hygiene, publish gate, live-site check, security checks | Step C |
+| `audit:seo`, `check:seo-live` | The on-page SEO gate on the build output (also run by `build`), and its live checks against a URL (`docs/SEO-GATE.md`) | ✅ (`audit:seo` needs a build) |
 | `audit`, `audit:perf`, `audit:a11y`, `audit:unique`, `audit:ga`, `audit:lighthouse` | CVE gate, lab speed, accessibility, duplicate text, GA4 privacy, Lighthouse CI | Step C (`audit:lighthouse` runs a pinned `npx @lhci/cli@0.15.1`) |
 | `gate:adsense`, `gate:design` | AdSense gate, contrast gate | Step C |
 | `growth:today` | Today's growth task | Step C |

@@ -44,7 +44,8 @@ The keyword map (URLs, types, primaries, secondaries, intents, clusters), recon 
   verify with their primary sources, internal links in and out, the JSON-LD types, voice notes (who the reader is, words to use and to avoid), the
   first-hand detail that makes the page more than a summary of what ranks (a worked example, a measured number, a real
   photo), word range (tool pages 600–1,500,
-  guides 800–1,500 [P]; never pad to reach it).
+  guides 800–1,500, hubs ≥ 300 words in `<main>`, trust pages ≥ 200 [P]; never pad to reach it), the title
+  (30–60 characters, primary keyword first, the URL's words in it), and the task words that replace repetition.
 
 ## Rules
 - Wave 1 is small and complete: a hub and its first spokes, plus the trust pages, before breadth.
@@ -53,6 +54,12 @@ The keyword map (URLs, types, primaries, secondaries, intents, clusters), recon 
 - No copied text from competitors; recon tells you structure and gaps only.
 - **Written for a person.** A brief that only a model could have written (generic outline, no first-hand detail, no
   clear reader) isn't done. The voice notes are what the coder and humanizer work from.
+- **Every brief must pass the build's SEO gate honestly** (`docs/SEO-GATE.md` §5):
+  - target terms stay at or under 5% of a page's meaningful words (6% fails);
+  - list the task words the writer uses instead of repeating the category name ("fractions, discounts, gravel orders",
+    not "tools");
+  - hub guide sections answer the visitor's next question with facts from the pages the hub links to;
+  - date-dependent pages put repeated units in table headers.
 - `llms.txt` is generated at build time from `llms` (Step C, `gen-public-files.mjs`); you only supply its content.
 - Label numbers ([M]/[R]/[P]/[U]).
 
