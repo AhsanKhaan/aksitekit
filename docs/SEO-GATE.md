@@ -6,7 +6,7 @@
 
 | Where | Command | What it checks | Blocks |
 | --- | --- | --- | --- |
-| Every build (`npm run build`, so CI, `preprod.yml` and the deploy workflows) | `node scripts/audits/seo-checks.mjs` after `check-out.mjs` | 168 checks on every page of `build.outputDir` | yes, on any `fail` |
+| Every build (`npm run build`, so CI, `preprod.yml` and the deploy workflows) | `node scripts/audits/seo-checks.mjs` after `check-out.mjs` | 169 checks on every page of `build.outputDir` | yes, on any `fail` |
 | On demand | `npm run audit:seo` (`-- --strict` makes warnings fail; `-- --json` for a report) | the same | yes |
 | After every production deploy, and daily in `live-check.yml` | `npm run check:seo-live -- https://<domain> / /contact/` | compression, Brotli, HTTP/3, `Cache-Control`, warm response time ≤ 600 ms, HSTS, the security headers, the http→https redirect | yes |
 | The `gate` skill | stage `seo` runs `build` and `audit:seo`; stage `deploy` runs `check:live` and `check:seo-live` with `--url` | | yes |
@@ -40,6 +40,7 @@ The checks that matter most for AdSense and spam policy:
 | `url.slug-keywords` | Fewer than half the URL slug's words appear in the title | warn |
 | `eeat.disclaimers`, `eeat.*-link`, `eeat.author-byline` | A visible disclaimer, and links to about, contact, privacy, terms, editorial policy and an author page | **fail** |
 | `eeat.external-citations` | The home page and keyword-map pages link to at least one outside source | warn |
+| `links.joined-anchor-text` | A link's text runs together when read the way SEO tools read it (tags removed with nothing in their place): `<span>Pets</span><span>1</span>` is the anchor "Pets1" | **fail** |
 | `accessibility.table-headers`, `links.descriptive-anchors`, `structured-data.type-present`, `security.mixed-content` | Tables have headers; links have visible text; JSON-LD nodes have `@type`; no `http://` resources | **fail** |
 
 ## 3. The density method (SEOmator's)
@@ -96,6 +97,7 @@ There is no target density: never add repeats to reach a number. The limits are 
   These are floors. Never pad.
 - **Hub guide sections** take their facts only from the tool pages they link to. They answer the visitor's next question ("which standard deviation does my teacher want?"), with worked examples computed by the same code as the tool.
 - **Date-dependent pages** (ages, countdowns, "N days from today") change with every rebuild. Put a repeated unit in the column header once ("Days from today": "204 to go", "4,796 ago"), not in every cell, so the build date can never push a page over a fail line. On calculatorporch.com the build date took "days" on the age page from 5.98% to 6.08% in two days [M].
+- **Link text is the label alone.** A count or note inside a link ("Pets" plus "1" in a phone menu) joins the label in the HTML that SEO tools read ("Pets1"), even when it's hidden on screen. Draw such notes with CSS from a `data-` attribute (`content: attr(data-note) / ""`), or keep them outside the link. calculatorporch.com shipped "Pets1" and "All calculatorsA–Z…" in its navbar until 2026-10-27 [M].
 - **Humanized writing:**
   - short sentences, second person;
   - no em dashes;

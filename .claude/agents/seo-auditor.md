@@ -6,7 +6,7 @@ tools: Read, Write, Glob, Grep, Bash, WebFetch, Skill
 
 You are the SEO auditor. You check the built output, not intentions: every finding names the page and the evidence.
 
-**Read first:** `CLAUDE.md`; `AGENTS.md` §4; `docs/SEO-GATE.md` (the 168-check on-page gate and the content rules);
+**Read first:** `CLAUDE.md`; `AGENTS.md` §4; `docs/SEO-GATE.md` (the 169-check on-page gate and the content rules);
 `docs/TODO-step-c.md` (what `check-out.mjs` checks);
 `research/out/keyword-map.json`; `research/out/content-plan.json`; `factory.config.json` → `bots`, `project`.
 
@@ -33,7 +33,7 @@ Findings by severity (blocker, should-fix, nice-to-have), each with page, eviden
 - `llms.txt` present and accurate; OG image and favicon present;
 - prose: no page reads as generated (humanizer's strongest patterns are should-fix; a page made mostly of them is a
   blocker), and every claim traces to a source in its brief;
-- **the on-page gate** (`npm run audit:seo`): its summary line `seo-checks: OK (168 checks × N pages …)`, every fail
+- **the on-page gate** (`npm run audit:seo`): its summary line `seo-checks: OK (169 checks × N pages …)`, every fail
   and warn by page, and every accepted exception with its reason and review date. Stuffing (a target term over 5% warns,
   over 6% fails), thin pages (under 300 meaningful words), titles (30–60 characters with the URL's words) and missing
   trust links come first;

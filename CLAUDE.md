@@ -25,7 +25,7 @@ ownership, npm script names and data formats. `docs/BLUEPRINT.md` is the approve
   **[U]** unverified. Say where a measured number came from.
 - **Before saying a change is done, run** `npm run verify`. If a script it calls doesn't exist yet, say so and point to
   `docs/TODO-step-c.md` (starter app and gates) instead of claiming a pass.
-- **The on-page SEO gate runs in every build** (`scripts/audits/seo-checks.mjs`, `docs/SEO-GATE.md`): 168 checks on
+- **The on-page SEO gate runs in every build** (`scripts/audits/seo-checks.mjs`, `docs/SEO-GATE.md`): 169 checks on
   every page covering a 171-check SEOmator audit, and a fail blocks the deploy. After a production deploy also run
   `npm run check:seo-live -- https://<domain> / /contact/`. An exception goes in `seo-checks.json` only with the
   owner's yes, a reason and a review date.

@@ -239,6 +239,15 @@ check(L, 'descriptive-anchors', 'Descriptive Anchor Text', 'warn', (p) => {
   const weak = bad.filter(({ t }) => !t ? true : GENERIC.has(t.toLowerCase()));
   return weak.length === 0 || `${weak.length} link(s) with no visible text or generic text: ${weak[0].l.href} "${weak[0].t || weak[0].l.a['aria-label']}"`;
 });
+// SEO tools read a link's text as textContent: tags removed with nothing in their place, so <span>Pets</span><span>1</span>
+// is the anchor "Pets1" (found on calculatorporch.com's nav, 2026-10-27). Compare that with the text read tag by tag.
+check(L, 'joined-anchor-text', 'Anchor Text Not Run Together', 'fail', (p) => {
+  const joined = p.links.filter((l) => l.href !== null).map((l) => {
+    const raw = decode(l.inner.replace(/<(script|style|svg|noscript|template)\b[\s\S]*?<\/\1>/gi, '').replace(/<[^>]+>/g, '')).replace(/\s+/g, ' ').trim();
+    return { href: l.href, raw, spaced: l.text };
+  }).filter(({ raw, spaced }) => raw && raw.split(' ').length < spaced.split(' ').length);
+  return joined.length === 0 || `${joined.length} link(s) whose text runs together for crawlers: ${joined[0].href} reads "${joined[0].raw}", not "${joined[0].spaced}"`;
+});
 check(L, 'fragment-targets', 'Fragment Link Targets', 'fail', (p) => {
   for (const l of p.links) {
     const [path, frag] = (l.href || '').split('#');

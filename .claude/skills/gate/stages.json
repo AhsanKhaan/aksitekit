@@ -145,7 +145,7 @@
     {
       "id": "seo",
       "agent": "seo-auditor",
-      "summary": "Titles, canonicals, sitemap, schema, internal links, depth ≤ 3; the 168-check on-page gate (stuffing, thin pages, titles, E-E-A-T, a11y)",
+      "summary": "Titles, canonicals, sitemap, schema, internal links, depth ≤ 3; the 169-check on-page gate (stuffing, thin pages, titles, E-E-A-T, a11y)",
       "outputs": [
         "reports/seo.md"
       ],

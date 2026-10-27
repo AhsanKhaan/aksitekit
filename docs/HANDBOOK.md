@@ -230,7 +230,7 @@ The thresholds in `factory.config.json` are starting defaults [P], not research 
 - **Length:** tool pages 600–1,500 words of unique text; guides 800–1,500; hubs ≥ 300 words in `<main>`; trust pages
   ≥ 200. These are floors, never targets; never pad.
 - **Keyword stuffing and thin pages are build failures:**
-  - every build runs the on-page SEO gate (`scripts/audits/seo-checks.mjs`, 168 checks per page, `docs/SEO-GATE.md`);
+  - every build runs the on-page SEO gate (`scripts/audits/seo-checks.mjs`, 169 checks per page, `docs/SEO-GATE.md`);
   - a target term over 6% of a page's meaningful words fails; titles must be 30–60 characters with the URL's words;
   - cut repetition by naming the task ("fractions, gravel orders"), never with vague swaps such as "tools".
 - **Programmatic SEO** only for keyword families with demand evidence (Google's scaled-content-abuse policy).

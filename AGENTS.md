@@ -93,7 +93,7 @@ outputs, runs the npm gates in order, and appends the result to the ledger. Scri
 | build | coder | app code | `npm run verify` (**C**) |
 | tests | harness | `tests/**` | `npm test`, `npm run test:e2e` (**C**) |
 | reconcile | reconciler | `reports/reconcile.md` | `npm run check:release`, `npm run audit:unique` (**C**) |
-| seo | seo-auditor | `reports/seo.md` | `npm run build` → `check-out.mjs` (**C**) and `scripts/audits/seo-checks.mjs` (168 checks per page, `docs/SEO-GATE.md`); `npm run audit:seo` |
+| seo | seo-auditor | `reports/seo.md` | `npm run build` → `check-out.mjs` (**C**) and `scripts/audits/seo-checks.mjs` (169 checks per page, `docs/SEO-GATE.md`); `npm run audit:seo` |
 | adsense | adsense-gatekeeper | `reports/adsense.md` | `npm run gate:adsense` (**C**) |
 | security | secops-reviewer | `reports/security.md`, `docs/SECURITY.md` | `npm run check:repo`, `npm run audit`, `npm run check:security -- <preview-url>` (**C**); CI `security.yml` |
 | responsive | responsive-checker | `reports/responsive.md` | `npm run test:e2e` (**C**) |

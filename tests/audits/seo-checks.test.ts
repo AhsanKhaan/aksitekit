@@ -153,6 +153,13 @@ describe('seo-checks', () => {
     expect(s.result('/', 'links.fragment-targets')).toMatchObject({ status: 'fail' });
   });
 
+  test('link text that runs together for crawlers fails ("Pets1" from a label and a count with no space)', () => {
+    const glued = `<p>${PROSE}</p><a href="/guide/"><span>Pets</span><span class="note">1</span></a>`;
+    expect(site({ '/': page('/', { body: glued }), '/guide/': page('/guide/') }).result('/', 'links.joined-anchor-text')).toMatchObject({ status: 'fail' });
+    const spaced = `<p>${PROSE}</p><a href="/guide/"><span>Pets</span> <span class="note">1</span></a>`;
+    expect(site({ '/': page('/', { body: spaced }), '/guide/': page('/guide/') }).result('/', 'links.joined-anchor-text')).toMatchObject({ status: 'pass' });
+  });
+
   test('a link whose only name is an aria-label is a warning (crawlers read the text)', () => {
     const s = site({ '/': page('/', { body: `<p>${PROSE}</p><a href="/guide/" aria-label="Guide"><svg></svg></a>` }), '/guide/': page('/guide/') });
     expect(s.result('/', 'links.descriptive-anchors')).toMatchObject({ status: 'warn' });
