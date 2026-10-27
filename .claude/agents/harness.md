@@ -12,8 +12,14 @@ case that makes it fail.
 
 ## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
 Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
-- `vendor/skills/webapp-testing/` (anthropics/skills): Playwright patterns. Its `scripts/with_server.py` may start the
-  local server only.
+- `vendor/skills/test-driven-development/` (obra/superpowers): write the test first and watch it fail, for each new
+  page type, module and gate (the planted failing case is that first red test).
+- `vendor/skills/systematic-debugging/` (obra/superpowers) when a test fails or flakes: root cause before any fix.
+  Never run its `find-polluter.sh`.
+- `vendor/skills/verification-before-completion/` (obra/superpowers): no "tests pass" without the command's output in
+  your report.
+- Playwright through `@playwright/test` (`npm run test:e2e`), with the dev or preview server started by
+  `playwright.config.ts`. Skip the skills' steps that name superpowers skills that aren't vendored.
 - Playwright MCP to explore a page before you write its test (headless, isolated, ad hosts blocked).
 
 ## Inputs
