@@ -569,6 +569,48 @@
       "notes": "Added: CLAUDE.md requires every GitHub Action to be in this lock."
     },
     {
+      "repo": "ossf/scorecard-action",
+      "url": "https://github.com/ossf/scorecard-action",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved-with-limits",
+      "license": "Apache-2.0",
+      "purpose": "OpenSSF Scorecard: scores supply-chain hygiene (scorecard.yml), on public repositories only",
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "main",
+      "commit": "fa7117db83c52d787ae5a89f350999701505d78e",
+      "commitDate": "2026-10-12T02:39:04Z",
+      "reviewed": "2026-10-28",
+      "release": {
+        "tag": "v2.5.0",
+        "commit": "fa7117db83c52d787ae5a89f350999701505d78e"
+      },
+      "notes": "A Docker action: action.yaml runs ghcr.io/ossf/scorecard-action:v2.5.0 by tag, not digest (upstream choice; Scorecard signs its releases). Skipped while the repository is private, because the action needs GitHub Advanced Security there (paid). Its job may only use checkout, upload-artifact, codeql-action/upload-sarif and the action itself (publish_results rules)."
+    },
+    {
+      "repo": "github/codeql-action",
+      "url": "https://github.com/github/codeql-action",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved-with-limits",
+      "license": "MIT",
+      "purpose": "CodeQL code scanning (codeql.yml) and the SARIF upload for Scorecard, on public repositories only",
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "main",
+      "commit": "6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee",
+      "commitDate": "2026-10-15T10:55:44Z",
+      "reviewed": "2026-10-28",
+      "release": {
+        "tag": "v4.39.0",
+        "commit": "6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee"
+      },
+      "notes": "v4.39.1 (2026-10-21) was under 7 days old. Skipped while the repository is private: code scanning there needs a GitHub Code Security licence (paid). init, analyze and upload-sarif all come from this pin; vendor/skills is excluded from analysis."
+    },
+    {
       "repo": "trailofbits/skills",
       "url": "https://github.com/trailofbits/skills",
       "kind": "skills",

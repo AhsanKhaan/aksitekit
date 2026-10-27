@@ -112,6 +112,8 @@ nothing newer than a week is pinned.
 | [actions/checkout](https://github.com/actions/checkout) | official | approved | MIT | GitHub first-party: check out the repository in workflows | devsecops-deployer | 2026-10-25 | `f548e57e544e` 2026-07-20 | — | `v7.0.1` `3d3c42e5aac5` |
 | [actions/setup-node](https://github.com/actions/setup-node) | official | approved | MIT | GitHub first-party: set up Node.js in workflows | devsecops-deployer | 2026-10-25 | `949feb2413d6` 2026-10-08 | — | `v7.1.0` `949feb2413d6` |
 | [actions/upload-artifact](https://github.com/actions/upload-artifact) | official | approved | MIT | GitHub first-party: keep reports from workflow runs | devsecops-deployer | 2026-10-25 | `cf430e030ddb` 2026-10-07 | — | `v7.0.2` `cf430e030ddb` |
+| [ossf/scorecard-action](https://github.com/ossf/scorecard-action) | official | approved-with-limits | Apache-2.0 | OpenSSF Scorecard: scores supply-chain hygiene (scorecard.yml), on public repositories only | secops-reviewer | 2026-10-28 | `fa7117db83c5` 2026-10-12 | — | `v2.5.0` `fa7117db83c5` |
+| [github/codeql-action](https://github.com/github/codeql-action) | official | approved-with-limits | MIT | CodeQL code scanning (codeql.yml) and the SARIF upload for Scorecard, on public repositories only | secops-reviewer | 2026-10-28 | `6f2ac81f5cd8` 2026-10-15 | — | `v4.39.0` `6f2ac81f5cd8` |
 | [trailofbits/skills](https://github.com/trailofbits/skills) | security-firm | approved | CC-BY-SA-4.0 | Trail of Bits security skills (`agentic-actions-auditor`, `differential-review`, `semgrep`, `supply-chain-risk-auditor`) | code-reviewer, secops-reviewer | 2026-10-28 | `5c99c03fb8a9` 2026-10-15 | 4 skills, 43 files | — |
 | [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | community | approved | MIT | UI/UX style, palette and font-pairing reasoning (`ui-ux-pro-max`) | designer | 2026-10-25 | `56ea9cf174ed` 2026-10-15 | 1 skill, 48 files | — |
 | [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md) | community | approved | MIT | Example DESIGN.md files, for format only | designer | 2026-10-25 | `3b605329240c` 2026-10-14 | — | — |
@@ -185,6 +187,10 @@ old, then vendored and hashed.
    `julianoczkowski/designer-skills` design tokens (optional in the plan; not approved yet), and the large collections
    (`wshobson/agents`, `VoltAgent/awesome-claude-code-subagents`, `sickn33/agentic-awesome-skills`), too broad to review
    as a unit.
+7. **Section 6 actions (open-source hardening):** `ossf/scorecard-action` v2.5.0 and `github/codeql-action` v4.39.0
+   (v4.39.1 was under 7 days old), both official and pinned by SHA. Both workflows skip while the repository is private,
+   where each needs a paid GitHub licence. The SBOM uses `npm sbom` (built into npm), so it adds no action. No licence
+   file yet: the owner will choose one later.
 
 ## Findings from the 2026-10-25 review (owner, please read)
 **The skills audit** (found with find-skills' directory search, then read file by file at the pinned commit):
