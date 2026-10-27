@@ -477,4 +477,6 @@ else {
 const failed = count('fail') + (flag('--strict') ? count('warn') : 0);
 const label = flag('--live') ? 'live checks' : `${CHECKS.length} checks × ${pages.filter((p) => !p.is404).length} pages (${production ? 'production' : 'preview'} build)`;
 console.log(`seo-checks: ${failed ? 'FAIL' : 'OK'} (${label}: ${count('pass')} pass, ${count('warn')} warn, ${count('accepted')} accepted, ${count('fail')} fail)`);
-process.exit(failed ? 1 : 0);
+// exitCode, not process.exit(): on Linux, stdout to a pipe is asynchronous, and exiting at once cuts off a long
+// report (CI saw the --json output end at ~146 KB). Node exits by itself once the output has flushed.
+process.exitCode = failed ? 1 : 0;
