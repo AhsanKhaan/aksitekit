@@ -40,7 +40,7 @@ const blocked = (evidence, next) => { throw new Outcome('BLOCKED', evidence, nex
 
 function parseCsv(text) {
   const rows = [];
-  for (const line of text.replace(/^﻿/, '').split(/\r?\n/)) {
+  for (const line of text.replace(/^\ufeff/, '').split(/\r?\n/)) {
     if (!line.trim()) continue;
     const cells = [];
     let cur = '';
@@ -135,7 +135,7 @@ const CHECKS = {
     const framework = String(b.framework || '').trim();
     if (!framework) fail('factory.config.json → build.framework is empty', 'owner: choose Next.js (built-in starter) or another technology');
     const out = String(b.outputDir || '');
-    if (!/^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/.test(out) || out.split('/').includes('..')) {
+    if (!/^[\w.-]+(?:\/[\w.-]+)*$/.test(out) || out.split('/').includes('..')) {
       fail('factory.config.json → build.outputDir must be a relative folder inside the repo (for example "out" or "dist")');
     }
     if (!String(b.commands?.build || '').trim()) fail(`factory.config.json → build.commands.build is empty for "${framework}"`, 'architect: set the build command');
@@ -228,7 +228,7 @@ const CHECKS = {
     for (const key of ['name', 'colors', 'typography']) {
       if (!new RegExp(`^${key}:`, 'm').test(fm[1])) fail(`docs/DESIGN.md front matter has no "${key}:"`);
     }
-    const topKeys = fm[1].split('\n').filter((l) => /^[A-Za-z]/.test(l)).map((l) => l.split(':')[0]);
+    const topKeys = fm[1].split('\n').filter((l) => /^[A-Z]/i.test(l)).map((l) => l.split(':')[0]);
     const dupKey = topKeys.find((k, i) => topKeys.indexOf(k) !== i);
     if (dupKey) fail(`docs/DESIGN.md front matter repeats the key "${dupKey}"`);
     const order = ['overview|brand & style', 'colors', 'typography', 'layout|layout & spacing', 'elevation & depth|elevation', 'shapes', 'components', "do's and don'ts"];
@@ -289,7 +289,7 @@ const CHECKS = {
   },
 
   'no-template-placeholders'(stage) {
-    for (const o of expandOutputs(stage).filter((f) => !f.endsWith('/') && /\.(md|json)$/.test(f))) {
+    for (const o of expandOutputs(stage).filter((f) => !f.endsWith('/') && /\.(?:md|json)$/.test(f))) {
       const lines = readFileSync(abs(o), 'utf8').split(/\r?\n/);
       const i = lines.findIndex((l) => PLACEHOLDER.test(l));
       if (i !== -1) fail(`${o}:${i + 1} still has a template placeholder (${lines[i].match(PLACEHOLDER)[0]})`);
@@ -307,7 +307,7 @@ function robotsGroups(text) {
   let current = null;
   for (const raw of text.split(/\r?\n/)) {
     const line = raw.replace(/#.*/, '').trim();
-    const m = line.match(/^([A-Za-z-]+)\s*:\s*(.*)$/);
+    const m = line.match(/^([A-Z-]+)\s*:\s*((?:\S.*)?)$/i);
     if (!m) continue;
     const key = m[1].toLowerCase();
     if (key === 'user-agent') {
@@ -358,7 +358,7 @@ function missingFor(script, scripts, seen = new Set()) {
   for (const [tool, cfg] of Object.entries(TOOL_CONFIG)) {
     if (new RegExp(`(^|[\\s&;])(npx[^&;]*)?${tool.replace(/[/@]/g, '\\$&')}(@[\\d.]+)?(\\s|$)`).test(cmd) && !existsSync(abs(cfg))) missing.push(cfg);
   }
-  const needsModules = /(^|[\s&;])(next|eslint|tsc|vitest|playwright)(\s|$)/.test(cmd);
+  const needsModules = /(?:^|[\s&;])(?:next|eslint|tsc|vitest|playwright)(?:\s|$)/.test(cmd);
   if (needsModules && !existsSync(abs('node_modules'))) missing.push('node_modules (run npm ci)');
   return [...new Set(missing)];
 }
@@ -370,7 +370,7 @@ function ownerOf(missing) {
   return `Step C (${TODO_C})`;
 }
 
-const SAFE_URL = /^https?:\/\/[A-Za-z0-9.-]+(?::\d+)?(?:\/[A-Za-z0-9._~/%-]*)?$/;
+const SAFE_URL = /^https?:\/\/[A-Za-z0-9.-]+(?::\d+)?(?:\/[\w.~/%-]*)?$/;
 
 function runNpm(stage, opts) {
   const pkg = readJson('package.json');
@@ -388,6 +388,7 @@ function runNpm(stage, opts) {
     const r = spawnSync('npm', args, { cwd: ROOT, encoding: 'utf8', shell: process.platform === 'win32', maxBuffer: 256 * 1024 * 1024 });
     const out = `${r.stdout || ''}${r.stderr || ''}`;
     process.stdout.write(out);
+    // eslint-disable-next-line no-control-regex -- \x1b starts the terminal colour codes this strips from the ledger line
     const tail = redact(out.replace(/\x1b\[[0-9;]*m/g, '')).trim().split(/\r?\n/).filter(Boolean).slice(-2).join(' / ');
     if (r.status !== 0) fail(`npm run ${script} exited ${r.status ?? r.signal}: ${tail}`.slice(0, 400));
     lines.push(`npm run ${script} ok${tail ? ` (${tail.slice(0, 120)})` : ''}`);
@@ -452,7 +453,7 @@ function runStage(stage, opts) {
     const before = STAGES.slice(0, STAGES.indexOf(stage)).filter((s) => applies(s) && !['PASS', 'SKIPPED'].includes(latest()[s.id]?.result));
     if (before.length) process.stdout.write(`warning: earlier stage(s) not passed yet: ${before.map((s) => s.id).join(', ')}\n`);
     for (const need of stage.needs || []) {
-      const ok = need.endsWith('/') ? filesIn(need).some((f) => /\.(csv|tsv)$/i.test(f)) : existsSync(abs(need));
+      const ok = need.endsWith('/') ? filesIn(need).some((f) => /\.(?:csv|tsv)$/i.test(f)) : existsSync(abs(need));
       if (!ok) blocked(`${need} is empty`, need.includes('/kp/') ? 'owner: drop Keyword Planner CSVs (one per competitor) in research/inputs/kp/' : `owner: provide ${need}`);
     }
     const checkAll = () => {

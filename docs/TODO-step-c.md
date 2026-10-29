@@ -1,7 +1,8 @@
 # Step C: starter app and gates
 
-Status: **built** (2026-10-29), except `npm run lint`, which is **blocked** ([Blocked](#blocked)). What was built and
-where is under [Built](#built); the spec below is kept as the reference the gates are held to. Step C owns the files
+Status: **built** (2026-10-29), and `npm run verify` passes end to end since lint was unblocked
+([Lint on TypeScript 7](#lint-on-typescript-7)). What was built and where is under [Built](#built); the spec below is
+kept as the reference the gates are held to. Step C owns the files
 listed for it in `docs/CONTRACT.md`. Free tools only: if anything below would need a paid tool, stop and ask the owner,
 and if refused, use a free alternative.
 
@@ -70,9 +71,10 @@ Results on 2026-10-29, Windows, Node 24.22.0, on the locked dependencies [M: the
 | Check | Result |
 |---|---|
 | `npm run check:skills`, `check:repo`, `audit` | pass |
-| `npm run lint` | **blocked** (below) |
+| `npm run lint` (eslint 10.13.0 on the TypeScript 6.0.3 API, [below](#lint-on-typescript-7)) | pass: 0 problems [M: `npm run verify` on branch `fix/lint-ts7-alias`] |
 | `npm run typecheck` (TypeScript 7.0.2) | pass |
-| `npm test` | 268 pass, 7 skipped (the release-only cases), 24 files |
+| `npm test` | 270 pass, 7 skipped (the release-only cases), 24 files [M: the same run] |
+| `npm run verify` | pass end to end, with `SITE_URL=https://example.com` [M: the same run] |
 | `npm run build` | pass: production-gate, gen-public-files, `next build`, check-out (12 pages), the SEO gate (0 fail, 75 warn) |
 | `npm run test:e2e` | 41 pass, 1 skipped (consent with analytics: the template has no GA4 ID) |
 | `npm run audit:a11y`, `audit:unique` | pass (0 axe violations on 13 pages; every page ≥ 96% unique) |
@@ -97,19 +99,52 @@ site URL (its own test says so), while the other gates and the app fall back to 
 `sitemap.xml` and `llms.txt` from the pages the build wrote (the Next.js default in `factory.config.json` does). The
 npm `build` script writes `robots.txt`, `_headers` and `security.txt` before the build.
 
-## Blocked
-`npm run lint` can't run on the locked versions (eslint 10.13.0, typescript 7.0.2, @types/node 26.6.5, from Dependabot
-on 2026-10-25). It fails before linting a file [M: `npm run lint`, 2026-10-29]:
+## Lint on TypeScript 7
+**Unblocked on 2026-10-29.** Before the fix, `npm run lint` failed before linting a file [M: `npm run lint`, 2026-10-29]:
 
 ```text
 Error: typescript-eslint does not support TS 7.0.
     at …/node_modules/eslint-config-next/node_modules/typescript-eslint/dist/index.js:52:11
 ```
 
-eslint-config-next 16.4.2 loads typescript-eslint 8.x (TypeScript < 6.1), and its React, import and jsx-a11y plugins
-accept ESLint 9 at most [M: `npm view`, 2026-10-28]. The owner decided to keep the versions; the options for lint that
-keep them are with the owner. `eslint.config.mjs` holds the rules the project wants once lint runs. Until then
-`npm run verify` stops at lint, and every step after it passes when run on its own (table above).
+The cause: typescript-eslint, loaded by eslint-config-next, needs the TypeScript compiler API, and TypeScript 7.0 ships
+without one. Neither the latest typescript-eslint (8.72.1) nor the latest eslint-config-next (16.4.3) supports
+TypeScript 7; both still want TypeScript < 6.1 [M: `npm view`, 2026-10-29].
+
+**The fix** keeps eslint 10.13.0, eslint-config-next 16.4.2 and the TypeScript 7.0.2 compiler. It uses the side-by-side
+setup from Microsoft's TypeScript 7.0 announcement, which the owner chose:
+
+| `package.json` devDependency | Resolves to | Used by |
+|---|---|---|
+| `"@typescript/native": "npm:typescript@7.0.2"` | the TypeScript 7.0.2 compiler (`tsc`) | `npm run typecheck` |
+| `"typescript": "npm:@typescript/typescript6@6.0.2"` | the TypeScript 6.0.3 API (`tsc6`) | typescript-eslint, and the type check inside `next build` |
+
+What else changed, each with the owner's yes:
+- **check:repo.** It now also accepts an npm alias pinned to an exact version (`npm:<name>@x.y.z`). Ranges, tags and a
+  bare `npm:<name>` still fail, with planted cases in `tests/gates/repo-audit.test.ts`.
+- **eslint.config.mjs.** ESLint 10 lints every file a `files` pattern names, so `*.config.*` now lists script
+  extensions only. It had pulled in `factory.config.json`.
+- **Regexes.** Once lint ran, it found 70 problems in 17 files, nearly all from eslint-plugin-regexp, including
+  11 regexes that could backtrack polynomially. Each one was rewritten to match exactly what it matched before
+  [M: old against new on about 20,000 inputs each, 0 differences in what the caller gets].
+- **Inline exceptions.** Three lines that are correct on purpose carry `eslint-disable-next-line` with a reason: two
+  `javascript:` XSS test payloads and the gate runner's colour-code strip.
+
+Supply-chain checklist for the two aliased packages [M: `npm view`, `npm audit`, `npm audit signatures`, 2026-10-29]:
+
+| Check | `@typescript/typescript6` 6.0.2 → typescript 6.0.3 | typescript 7.0.2 |
+|---|---|---|
+| Publisher | Microsoft (`typescript-deploys`, `typescript-bot`) | Microsoft (`microsoft1es`) |
+| Age | 115 and 196 days | 113 days |
+| Install scripts | none | none |
+| Exact version in `package.json` | yes | yes |
+
+`npm audit` reports 0 vulnerabilities. `npm audit signatures` verifies registry signatures on all 396 packages.
+The vendored supply-chain-risk-auditor was not run, because `uv` isn't installed on this machine.
+
+**Undo when typescript-eslint supports TypeScript 7.1** (typescript-eslint issue 10940; work in progress, no date).
+Then set `"typescript"` back to a plain exact version and drop `@typescript/native`. Whether Dependabot handles npm
+aliases is unverified [U]; check its first npm pull request after this lands.
 
 ## Follow-ups (outside Step C's files)
 - `.github/workflows/ci.yml` (Step D): set `SITE_URL` for the build when `project.domain` is empty, or the template's

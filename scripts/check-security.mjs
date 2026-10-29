@@ -118,7 +118,7 @@ export function cspAllows(value, name, origin, self) {
 /** Resources on a page that the CSP would block (scripts, styles, images, frames on other origins). */
 export function resourcesOutsideCsp(html, cspValue, self) {
   const out = [];
-  const kinds = [[/<script\b[^>]*\ssrc="([^"]+)"/gi, 'script-src'], [/<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"/gi, 'style-src'], [/<img\b[^>]*\ssrc="([^"]+)"/gi, 'img-src'], [/<iframe\b[^>]*\ssrc="([^"]+)"/gi, 'frame-src']];
+  const kinds = [[/<script\b[^>]*\ssrc="([^"]+)"/gi, 'script-src'], [/<link\b[^>]+rel="stylesheet"[^>]*href="([^"]+)"/gi, 'style-src'], [/<img\b[^>]*\ssrc="([^"]+)"/gi, 'img-src'], [/<iframe\b[^>]*\ssrc="([^"]+)"/gi, 'frame-src']];
   for (const [re, name] of kinds) {
     for (const m of html.matchAll(re)) {
       let origin;
@@ -133,6 +133,7 @@ export function resourcesOutsideCsp(html, cspValue, self) {
   return [...new Set(out)];
 }
 
+// eslint-disable-next-line no-script-url -- an XSS test payload sent to the live site, never run here
 export const XSS_PAYLOADS = ['"><script>alert(1)</script>', "'><img src=x onerror=alert(1)>", '" onmouseover="alert(1)', 'javascript:alert(1)//'];
 /** A payload echoed back unescaped (the tag or handler survives as markup). */
 export function xssEchoed(body, payload) {

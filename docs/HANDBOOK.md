@@ -42,14 +42,13 @@ copy of this repository instead of a long chat.
 | Step A: rules, 18 agents, 5 skills, gate runner, hooks, trusted-source lock, MCP config, doc templates | ✅ done | `CLAUDE.md`, `AGENTS.md`, `.claude/`, `skills.lock.json`, `.mcp.json`, `docs/` |
 | Step B: keyword pipeline (ingest → select → cluster), 55 tests [M] | ✅ done | `scripts/research/`, `research/`, `tests/research/` |
 | Step D: GitHub Actions (CI, security, Lighthouse, pre-prod, deploys, live check), Dependabot | ✅ done (not yet run on GitHub) | `.github/` |
-| Step C: Next.js starter (one example page of each type), every gate script, 268 unit and 41 e2e tests [M: 2026-10-29 runs] | ✅ done; `lint` ⛔ blocked (below) | `app/`, `components/`, `lib/`, `content/`, `scripts/`, `tests/`, `docs/TODO-step-c.md` |
+| Step C: Next.js starter (one example page of each type), every gate script, 270 unit and 41 e2e tests [M: 2026-10-29 runs] | ✅ done | `app/`, `components/`, `lib/`, `content/`, `scripts/`, `tests/`, `docs/TODO-step-c.md` |
 
-**Lint is blocked.** `npm run lint` can't run on the locked versions: eslint-config-next 16.4.2 loads typescript-eslint,
-which refuses TypeScript 7.0, and its React, import and accessibility plugins accept ESLint 9 at most [M: `npm run
-lint` and `npm view`, 2026-10-29]. The owner picks the fix (`docs/TODO-step-c.md` → Blocked). Until then `npm run
-verify` stops at lint, and every step after it passes when run on its own: typecheck, test, build (production-gate,
-check-out, the SEO gate with 0 fails) and test:e2e [M: 2026-10-29]. On the bare template (no `project.domain` yet), run
-the build with `SITE_URL=https://example.com`: the SEO gate refuses to guess a site URL.
+**Lint on TypeScript 7.** typescript-eslint, which eslint-config-next loads, needs the TypeScript compiler API, and
+TypeScript 7.0 has none. So `typescript` is an alias for Microsoft's TypeScript 6.0 API package, and
+`@typescript/native` is the TypeScript 7.0.2 compiler that `npm run typecheck` runs (`docs/TODO-step-c.md` →
+Lint on TypeScript 7). `npm run verify` passes end to end [M: 2026-10-29]. On the bare template (no `project.domain`
+yet), run it with `SITE_URL=https://example.com`: the SEO gate refuses to guess a site URL.
 
 On GitHub, CI runs in **template mode**: the site jobs (build, lint, e2e, Lighthouse, pre-production, deploys) show as
 *skipped*, and the template's own checks (tests, helper self-tests, gitleaks, Semgrep, npm audit) run and pass.
@@ -334,13 +333,13 @@ The names are frozen in `docs/CONTRACT.md`. Every script exists; ⛔ marks the o
 |---|---|---|
 | `research:ingest` / `research:select` / `research:cluster` / `research:all` | The keyword pipeline (§7) | ✅ |
 | `dev`, `build`, `serve` | Dev server and production build in **your chosen technology** (`scripts/framework.mjs` runs `build.commands`; the build adds `production-gate`, `check-out` and the SEO gate), local static server for `build.outputDir` | ✅ |
-| `lint`, `typecheck`, `test`, `test:e2e` | ESLint, TypeScript, Vitest, Playwright | `typecheck`, `test`, `test:e2e` ✅; `lint` ⛔ (§1) |
+| `lint`, `typecheck`, `test`, `test:e2e` | ESLint, TypeScript, Vitest, Playwright | ✅ (`lint` reads the code through TypeScript 6's API, §1) |
 | `check:repo`, `check:release`, `check:live`, `check:security` | Repo hygiene, publish gate, live-site check, security checks | ✅ (`check:release` fails on the template by design: example pages, no briefs) |
 | `audit:seo`, `check:seo-live` | The on-page SEO gate on the build output (also run by `build`), and its live checks against a URL (`docs/SEO-GATE.md`) | ✅ (`audit:seo` needs a build) |
 | `audit`, `audit:perf`, `audit:a11y`, `audit:unique`, `audit:ga`, `audit:lighthouse` | CVE gate, lab speed, accessibility, duplicate text, GA4 privacy, Lighthouse CI | ✅ (`audit:ga` skips without a GA4 ID; `audit:lighthouse` runs a pinned `npx @lhci/cli@0.15.1`) |
 | `gate:adsense`, `gate:design` | AdSense gate, contrast gate | ✅ (NO-GO on the template's example pages; `gate:design` reads `docs/DESIGN.md`, written at the design stage) |
 | `growth:today` | Today's growth task | ✅ (reads `growth/plan.json`, written at the growth stage) |
-| `verify` | check:repo → audit → lint → typecheck → test → build → test:e2e | stops at `lint` until it's unblocked |
+| `verify` | check:repo → audit → lint → typecheck → test → build → test:e2e | ✅ (on the bare template, with `SITE_URL=https://example.com`) |
 
 ---
 
@@ -421,4 +420,5 @@ The full list is in `CLAUDE.md`. The essentials:
   a project exists.
 - The starter website is generic on purpose: its example pages describe the kit itself and are replaced at the build
   stage, and each project's look comes from its designer stage.
-- `npm run lint` is blocked until the owner picks a fix for ESLint 10 and TypeScript 7 (§1).
+- `npm run lint` reads the code through TypeScript 6's API until typescript-eslint supports TypeScript 7.1; then the
+  `typescript` alias goes (§1).

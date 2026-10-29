@@ -102,7 +102,7 @@ export function analyzeKeyword(keyword, vocab = new Set()) {
 
 /** "Example Widget Sizer (2026)" → "example-widget-sizer-2026". */
 export function slugify(s) {
-  return String(s).normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  return String(s).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
     .replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 

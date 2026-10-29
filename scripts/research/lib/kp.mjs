@@ -9,8 +9,8 @@ const FULL_MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'ju
 const SUFFIX = { k: 1e3, m: 1e6, b: 1e9 };
 const COUNT = /^(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d+))?\s*([kmb])?$/i;
 // "1K – 10K": en dash in real exports; hyphen, em dash, minus sign and "to" are accepted too.
-const RANGE = /^(.+?)\s*(?:–|—|‒|−|-|\bto\b)\s*(.+)$/iu;
-const BLANK = /^(?:|-|--|–|n\/a)$/iu;
+const RANGE = /^([^–—‒−\-]*?[^\s–—‒−\-])\s*(?:[–—‒−\-]|\bto\b)\s*(\S.*)$/iu;
+const BLANK = /^(?:-{1,2}|–|n\/a)?$/iu;
 
 /** Header names (lower-cased, spaces collapsed) for the columns the pipeline reads. */
 export const KP_COLUMNS = {
@@ -133,7 +133,7 @@ function parseMoney(raw) {
   return Number(`${m[1].replaceAll(',', '')}${m[2] ? `.${m[2]}` : ''}`);
 }
 
-const normHeader = (h) => String(h).replace(/^﻿/, '').normalize('NFKC').replace(/\s+/gu, ' ').trim().toLowerCase();
+const normHeader = (h) => String(h).replace(/^\ufeff/, '').normalize('NFKC').replace(/\s+/gu, ' ').trim().toLowerCase();
 
 /**
  * Parses one Keyword Planner export.
@@ -147,7 +147,7 @@ export function parseKpExport(buffer, { file, source }) {
   const lines = text.split(/\r\n|\n|\r/);
   let delimiter = null;
   for (const line of lines.slice(0, 20)) {
-    const m = /^﻿?"?keyword"?([\t,;])/i.exec(line.trim());
+    const m = /^\ufeff?"?keyword"?([\t,;])/i.exec(line.trim());
     if (m) {
       delimiter = m[1];
       break;

@@ -46,7 +46,8 @@ export default defineConfig([
   },
   {
     // Node scripts: the gates, the workflow helpers (.github/README.md: ESLint covers .github/scripts) and the hooks.
-    files: ['scripts/**/*.mjs', '.github/scripts/**/*.mjs', '.claude/**/*.mjs', '*.config.*'],
+    // Config files by script extension only: ESLint 10 lints every file a `files` pattern names, factory.config.json too.
+    files: ['scripts/**/*.mjs', '.github/scripts/**/*.mjs', '.claude/**/*.mjs', '*.config.{js,mjs,cjs,ts,mts,cts}'],
     rules: { 'no-console': 'off' },
   },
   // .claude/worktrees/ holds other sessions' git worktrees (full copies of the repo); vendor/skills/ holds reviewed

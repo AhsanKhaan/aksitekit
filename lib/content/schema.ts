@@ -27,7 +27,7 @@ export const sectionSchema = z.strictObject({
 
 export const sourceSchema = z.strictObject({
   title: text,
-  url: z.string().regex(/^https:\/\/[^\s]+$/, 'an https URL'),
+  url: z.string().regex(/^https:\/\/\S+$/, 'an https URL'),
   publisher: text.optional(),
 });
 

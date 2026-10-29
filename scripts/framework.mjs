@@ -27,7 +27,7 @@ const framework = String(b.framework || '').trim();
 if (!framework) fail('build.framework is empty: run /start and choose Next.js (built-in starter) or another technology');
 
 const outputDir = String(b.outputDir || '');
-if (!/^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/.test(outputDir) || outputDir.split('/').includes('..')) {
+if (!/^[\w.-]+(?:\/[\w.-]+)*$/.test(outputDir) || outputDir.split('/').includes('..')) {
   fail('build.outputDir must be a relative folder inside the repo (for example "out" or "dist")');
 }
 

@@ -9,7 +9,7 @@ export function parseInline(text: string): ({ text: string } | { text: string; h
   let last = 0;
   for (const m of text.matchAll(LINK)) {
     const [whole, words, href] = m as unknown as [string, string, string];
-    const internal = /^\/(?!\/)[a-z0-9/._#-]*$/i.test(href);
+    const internal = /^\/(?!\/)[\w/.#-]*$/.test(href);
     const external = /^https:\/\/[^\s"'<>]+$/.test(href);
     if (!internal && !external) continue;
     if (m.index! > last) parts.push({ text: text.slice(last, m.index) });
