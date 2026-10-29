@@ -1,7 +1,7 @@
 {
-  "$comment": "Trusted sources for skills, plugins, MCP servers and GitHub Actions. Explained in docs/SKILLS.md. commit = the commit reviewed on the reviewed date. vendored = the skill folders copied byte for byte from that commit into vendorDir, with the sha256 of every file; npm run check:skills verifies them. For GitHub Actions, workflows pin release.commit (the newest release tag) by full SHA.",
+  "$comment": "Trusted sources for skills, plugins, MCP servers and GitHub Actions. Explained in docs/SKILLS.md. commit = the commit reviewed on the reviewed date. vendored = the skill folders copied byte for byte from that commit into vendorDir, with the sha256 of every file; npm run check:skills verifies them. For GitHub Actions, workflows pin release.commit (the newest release tag) by full SHA. Every vendored skill also records audit (the skills.sh scanners: Gen Agent Trust Hub, Socket, Snyk; the rule is in docs/SKILLS.md) and discovery (how it was found; from 2026-10-27 on, through Skillselion).",
   "lockVersion": 2,
-  "reviewed": "2026-10-25",
+  "reviewed": "2026-10-28",
   "statuses": {
     "approved": "Agents may use it, at the pinned commit",
     "approved-with-limits": "Agents may use it within the limits in notes",
@@ -17,14 +17,12 @@
       "tier": "official",
       "status": "approved",
       "license": "Apache-2.0 for most skills; docx, pdf, pptx and xlsx are source-available (per its README)",
-      "purpose": "Anthropic example skills: frontend design and Playwright web-app testing",
+      "purpose": "Anthropic example skills: frontend design",
       "skills": [
-        "frontend-design",
-        "webapp-testing"
+        "frontend-design"
       ],
       "usedBy": [
-        "coder",
-        "harness"
+        "coder"
       ],
       "defaultBranch": "main",
       "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
@@ -39,38 +37,105 @@
           "files": {
             "LICENSE.txt": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
             "SKILL.md": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
-          }
-        },
-        "webapp-testing": {
-          "usedBy": [
-            "harness"
-          ],
-          "upstreamPath": "skills/webapp-testing",
-          "files": {
-            "examples/console_logging.py": "ea46877289acb82da7e7ce59d0bc37c8977cd57e2a006d0c88d7a1c625bf95da",
-            "examples/element_discovery.py": "d63c89604a22f8845d724e95dda45db49b1bf57c25ce0a83afbb7b8da3d402f0",
-            "examples/static_html_automation.py": "9d533aafb875ee3ab8b8ebf8f5b9003ac8d999da3d09b285cce252e623140064",
-            "LICENSE.txt": "bc6b3af2f331cbc7fb0da1344efb2cbe5877a31498b4d70dbc7000f3405a1362",
-            "scripts/with_server.py": "b0dcf4918935b795f4eda9821579b9902119235ff4447f687a30286e7d0925fd",
-            "SKILL.md": "51b7349e77ec63b7744a6f63647e7566a0b4d2e301121cc10e8c2113af6556a2"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "anthropics/skills/frontend-design",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
-      }
+      },
+      "notes": "webapp-testing removed 2026-10-28 (owner-approved v2 plan): 1/3 on skills.sh (Socket: scripts/with_server.py runs commands with shell=True; Snyk W011). The harness uses @playwright/test directly with obra/superpowers' test-driven-development."
     },
     {
       "repo": "anthropics/claude-plugins-official",
       "url": "https://github.com/anthropics/claude-plugins-official",
       "kind": "plugins",
       "tier": "official",
-      "status": "approved",
-      "license": "Apache-2.0",
-      "purpose": "Anthropic's official plugin marketplace",
-      "usedBy": [],
+      "status": "approved-with-limits",
+      "license": "Apache-2.0 for the repository and most plugins; claude-security is proprietary (its own LICENSE: all rights reserved, no redistribution)",
+      "purpose": "Anthropic's official plugin marketplace. Vendored: the pr-review-toolkit and feature-dev agent prompts",
+      "usedBy": [
+        "architect",
+        "code-reviewer"
+      ],
       "defaultBranch": "main",
-      "commit": "58267944f92187b7d6a1c822165c96c81c864806",
-      "commitDate": "2026-10-23T18:21:26Z",
-      "reviewed": "2026-10-25",
-      "notes": "Not used: frontend-design is vendored from anthropics/skills, its source."
+      "commit": "8680640bffd91d9a7fc33ad1ede46a031d36abef",
+      "commitDate": "2026-10-19T21:53:45Z",
+      "reviewed": "2026-10-28",
+      "notes": "Read the vendored agent prompts as review and design methods (by path, like a skill); never install the plugins from here. claude-security is NOT open source (proprietary licence, no redistribution), so it is never vendored or required; the owner may install it for personal use. frontend-design is vendored from anthropics/skills, its source.",
+      "skills": [
+        "feature-dev",
+        "pr-review-toolkit"
+      ],
+      "vendored": {
+        "pr-review-toolkit": {
+          "usedBy": [
+            "code-reviewer"
+          ],
+          "upstreamPath": "plugins/pr-review-toolkit",
+          "files": {
+            ".claude-plugin/plugin.json": "7aa64c91a9316ef3641df115414c07c7caee8f48368815dc2950483598321865",
+            "agents/code-reviewer.md": "019395c3ce457460115cc703e2f4a86fed4bbe560dc58355051c4d877155d366",
+            "agents/code-simplifier.md": "976ddb22b84bc5a714216531a75db5e73169554add6b953442beeedb49b56891",
+            "agents/comment-analyzer.md": "4a9c1f2eb8234a4b9231983e75739663d512e1aed242388964a165a719b84698",
+            "agents/pr-test-analyzer.md": "fcb1cde9ba7b21694b508766a8d6a79bc91bed9982f828f816210059934f46b4",
+            "agents/silent-failure-hunter.md": "fa9b0daec5a267e7e66435cc48b3328301fc9f70c3af259fe248881327a1babc",
+            "agents/type-design-analyzer.md": "c1cf67843d3c4fd27ddf6b24aa92521414b16c01610e7f7e87212c7b8681198d",
+            "commands/review-pr.md": "5e70c17293a044e1bf9d092c80b5da8b4fd5802ebb07dc53993dec4ba7ce2fc4",
+            "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "README.md": "364cb1d46aa64a01016e4ef5f41dfea5bd5e3cf530459409a376feba93dd2b49"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "checked": "2026-10-28",
+            "verdict": "not-listed",
+            "note": "A Claude Code plugin, not a skills.sh skill, so it has no scanner results. Official tier (Anthropic), Apache-2.0; agent prompts and one command, Markdown only. Reviewed file by file on 2026-10-28."
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "pr review toolkit",
+            "date": "2026-10-28",
+            "note": "Skillselion lists a re-hosted copy (ffalor/ffalor-plugins); vendored from anthropics/claude-plugins-official, the source."
+          }
+        },
+        "feature-dev": {
+          "usedBy": [
+            "architect"
+          ],
+          "upstreamPath": "plugins/feature-dev",
+          "files": {
+            ".claude-plugin/plugin.json": "66e5b7724eae5bc5b24f18fafe4c425ba3763c543218ba1c68dcc22c589a99d9",
+            "agents/code-architect.md": "c50fb08d59a4bbd19660860626a049e44cf1a2b0c1cf782e6c7a99ba7e71b0c3",
+            "agents/code-explorer.md": "3b277703de7458988ec3b8021c716f79f642e174950ed332629310f68322029a",
+            "agents/code-reviewer.md": "a7df173bf77a00da5584c6401a1061524fdbe477b6fef5dd496d4c7a9113c78c",
+            "commands/feature-dev.md": "652e5d6264fd253fcb70c2f84de986a88d77109a02410aacd90230a6ab4bf557",
+            "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "README.md": "8dca1b27e026cab4b8bb8118709935b08fc27d2911efd9e1061b9836b534fbc1"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "checked": "2026-10-28",
+            "verdict": "not-listed",
+            "note": "A Claude Code plugin, not a skills.sh skill, so it has no scanner results. Official tier (Anthropic), Apache-2.0; agent prompts and one command, Markdown only. Reviewed file by file on 2026-10-28."
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "feature development architect",
+            "date": "2026-10-28",
+            "note": "Skillselion lists re-hosted copies (majiayu000, secondsky); vendored from anthropics/claude-plugins-official, the source."
+          }
+        }
+      }
     },
     {
       "repo": "anthropics/claude-code-action",
@@ -124,6 +189,23 @@
           "files": {
             "LICENSE": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
             "SKILL.md": "79c531e95ca4d96a7de920c28c127c2c09ec55cd452a92222267d2954580be23"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "cloudflare/skills/web-perf",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "workers-best-practices": {
@@ -139,6 +221,20 @@
             "references/platform-apis.md": "9ca9f5a7a82f92de45d310f5e2ee05aa464ddb7a63a737529caa17fff3660f28",
             "references/runtime-patterns.md": "704ce8d4ff62c7655eb1d15f804ad566ed2012d11c2086e0d94bd3addb4d2c07",
             "SKILL.md": "039c2a70aac53e00da20adc3d527bd3fc9b727be90c28b94c81c5e10092339ef"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "cloudflare/skills/workers-best-practices",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "wrangler": {
@@ -152,6 +248,20 @@
           "files": {
             "LICENSE": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
             "SKILL.md": "7884f560509c08ac29ee0d3cfe1b5259855fd6790acf0c5292f4d1c54db7c191"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "cloudflare/skills/wrangler",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
       }
@@ -459,6 +569,48 @@
       "notes": "Added: CLAUDE.md requires every GitHub Action to be in this lock."
     },
     {
+      "repo": "ossf/scorecard-action",
+      "url": "https://github.com/ossf/scorecard-action",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved-with-limits",
+      "license": "Apache-2.0",
+      "purpose": "OpenSSF Scorecard: scores supply-chain hygiene (scorecard.yml), on public repositories only",
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "main",
+      "commit": "fa7117db83c52d787ae5a89f350999701505d78e",
+      "commitDate": "2026-10-12T02:39:04Z",
+      "reviewed": "2026-10-28",
+      "release": {
+        "tag": "v2.5.0",
+        "commit": "fa7117db83c52d787ae5a89f350999701505d78e"
+      },
+      "notes": "A Docker action: action.yaml runs ghcr.io/ossf/scorecard-action:v2.5.0 by tag, not digest (upstream choice; Scorecard signs its releases). Skipped while the repository is private, because the action needs GitHub Advanced Security there (paid). Its job may only use checkout, upload-artifact, codeql-action/upload-sarif and the action itself (publish_results rules)."
+    },
+    {
+      "repo": "github/codeql-action",
+      "url": "https://github.com/github/codeql-action",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved-with-limits",
+      "license": "MIT",
+      "purpose": "CodeQL code scanning (codeql.yml) and the SARIF upload for Scorecard, on public repositories only",
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "main",
+      "commit": "6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee",
+      "commitDate": "2026-10-15T10:55:44Z",
+      "reviewed": "2026-10-28",
+      "release": {
+        "tag": "v4.39.0",
+        "commit": "6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee"
+      },
+      "notes": "v4.39.1 (2026-10-21) was under 7 days old. Skipped while the repository is private: code scanning there needs a GitHub Code Security licence (paid). init, analyze and upload-sarif all come from this pin; vendor/skills is excluded from analysis."
+    },
+    {
       "repo": "trailofbits/skills",
       "url": "https://github.com/trailofbits/skills",
       "kind": "skills",
@@ -468,16 +620,18 @@
       "purpose": "Trail of Bits security skills",
       "skills": [
         "agentic-actions-auditor",
+        "differential-review",
         "semgrep",
         "supply-chain-risk-auditor"
       ],
       "usedBy": [
+        "code-reviewer",
         "secops-reviewer"
       ],
       "defaultBranch": "main",
       "commit": "5c99c03fb8a9ea568432ecbcba5d86e9f4ac2bf0",
       "commitDate": "2026-10-15T18:16:40Z",
-      "reviewed": "2026-10-25",
+      "reviewed": "2026-10-28",
       "notes": "The semgrep skill can use Semgrep Pro when available; we never do (paid).",
       "vendored": {
         "agentic-actions-auditor": {
@@ -503,6 +657,24 @@
             "references/vector-h-dangerous-sandbox-configs.md": "892cb478d91c2e155b4084c5cf707bea5045bb4e2a11c7a5a1131b6212690b86",
             "references/vector-i-wildcard-allowlists.md": "68a4cd774ad829e535a8ec15ee492caefbae8e46f115f345b7f2bf2fecf88f86",
             "SKILL.md": "b2bdb88d559bc37e6c2c8314e28e7a2eb47e7cdd9da51e77da347d3517326dc0"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "trailofbits/skills/agentic-actions-auditor",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "warn",
+            "snyk": "pass",
+            "findings": [
+              "socket: LOW anomaly in references/vector-a-env-var-intermediary.md"
+            ],
+            "verdict": "exception",
+            "note": "Socket flags a reference file that documents an attack vector for auditors (LOW). Security-firm tier; Markdown documentation. Kept by the owner in the approved v2 plan (2026-10-28)."
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "semgrep": {
@@ -521,6 +693,23 @@
             "scripts/run-scans.sh": "ac3d815dbd5cdfa0419596411058378ab659bd243c7dc87495114e773aa40347",
             "SKILL.md": "52162605593f871cf45f48f9cf00b7c2d7e0759ccb7507981088442b7cc5d76c",
             "workflows/scan-workflow.md": "fef44f3abb2ebc050e96daaefa71d9b94a0d0082278d6d958f366dff04d9064d"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "trailofbits/skills/semgrep",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "supply-chain-risk-auditor": {
@@ -540,6 +729,52 @@
             "scripts/sources.py": "4eb66952dca285b4790d1193b39f240e8015025ee054a215f4c696cbba2478e2",
             "scripts/uv.lock": "99598cc397a42c945abbc9d839d1c61f1852f414660ce41e2e68bd9cdf664100",
             "SKILL.md": "a1254b7f8d3a1731a9a7e1f9cd6c67b59cf84ed6ef7c7fb455db9a14c528ceb4"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "trailofbits/skills/supply-chain-risk-auditor",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
+          }
+        },
+        "differential-review": {
+          "usedBy": [
+            "code-reviewer",
+            "secops-reviewer"
+          ],
+          "upstreamPath": "plugins/differential-review/skills/differential-review",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "adversarial.md": "3cb823f38c6e551cbcf5f72325d2bb219dacdad774072519c31d50d92db19800",
+            "agents/openai.yaml": "0279d56f88dc1a04d4b1941a25fa7672912a3ceb0557b13c38d069908b30ae61",
+            "assets/trail-of-bits-mark.svg": "4bf74c789b38dcf6ad762c136b6832363d27ae19fbaa9a18ec18d66ecce6ca05",
+            "LICENSE": "7abe19ec9bb73b36141b999b861d24ad855e808bafe0f81e84cce28556f6c297",
+            "methodology.md": "16b335d24cf2145e3dc4a37f50056550d29db2efa20e6df78fec95ec1e6fb0b4",
+            "patterns.md": "52abb18abbc73502a3d3b2f36a7a035adc1db40fd812d1d5424cf065036a06e9",
+            "reporting.md": "0016876dc6f158e926448bff1b6f634796757c7afe09dff177cfe30250724fc4",
+            "SKILL.md": "f9af6a8193fc1a9f8ca3c54bb8d19095a5f20c9472ca6d014488bbde50b67da0"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "trailofbits/skills/differential-review",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "differential review",
+            "date": "2026-10-27"
           }
         }
       }
@@ -618,6 +853,20 @@
             "scripts/search.py": "d54e648fe0ec2932cac66684220cc17be4bd4b4eba1d23d3195d509d398db374",
             "scripts/validate_data.py": "a599aa256049cf30954d1f164721b99e453eb7e4cb8241bcab2d5573e6cf58b8",
             "SKILL.md": "ea087c341bfb5b23195c7302027268ede86da802554c18a5c4896a6017b439f9"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
       }
@@ -705,6 +954,20 @@
             "references/native-and-artifacts.md": "1d2ac5f64feb5ad6ef8b98d803d570e1c48aa588281ff91a4bbf50d40f924450",
             "references/runtime-observation.md": "fea85e2005a8fd1c86a946eeede24c20e57592a1deb36576b45216e9854803c8",
             "SKILL.md": "278a5826b004ebd33b83c9534f3081d8e4c0eae514be96a0124ceb6f3081d21c"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "morluto/rea/reverse-engineer-anything",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "owner",
+            "date": "2026-10-25",
+            "note": "Added at the owner's request in the 2026-10-25 review. Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
       }
@@ -743,6 +1006,7 @@
         "seo-technical"
       ],
       "usedBy": [
+        "ai-search-auditor",
         "architect",
         "content-strategist",
         "keyword-researcher",
@@ -767,6 +1031,23 @@
             "references/serp-overlap-methodology.md": "a0c02dcd394a0cfe4636c02ce03da4ff58dc68b6f55ee0b3b9e36e10f20f7662",
             "SKILL.md": "9041eee8c40d60394790f27486aca9a424cb8b26971715fff7f6b07f701ff773",
             "templates/cluster-map.html": "73d50e0bcab7855b4c50b182b46ad2f38965aa2fc854bc41de5acdd611a6d8c9"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "AgriciDaniel/claude-seo/seo-cluster",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "seo-content": {
@@ -779,6 +1060,23 @@
             "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
             "LICENSE.txt": "5c617ae0aa59b995e19b3e774fcc2f2ba91b864e0b4c3e18475b139526a2da1e",
             "SKILL.md": "c2b2d458f010e6dd38597eff24370046bb5dc67983af97945cda1aac0741e21f"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "AgriciDaniel/claude-seo/seo-content",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "seo-content-brief": {
@@ -794,12 +1092,29 @@
             "references/keyword-density.md": "5f66b7516fda29ca43b4db64874ad445390a3eacfe3c6e99bee2f45b3c7ab348",
             "references/page-type-templates.md": "ac638c16ee6ef871d07d8d8172e23a491e11e5e9734f5a5f9ac070631156fd6d",
             "SKILL.md": "bdca005f46877fcab89bcedb3fa3cab40240e51a1617ad5a13ede7edd200ed16"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "AgriciDaniel/claude-seo/seo-content-brief",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "seo-geo": {
           "usedBy": [
-            "content-strategist",
-            "seo-auditor"
+            "ai-search-auditor",
+            "content-strategist"
           ],
           "upstreamPath": "skills/seo-geo",
           "licenceFrom": "LICENSE",
@@ -809,6 +1124,20 @@
             "references/google-ai-optimization-guide.md": "587dfbe3a298b625341883cffe389441f6acff61fb4e12be7586c7e1cf455348",
             "references/llmstxt-evidence.md": "6cc60538738ddabdb6da0657d43cd187d63f377140a3d4deed52dac634c344a1",
             "SKILL.md": "881fffb9e1d09cfbc608e93514a8b5534b42e74ebc3d0d63a365cedb48e717f7"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "AgriciDaniel/claude-seo/seo-geo",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "seo-programmatic": {
@@ -821,6 +1150,20 @@
             "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
             "LICENSE.txt": "5c617ae0aa59b995e19b3e774fcc2f2ba91b864e0b4c3e18475b139526a2da1e",
             "SKILL.md": "a987a228640cd917cf145d92772b1f45ca7d3486cf83dd1a7677b1999fff1ee4"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "AgriciDaniel/claude-seo/seo-programmatic",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "seo-schema": {
@@ -835,6 +1178,23 @@
             "LICENSE.txt": "5c617ae0aa59b995e19b3e774fcc2f2ba91b864e0b4c3e18475b139526a2da1e",
             "references/deprecated-types-2024-2026.md": "a8e0deb70032e8807182d64d407822acbc24946154d29b3551312340f7e1a6f9",
             "SKILL.md": "91a5a7b33cd1dca1c1e948556735352696c1e77e63af56f01cd723eac7bd519a"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "AgriciDaniel/claude-seo/seo-schema",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "seo-sitemap": {
@@ -848,6 +1208,23 @@
             "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
             "LICENSE.txt": "5c617ae0aa59b995e19b3e774fcc2f2ba91b864e0b4c3e18475b139526a2da1e",
             "SKILL.md": "9b56ca83f957a8f573b52794aa35a883040f4cb87e16ad3f04b30b0b22657066"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "AgriciDaniel/claude-seo/seo-sitemap",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "seo-technical": {
@@ -860,6 +1237,23 @@
             "LICENSE": "a42b3b0253cecea9af810c5207a67b0be8c9a0cfbf52b9302c3d26b063e7a86b",
             "LICENSE.txt": "5c617ae0aa59b995e19b3e774fcc2f2ba91b864e0b4c3e18475b139526a2da1e",
             "SKILL.md": "37ccc4b03e5ad813f337150217fff7568cb3eab15b937ea1e37fa975f825b1cc"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "AgriciDaniel/claude-seo/seo-technical",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
       }
@@ -888,6 +1282,7 @@
         "site-architecture"
       ],
       "usedBy": [
+        "ai-search-auditor",
         "architect",
         "coder",
         "competitor-recon",
@@ -904,6 +1299,7 @@
       "vendored": {
         "ai-seo": {
           "usedBy": [
+            "ai-search-auditor",
             "content-strategist"
           ],
           "upstreamPath": "skills/ai-seo",
@@ -921,6 +1317,20 @@
             "references/positioning-and-consensus.md": "b7618247e57a4560c3785155c34de77adc232784b7dd91b2c44a77a73617b9b4",
             "references/youtube-ai-citations.md": "eee24cd9f377db5f59933c775a740f5ff7ece9f238b051157ba72531d9507a99",
             "SKILL.md": "6d3c9bcc5ad19fa0425766de8a3127ecd9e0806c4ede281fdc4df9cc9c1b55d4"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/ai-seo",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "competitors": {
@@ -934,6 +1344,20 @@
             "references/content-architecture.md": "893b0bf30a630753bff02345029a96959ac359a5221467132d553d8e09a2d433",
             "references/templates.md": "138f4367a45fc9cc775f9fd67324f8a6f1e1f5c3c1a90bd952db4731f080844f",
             "SKILL.md": "ff77b76dfe43158b2fc248bb8c41fe94745d1264abb0a0c665b2c55318287a35"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/competitors",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "content-strategy": {
@@ -947,6 +1371,23 @@
             "references/content-distribution.md": "1861a1aab0627ab29c279000879a9889242da1ba85e677acdc759c66a6241778",
             "references/headless-cms.md": "c0a7b87f47c8f7af907ce73facf1ed4721ade811e53f86ddf22f4bc0d7ca324e",
             "SKILL.md": "0ad572d607884c561668810f77cd21bbe3e0508c64090f2997661a728360f946"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/content-strategy",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "copy-editing": {
@@ -962,6 +1403,20 @@
             "references/content-refresh.md": "8a3a2d301bb2b8b2a780f5bef43093ab42295041b2fea2a9caeca2421ef3c79b",
             "references/plain-english-alternatives.md": "df4f820d4c63ae8a517c64a243c101658352cd07d002355bf3c97de0a00f3775",
             "SKILL.md": "1c86fafd6667132bef4902578aee741fc6adc97953c0d9830b29e2e1ef52f8e3"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/copy-editing",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "copywriting": {
@@ -977,6 +1432,20 @@
             "references/copy-frameworks.md": "352122944bf9e891ceb0e003adce41591d111e9d97057700626249919dfe430d",
             "references/natural-transitions.md": "9bd61b0de5be2c4de4ce130c68236b4f290b12737823827a458bb2b4c8584683",
             "SKILL.md": "78c0a09b78a41995ba055d6549bbd7db3fe958673d039b9121e7a2e32bb4bb06"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/copywriting",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "customer-research": {
@@ -990,6 +1459,23 @@
             "references/interviews-and-surveys.md": "56adecdc40af1242464937100349fc1a161627394909551720494bc5ee537076",
             "references/source-guides.md": "56682ea98d781060396fd4009739d071671b3489a0d4c81f0a0ef3078cb5c9ee",
             "SKILL.md": "ae4769147f63dd5aea1308a0fddd85473601164893f58111dce738738226317e"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/customer-research",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "marketing-council": {
@@ -1014,6 +1500,23 @@
             "references/advisors/russell-brunson.md": "ae0cb018f48a734ec64fd087fd469a7e8170f5d2a2fea7623dfd58f35cfe739e",
             "references/advisors/seth-godin.md": "02cb1b64b1fff7eecc6ff9769b60c23ef68b03017fd3d82b1a5b544009dd79c0",
             "SKILL.md": "0b94358427c344e1f5f50169770cce44e0b065ec8b05fc887a800daed008ac31"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/marketing-council",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "marketing-ideas": {
@@ -1027,6 +1530,20 @@
             "references/guerrilla-marketing.md": "07b0534b579ce1916a60e79ab426cd936e78b4b261802d6486ad145f7bf552ae",
             "references/ideas-by-category.md": "8b6aa55b3255616ea80c0ea45eca8f2bb70e528510ed76f6392e71475dd0c09b",
             "SKILL.md": "d5ea46d2d2eb2fb039494e8b545550a6bd5b5b9aedc5e65a228ac514deb018ff"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/marketing-ideas",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "marketing-loops": {
@@ -1043,6 +1560,23 @@
             "references/loop-state.md": "ecb863ecc44944afe7dbb789d4b16a1ea80f045713b8d443bdcb414a4d17547e",
             "references/loop-template.md": "695fde57b9b0735e49b5fc718b0e8eb726808c08b19bea89056f8913cf1bff26",
             "SKILL.md": "db4ba419ee74c7ef4c6dacffdf92fa4038e720640a4b4b95e8766ad9ff269898"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/marketing-loops",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "programmatic-seo": {
@@ -1055,10 +1589,25 @@
             "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
             "references/playbooks.md": "b2b3fd7c58c686f0670b94cf7192ff79436ccf0d602650b33a83a9d01102f11d",
             "SKILL.md": "15cb5979cab5263ede902a830e03342869256ece17905bff240eef498e27cde1"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/programmatic-seo",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "schema": {
           "usedBy": [
+            "ai-search-auditor",
             "content-strategist"
           ],
           "upstreamPath": "skills/schema",
@@ -1067,6 +1616,20 @@
             "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
             "references/schema-examples.md": "5d55c96ae9859a5fb84cb18828c4a96dcd468e7aeec667c88fdf9032558ab318",
             "SKILL.md": "d8b7aa7bcd9727a87fb5470a6c9ee252b99a7ccb84f637d7c67c5d155b507e0b"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/schema",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "seo-audit": {
@@ -1080,6 +1643,23 @@
             "references/ai-writing-detection.md": "f1e273f56ce7e2215ff218bf903680ddcec0fd026ab90c3ebfb3439ed0edfaa4",
             "references/international-seo.md": "d2fc76f40eccc422ae0f1d7e5b770095e89a045f38e1d0370811203da57996ff",
             "SKILL.md": "9420a6c1ffcf7212766bcb618c28766ecb084631bed8045f3115d42b1230d368"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/seo-audit",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "site-architecture": {
@@ -1094,6 +1674,20 @@
             "references/navigation-patterns.md": "2efa772709b753e33d5018c007147ca30aaa95a04b04dc0df6227ea5a053078b",
             "references/site-type-templates.md": "3c3cd7ce5e31c502dc071baf82bb58cb30f5edf4a2fd8ca052fbc8f3777db140",
             "SKILL.md": "a47f693c6a4f45db89276d8c341b3aa3054090cc8002dd4a2635448d7d152492"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/site-architecture",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
       }
@@ -1136,6 +1730,20 @@
             "architecture.md": "3e45dc5523f00448d78853ece7d0c5240c1a35f2300c0d9511001b24d9e61460",
             "LICENSE": "857c8d5276809c8196b3cd7cb3300324768bfc562b2b6281b06d6865058e186c",
             "SKILL.md": "411c429c9b3e6858d85e0c57b1378b235dd622fd565e9cc0af677ab7ccc2992f"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "Jakeschincariol/replica-skill/replica-architect",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "owner",
+            "date": "2026-10-25",
+            "note": "Added at the owner's request in the 2026-10-25 review. Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "replica-design": {
@@ -1149,6 +1757,20 @@
             "LICENSE": "857c8d5276809c8196b3cd7cb3300324768bfc562b2b6281b06d6865058e186c",
             "SKILL.md": "34f0375bef33a713267e8543b4c4ffd669c59cf0a0b9999c7fb70451b2a5f4d4",
             "tokens.json": "1dc9afb9f860ab9089ed7ad762878d9e5754570d081a0d2f2cb63382260ec63e"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "Jakeschincariol/replica-skill/replica-design",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "owner",
+            "date": "2026-10-25",
+            "note": "Added at the owner's request in the 2026-10-25 review. Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "replica-diff": {
@@ -1163,6 +1785,20 @@
             "LICENSE": "857c8d5276809c8196b3cd7cb3300324768bfc562b2b6281b06d6865058e186c",
             "parity.py": "208a2bd1d4168da24ddc1c29d5d011a8a22a90587cb0d430bd442165fe3c9c28",
             "SKILL.md": "bd9fc956c347233fb17698fd5ed22caabfc0a35a210b90b9eea874f033ef1c30"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "Jakeschincariol/replica-skill/replica-diff",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "owner",
+            "date": "2026-10-25",
+            "note": "Added at the owner's request in the 2026-10-25 review. Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "replica-entrepreneur": {
@@ -1176,6 +1812,23 @@
             "reviews.py": "4e48d770727d6229ebdc398824bb947b919b5e267c5fcc23a11ab1be63995beb",
             "SKILL.md": "041724878b4c40b1a92e9d077cb31c5f551b85ca7beb3db99b03fe8c772a7d9b",
             "themes.json": "008d337c9dd3c33adb1aad24bb4c35feed776c5370b6b295cd67f306aaa3d754"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "Jakeschincariol/replica-skill/replica-entrepreneur",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "owner",
+            "date": "2026-10-25",
+            "note": "Added at the owner's request in the 2026-10-25 review. Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "replica-recon": {
@@ -1189,6 +1842,23 @@
             "LICENSE": "857c8d5276809c8196b3cd7cb3300324768bfc562b2b6281b06d6865058e186c",
             "recon-map.md": "5864395958d147ef8a9b96019591fdd3943a230e7ee4d977e7a7b053728b4d3e",
             "SKILL.md": "b1fd6a60cf0bcd481f6828453da24b9d9f0935ec6e883741e5f620259f13ff40"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "Jakeschincariol/replica-skill/replica-recon",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "owner",
+            "date": "2026-10-25",
+            "note": "Added at the owner's request in the 2026-10-25 review. Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
       }
@@ -1197,40 +1867,322 @@
       "repo": "getsentry/skills",
       "url": "https://github.com/getsentry/skills",
       "kind": "skills",
-      "tier": "community",
-      "status": "approved",
+      "tier": "excluded",
+      "status": "excluded",
       "license": "Apache-2.0",
       "purpose": "GitHub Actions security review",
+      "skills": [],
+      "usedBy": [],
+      "defaultBranch": "main",
+      "commit": "f57ada2d0b640406ea7e25b11d636c530e77c58b",
+      "commitDate": "2026-10-15T13:25:46Z",
+      "reviewed": "2026-10-28",
+      "notes": "Excluded 2026-10-28 (owner-approved v2 plan): gha-security-review scored 1/3 on skills.sh. Gen Agent Trust Hub failed it at CRITICAL because its reference files carry working attack payloads; Socket raised 2 MEDIUM alerts. Replaced by github/awesome-copilot's github-actions-hardening (3/3)."
+    },
+    {
+      "repo": "github/awesome-copilot",
+      "url": "https://github.com/github/awesome-copilot",
+      "kind": "skills",
+      "tier": "community",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "GitHub's curated collection of community agent skills: GitHub Actions hardening and a code security review",
       "skills": [
-        "gha-security-review"
+        "github-actions-hardening",
+        "security-review"
       ],
       "usedBy": [
         "secops-reviewer"
       ],
       "defaultBranch": "main",
-      "commit": "f57ada2d0b640406ea7e25b11d636c530e77c58b",
-      "commitDate": "2026-10-15T13:25:46Z",
-      "reviewed": "2026-10-25",
-      "notes": "Reviewed 2026-10-25: Markdown only (attack examples are documentation). Use it to review .github/workflows.",
+      "commit": "613efc8c21d9b3ce642dff361d17006cd9967e28",
+      "commitDate": "2026-10-19T23:58:05Z",
+      "reviewed": "2026-10-28",
+      "notes": "Community tier: GitHub maintains the collection, contributors write the skills. Both are Markdown only (3/3 on skills.sh). Their \"npm install\" lines are examples of what a workflow must not run on fork code, not steps to run.",
       "vendored": {
-        "gha-security-review": {
+        "github-actions-hardening": {
           "usedBy": [
             "secops-reviewer"
           ],
-          "upstreamPath": "skills/gha-security-review",
+          "upstreamPath": "skills/github-actions-hardening",
           "licenceFrom": "LICENSE",
           "files": {
-            "LICENSE": "96e78a9ce85795b117c8929887bdb78f88bf23f7b85a31f0872cde4dff7e92cd",
-            "references/ai-prompt-injection-via-ci.md": "9177d24968ac5b8d719b9f6748f91751d5e157ae0afa4d41cd0bb760356f23a2",
-            "references/comment-triggered-commands.md": "243526302999b7cbcbff4bbdd01c7d16377b1c60a86ee8877326c2b2b040a0b3",
-            "references/credential-escalation.md": "7febad6c0e4073dabfb338ee4646c2dd484251ad7d18b500ea83ad6fd9ac1a1d",
-            "references/expression-injection.md": "f701049355e4758207f77efc53c8e4a42f377eaa15240a2c867446154041d4f0",
-            "references/permissions-and-secrets.md": "6b6837c5f37ff85cf18c1f611f882202ce0ce41cb006b55dd49c4da52f976779",
-            "references/pwn-request.md": "6dd84c91ce77d57883059edf95c2f1c64ea1ec39551c5c8208e0cadb9c3ca673",
-            "references/real-world-attacks.md": "761260977a220264a1ee30e0b961618495723c2e6cc4e91893b7d9d4a9408718",
-            "references/runner-infrastructure.md": "cb427fa29c34c10aef18766441e0be8e0123632bb87c307bdb8d1c40b47fc81e",
-            "references/supply-chain.md": "1f80df872a1be8f70ccf1be0bb25b2e24ee1ec2ac6a9f3d7a53800cb361bfa86",
-            "SKILL.md": "b75c6c43ff99c82b3cf44519bd30723917de97064f225e392ecfd6fdcd7455bd"
+            "LICENSE": "e32449d23085399adc1222f7a17408b730550258e51627c153cb108ca9955823",
+            "references/injection.md": "ebd6ef8d39ba6f1cd3dc13051e6ed4163d1d2ba36518cf0f7393836a211e58ff",
+            "references/permissions-and-tokens.md": "7272d00b20cf99c6fcbf34346f76730907c00701aef44bb9cfb7ab3eecac336b",
+            "references/report-format.md": "3ecd2442e173bc001f858747873349be7c6c77050470b87ae516647908b1e86e",
+            "references/supply-chain.md": "f66f613dbd732ce87c1e76b88208efde8feae3ffe5a3ab405cde4ce3df66f605",
+            "references/triggers-and-privilege.md": "465f3f76517e9f5374a73e30f46cb47e1fe62ce9fd81f782808a3abbb2df2756",
+            "SKILL.md": "31a8e7483d978e6267941edefebbe42aaa946bb3d43c9095aa3db343d4a8ff06"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "github/awesome-copilot/github-actions-hardening",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "github actions security",
+            "date": "2026-10-27"
+          }
+        },
+        "security-review": {
+          "usedBy": [
+            "secops-reviewer"
+          ],
+          "upstreamPath": "skills/security-review",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "e32449d23085399adc1222f7a17408b730550258e51627c153cb108ca9955823",
+            "references/language-patterns.md": "ddfbcbb68b9d605789c85a168a274219f0ad86f5fc76b46b5332eb42f0c042b3",
+            "references/report-format.md": "688ef9f2862303527314eb17a090a72d512b907a685f5d1f122d6ebd5ae66db1",
+            "references/secret-patterns.md": "38f84f60021490d785f33fc70f2ce784888d2a751781a881372e6862e7e11288",
+            "references/vuln-categories.md": "d06159479bd92b9dcf3a2842e09f7712f1fd297c0bc9792fe20bc3cb69188df5",
+            "references/vulnerable-packages.md": "8693a6a258bad18a8a1d0925bc1eae9c744071ff37a36b8f1da83adca93608af",
+            "SKILL.md": "002392d88637b89e4cbc409a0531834970937f3b57c0b448a17e04b5ca6d356c"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "github/awesome-copilot/security-review",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "secure code audit",
+            "date": "2026-10-27"
+          }
+        }
+      }
+    },
+    {
+      "repo": "obra/superpowers",
+      "url": "https://github.com/obra/superpowers",
+      "kind": "skills",
+      "tier": "community",
+      "status": "approved-with-limits",
+      "license": "MIT",
+      "purpose": "Engineering discipline: code review requests, test-driven development, systematic debugging, verification before completion, implementation plans",
+      "skills": [
+        "requesting-code-review",
+        "systematic-debugging",
+        "test-driven-development",
+        "verification-before-completion",
+        "writing-plans"
+      ],
+      "usedBy": [
+        "architect",
+        "code-reviewer",
+        "coder",
+        "harness"
+      ],
+      "defaultBranch": "main",
+      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
+      "commitDate": "2026-10-10T00:28:04Z",
+      "reviewed": "2026-10-28",
+      "notes": "These skills name other superpowers skills (subagent-driven-development, executing-plans, using-git-worktrees, writing-skills) that aren't vendored: ignore those references. Subagents can't start subagents, so a step that says to dispatch one is done by the agent itself. systematic-debugging's find-polluter.sh is never run; its test-*.md pressure tests were left out (tests).",
+      "vendored": {
+        "requesting-code-review": {
+          "usedBy": [
+            "code-reviewer"
+          ],
+          "upstreamPath": "skills/requesting-code-review",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "code-reviewer.md": "82e370be6b3447523816286195571e4216ba56ba1ad6ad0e87862294c4c78dcb",
+            "LICENSE": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
+            "SKILL.md": "2180e14a448e9410bec88e6646a2d1f0ce7fdd58de27388c1e052e929679d2bc"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "obra/superpowers/requesting-code-review",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "code review",
+            "date": "2026-10-27"
+          }
+        },
+        "systematic-debugging": {
+          "usedBy": [
+            "harness"
+          ],
+          "upstreamPath": "skills/systematic-debugging",
+          "licenceFrom": "LICENSE",
+          "omitted": [
+            "test-academic.md",
+            "test-pressure-1.md",
+            "test-pressure-2.md",
+            "test-pressure-3.md"
+          ],
+          "files": {
+            "condition-based-waiting-example.ts": "40ae5ebe497fdf310200e43fe986552546d0a22837c0d39e855db1cfd33eb88e",
+            "condition-based-waiting.md": "e89fec8400d6cd50f43407cec9fab50976ba4d55d0ec2eb51c0bd68036b54c26",
+            "CREATION-LOG.md": "c24733a5b1821bd6bed1fc950261f0b9f4e90097e0bbb96459d8179713730789",
+            "defense-in-depth.md": "1e175fb86fc357e58c6aebf5441e481e1b7868b4380c0456b63a17eefbd18ba7",
+            "find-polluter.sh": "dd7b8f13c4cc2a24b33ff87b18da9248f3e1c80a085c3316224f69ff0fa5c43c",
+            "LICENSE": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
+            "root-cause-tracing.md": "75b933b6a8c40bdb2031b10f21654395b56ec6ab6bc7b018c18d3fe57aeb7fb8",
+            "SKILL.md": "51c6435d98c83c42c96ba7c35725a0b2c376cd487fb1a4e6bd0ddbe7e33ef202"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "obra/superpowers/systematic-debugging",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "systematic debugging",
+            "date": "2026-10-28"
+          }
+        },
+        "test-driven-development": {
+          "usedBy": [
+            "harness"
+          ],
+          "upstreamPath": "skills/test-driven-development",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
+            "SKILL.md": "64b03fce4aee5a97a93160cea8111f3ba13a17b7c001db4bd5836d67fd10705d",
+            "writing-good-tests.md": "51471c853306ff92ca8bb41dcaea05f31c0e46b03651f8f3c99754b7172f4ae1"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "obra/superpowers/test-driven-development",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "test driven development",
+            "date": "2026-10-27"
+          }
+        },
+        "verification-before-completion": {
+          "usedBy": [
+            "coder",
+            "harness"
+          ],
+          "upstreamPath": "skills/verification-before-completion",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
+            "SKILL.md": "2befe7fc55bcadaa3d97dd9e8efeb633d2561c0ebe74c5a8b17c4d9e7e4520b3"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "obra/superpowers/verification-before-completion",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "unscored",
+            "snyk": "pass",
+            "verdict": "exception",
+            "note": "Socket has not scored it yet; Trust Hub and Snyk pass. One Markdown file. Listed in the approved v2 plan (2026-10-28); re-check Socket at the next pin change."
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "verification before completion",
+            "date": "2026-10-28",
+            "note": "Skillselion lists the older obra/superpowers-skills copy; vendored from obra/superpowers, its current home."
+          }
+        },
+        "writing-plans": {
+          "usedBy": [
+            "architect"
+          ],
+          "upstreamPath": "skills/writing-plans",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
+            "SKILL.md": "a6c67c1900064347c2a329990dd3c555657c51c3ec53b259a08aa01a2c26139a"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "obra/superpowers/writing-plans",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "writing plans",
+            "date": "2026-10-28",
+            "note": "Skillselion lists the older obra/superpowers-skills copy; vendored from obra/superpowers, its current home."
+          }
+        }
+      }
+    },
+    {
+      "repo": "mattpocock/skills",
+      "url": "https://github.com/mattpocock/skills",
+      "kind": "skills",
+      "tier": "community",
+      "status": "approved",
+      "license": "MIT",
+      "purpose": "Deep-module design vocabulary for interfaces and seams",
+      "skills": [
+        "codebase-design"
+      ],
+      "usedBy": [
+        "architect",
+        "code-reviewer"
+      ],
+      "defaultBranch": "main",
+      "commit": "5beb35b040e3de97e54fa9e386d7e42d15c295c2",
+      "commitDate": "2026-10-19T15:51:40Z",
+      "reviewed": "2026-10-28",
+      "notes": "Markdown only, plus a two-line Codex display file (agents/openai.yaml).",
+      "vendored": {
+        "codebase-design": {
+          "usedBy": [
+            "architect",
+            "code-reviewer"
+          ],
+          "upstreamPath": "skills/engineering/codebase-design",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "agents/openai.yaml": "edebc9e4fcfe102114012575eaa9600b9b5fd08c311664f389c36e7bc717740f",
+            "DEEPENING.md": "f3dd099ce99289bd213914d8ee3e2429b78309c3957ca4583f7659551b1d53c1",
+            "DESIGN-IT-TWICE.md": "52b52e75655a27aea59c6966b410bac82448968ad46ef1ebb9f07c274e3ae010",
+            "LICENSE": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+            "SKILL.md": "2c20617f87ec8af6a434859f381b2f061a69b530444e74eb39e78bb016a6d1e2"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "mattpocock/skills/codebase-design",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "code review",
+            "date": "2026-10-27",
+            "note": "Also on Skillselion's top-skills leaderboard."
           }
         }
       }
@@ -1265,6 +2217,20 @@
             "LICENSE": "6f202f8bd568cd730dbb2b0d1f8e243bc74c2fa1f64dbce9b2c7ea08bd5c9fd7",
             "references/hardening-patterns.md": "2e1b93a502b4cdb0258404441f3aab029b0cce4003fbbcc61af9a2de18bab9ab",
             "SKILL.md": "2e3fc60eed5aba97fe416f3f3c9317fdb014a682925ec70a733c3ff99e4b9858"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "addyosmani/agent-skills/security-and-hardening",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
       }
@@ -1353,6 +2319,20 @@
           "files": {
             "LICENSE": "4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96",
             "SKILL.md": "0612f1dfb1672b0ea9b97e139bf1f06cabe98d8b27424fe8ff01e1fb4cc99cad"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "blader/humanizer/humanizer",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
       }
@@ -1394,6 +2374,25 @@
             "references/keyword-prioritization-framework.md": "e1cc7c3b8c1f8c32a0c8adc0a2870e20c622c8a8997f1b61fec8d66ac8a28d0e",
             "references/topic-cluster-templates.md": "0da2b2baa789f0fd02e29299b16af3fa87a6160c12086944654883e3c1e836aa",
             "SKILL.md": "2b47555b8ce9f6a05499bc065e1cf41b9c558f039dc237efe07cee53a8c976b9"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "aaron-he-zhu/aaron-marketing-skills/keyword-research",
+            "checked": "2026-10-27",
+            "trustHub": "warn",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011",
+              "trustHub: COMMAND_EXECUTION, INDIRECT_PROMPT_INJECTION, EXTERNAL_DOWNLOADS"
+            ],
+            "verdict": "exception",
+            "note": "Trust Hub's findings are about the helper scripts (suggest.py, firecrawl.py, pageviews.py), which this repo never vendored; the vendored files are Markdown only. Kept by the owner in the approved v2 plan (2026-10-28)."
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "serp-analysis": {
@@ -1408,6 +2407,23 @@
             "references/example-report.md": "e3d14464fc33657655da7d01c6a4d3e2048b3b0e68c877785cea00cefc5f6cd5",
             "references/serp-feature-taxonomy.md": "13ea2d135bd0067df01e4ccc33190fece5d1ebd42e745c2421ed867d8d85cf15",
             "SKILL.md": "2b23cae5a675bdfe9872b6d21b68b6650b8edc9c8d3561c0423c2b6f097470c4"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "aaron-he-zhu/aaron-marketing-skills/serp-analysis",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "site-structure-optimizer": {
@@ -1424,6 +2440,20 @@
             "references/mermaid-templates.md": "71b453792bb537fdd3b1611fab97c24ff50c29ecb7c1b16aba54af2b441500a7",
             "references/site-type-patterns.md": "2faa3b6d0d11a097dcacecc38f28976d744bf19fdcb208e7e155211ad1ed8d3f",
             "SKILL.md": "391ad255c156c311094548b44a969ed1cce81d29cf4077f55aa2831495b99c50"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "aaron-he-zhu/aaron-marketing-skills/site-structure-optimizer",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
       }
@@ -1435,7 +2465,7 @@
       "tier": "official",
       "status": "approved-with-limits",
       "license": "MIT (stated in its README; the repository has no LICENSE file)",
-      "purpose": "Vercel's React and Next.js performance rules, and the web-interface review skill",
+      "purpose": "Vercel's React and Next.js performance and composition rules, and the web-interface review skill",
       "usedBy": [
         "coder",
         "designer",
@@ -1444,9 +2474,10 @@
       "defaultBranch": "main",
       "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
       "commitDate": "2026-08-28T13:36:07Z",
-      "reviewed": "2026-10-25",
-      "notes": "web-design-guidelines tells the agent to fetch its rules from the guidelines repository's main branch on every run, which would make unpinned text the instructions. Never fetch: read the pinned copy in vendor/skills/web-interface-guidelines/command.md. react-best-practices applies only when build.framework is nextjs.",
+      "reviewed": "2026-10-28",
+      "notes": "web-design-guidelines tells the agent to fetch its rules from the guidelines repository's main branch on every run, which would make unpinned text the instructions. Never fetch: read the pinned copy in vendor/skills/web-interface-guidelines/command.md. react-best-practices applies only when build.framework is nextjs. composition-patterns (added 2026-10-28) also applies only when build.framework is nextjs or another React framework.",
       "skills": [
+        "composition-patterns",
         "react-best-practices",
         "web-design-guidelines"
       ],
@@ -1537,6 +2568,20 @@
             "rules/server-parallel-nested-fetching.md": "ad5d9656984d4a959997a2367bf59cc6632297b4634a1dd13a087939d83f30b3",
             "rules/server-serialization.md": "f4c7d68b29c82381baad059c4a7f09e868e71ec9c3115a26ad3ae7d24c0dfe1f",
             "SKILL.md": "71ed7794962fa6e803ee83030517b5b93a9f70fbfeb431ec4535c5480a8d8355"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "vercel-labs/agent-skills/react-best-practices",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "web-design-guidelines": {
@@ -1551,6 +2596,65 @@
           "files": {
             "NOTICE.md": "f54556f43bf2992014ae8e294d7bddb6741c8fde1e03c8b9cc3519e42ea450a9",
             "SKILL.md": "f4647ca866a3accf763777f83e7682954f0187cd6bea7eea0399796652414e8f"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "vercel-labs/agent-skills/web-design-guidelines",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "warn",
+            "snyk": "pass",
+            "findings": [
+              "socket: LOW \"system prompt extraction\" anomaly, scanned 2026-03-18 on a version that fetched its rules live"
+            ],
+            "verdict": "exception",
+            "note": "Agents never fetch: they read the pinned rules in vendor/skills/web-interface-guidelines/command.md. Kept by the owner in the approved v2 plan (2026-10-28)."
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
+          }
+        },
+        "composition-patterns": {
+          "usedBy": [
+            "coder"
+          ],
+          "upstreamPath": "skills/composition-patterns",
+          "added": [
+            "NOTICE.md"
+          ],
+          "files": {
+            "AGENTS.md": "89e3ddd58fcf99a53a50e25dfd21b8cde1be5f10b7df6bacd3dfa6796932f516",
+            "metadata.json": "49262ed5cb4186f31ee980cf8d990be0170c51efed4908d0464a1cff9905bd05",
+            "NOTICE.md": "d47a6251a75bf830bd7b1a2422858cdf9c37076be0817fe5ff297bf848f9263f",
+            "README.md": "85915a43a6f0b4efe525e3cf6398dd866166da2025837c4460468a24a940da94",
+            "rules/_sections.md": "a174213b87e6911e2b766995a2cbaf8d1534057076e82fb79fe3f0ecb38047df",
+            "rules/_template.md": "587f7d16b0660eb61fee4a4d3d7df2b3077d6835de170602c7d6e60bee559131",
+            "rules/architecture-avoid-boolean-props.md": "007555ebb020f4d552582a2c4db194db71a1fd33094012e5187bcfa4f8c392d5",
+            "rules/architecture-compound-components.md": "f246af13dc269b521cf20eb8ad99a0cb645beac381c8c9b117262c34612c8457",
+            "rules/patterns-children-over-render-props.md": "7c45a0d21b3c4126a32cba916ee31adeae195386ad1dbbe6634aedb7457aa0ad",
+            "rules/patterns-explicit-variants.md": "8c19e596e61807549d01ce8c6954c6358199f97a8511c0c02c625ec0efda8c0e",
+            "rules/react19-no-forwardref.md": "881830adb7534c4b2d70db426556646ad9837f5478f744f35641f635ada22227",
+            "rules/state-context-interface.md": "09e73afbf9285fa416679cc864a287b9e8b821d0969272ab784295386d8c9bc3",
+            "rules/state-decouple-implementation.md": "76a8c1eb29a70d8996ab3f71260345af2f7bc89deab815a421d6c87c6591a9c3",
+            "rules/state-lift-state.md": "74c54038a6c554c748fe31cec673b80861b5d920b7553cf78cdf10d18b4b759b",
+            "SKILL.md": "e38e0eaa609316b10423a9a138ed95e35099accd3f735585295c8a8f165c28a3"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "vercel-labs/agent-skills/vercel-composition-patterns",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "react composition patterns",
+            "date": "2026-10-28",
+            "note": "Skillselion lists re-hosted copies (one credits Vercel Engineering); vendored from vercel-labs/agent-skills, the source."
           }
         }
       }
@@ -1586,6 +2690,17 @@
           "files": {
             "command.md": "d246b026f4f29b5823a9cc857f9edf3d2507002e055e32040cadeaf3b38e0234",
             "LICENSE": "6cd1609c9c12233507cdd2ce0d32e9a721e3c27494951be06b90090deeeb7af2"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "checked": "2026-10-27",
+            "verdict": "not-listed",
+            "note": "A pinned rules file (command.md), not a skill, so skills.sh has no entry. Reviewed by hand on 2026-10-25."
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
       }
@@ -1624,6 +2739,20 @@
             "references/A11Y-PATTERNS.md": "f10e238dd4dd3c4f51134c2056bc02d3dd4f8fb6ccc9145c2c1ba7aab4d58140",
             "references/WCAG.md": "16683e025e3833d931c9d880645d98a448827f97e10189b6c8f12c832e7a2361",
             "SKILL.md": "267fb2a0707d6142f2871f22688203a42ba21291a2aa200fb740936e41362b5d"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "addyosmani/web-quality-skills/accessibility",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         },
         "core-web-vitals": {
@@ -1638,6 +2767,20 @@
             "references/INP.md": "7d40cf6053e9bb8a8a77e02da7c6b25aa8e6c1c092b48d8f9c8f30e9b25cf3a7",
             "references/LCP.md": "522054d44b7a55409cbde511e8d365f7fa52399dd1e72b8d6b44a92ecddca81f",
             "SKILL.md": "731aa78c0347e8b3e191b75962175bee058ce73817278e610ac0fe546e685914"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "addyosmani/web-quality-skills/core-web-vitals",
+            "checked": "2026-10-27",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "find-skills",
+            "date": "2026-10-25",
+            "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
           }
         }
       }

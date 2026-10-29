@@ -1,0 +1,49 @@
+# OpenSSF Scorecard (docs/PROPOSAL-v2.md, section 6): scores the repository's supply-chain hygiene (pinned
+# dependencies, token permissions, branch protection, code review, SAST, licence, security policy, SBOM).
+# Free on public repositories only: on a private one the action needs GitHub Advanced Security (paid), so every job
+# here is skipped while the repository is private and starts on its own once it's public.
+# Security (.github/README.md): actions pinned by commit SHA (skills.lock.json); read-only token plus the two writes the
+# action needs to publish and upload; no secrets; runs on the default branch only.
+name: scorecard
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '41 5 * * 1' # Mondays 05:41 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  scorecard:
+    name: OpenSSF Scorecard
+    # publish_results works only from the default branch, and its workflow rules allow no env, defaults or run steps in
+    # this job (ossf/scorecard-action README → Workflow restrictions).
+    if: ${{ !github.event.repository.private && github.ref_name == github.event.repository.default_branch }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      security-events: write # upload the SARIF to code scanning (free on public repositories)
+      id-token: write # publish_results: signs the result for the public Scorecard API
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e # v2.5.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: scorecard-sarif
+          path: results.sarif
+          retention-days: 30
+
+      - uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          sarif_file: results.sarif

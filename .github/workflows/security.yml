@@ -99,6 +99,18 @@ jobs:
       - name: Registry signatures and provenance of installed packages
         run: npm audit signatures
 
+      # Software bill of materials (OpenSSF Scorecard: SBOM), CycloneDX from npm itself: no new tool or action.
+      # Production dependencies only: they're what ships, and the dev tree fails npm's peer-dependency check until
+      # Step C settles the ESLint and TypeScript versions (docs/PROPOSAL-v2.md).
+      - name: SBOM (CycloneDX, production dependencies)
+        run: npm sbom --sbom-format cyclonedx --sbom-type application --omit dev > "$RUNNER_TEMP/sbom.cdx.json"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sbom-cyclonedx
+          path: ${{ runner.temp }}/sbom.cdx.json
+          retention-days: 90
+
   semgrep:
     name: Semgrep (registry rules, no account)
     if: github.event_name != 'deployment_status' && (github.event_name != 'workflow_dispatch' || inputs.scan == 'static')

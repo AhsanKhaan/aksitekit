@@ -1,5 +1,9 @@
 # Plan: `aksitekit` (AK Site Kit; working name `adsense-site-factory`), a template repo that turns keyword research into a deployed, AdSense-ready site
 
+> **Updated by `docs/PROPOSAL-v2.md`** (approved 2026-10-28): 20 agents (adds `code-reviewer` and `ai-search-auditor`),
+> every skill found through Skillselion and held to the skills.sh audit rule, `webapp-testing` and
+> `gha-security-review` replaced. Where this plan and v2 differ, v2 wins; `AGENTS.md` and `docs/SKILLS.md` are current.
+
 ## Context
 Building the first site by hand took a long chat: dozens of decisions, corrections and checks. You want a **separate, reusable repository** so the next site starts from a copy ("Use this template") and runs as a **pipeline of dedicated agents with hard gates**, not a conversation.
 

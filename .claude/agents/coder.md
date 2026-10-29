@@ -16,6 +16,10 @@ Read each skill's `SKILL.md` at the path below and use its method inside this fi
 - `vendor/skills/frontend-design/` (anthropics/skills), applied **within** DESIGN.md's tokens.
 - `vendor/skills/react-best-practices/` (Vercel) when `build.framework` is `nextjs`; with a static export, skip its
   server-side sections.
+- `vendor/skills/composition-patterns/` (Vercel) for React components (Next.js or another React framework): compound
+  components and explicit variants instead of boolean props.
+- `vendor/skills/verification-before-completion/` (obra/superpowers): never say a page or fix is done without the
+  `npm run verify` output that shows it.
 - Page text: `vendor/skills/copywriting/` and `vendor/skills/copy-editing/` (marketingskills), then a
   `vendor/skills/humanizer/` pass on every page before you hand it on. Humanizer never adds facts; neither do you.
 - `vendor/skills/wrangler/` and `vendor/skills/workers-best-practices/` (cloudflare/skills) for Pages or Workers

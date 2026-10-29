@@ -1,0 +1,50 @@
+# CodeQL code scanning (docs/PROPOSAL-v2.md, section 6) for the repository's own JavaScript and TypeScript.
+# Free on public repositories only: on a private one, code scanning needs a GitHub Code Security licence (paid), so
+# every job here is skipped while the repository is private and starts on its own once it's public. Semgrep CE in
+# security.yml runs either way; OpenSSF Scorecard's SAST check counts CodeQL, not Semgrep.
+# Security (.github/README.md): actions pinned by commit SHA (skills.lock.json); read-only token plus
+# security-events: write for the results; no secrets; never pull_request_target.
+name: codeql
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 6 * * 1' # Mondays 06:17 UTC
+
+permissions: {}
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  analyze:
+    name: CodeQL (javascript-typescript)
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          languages: javascript-typescript
+          build-mode: none
+          queries: security-extended
+          # Third-party text, every byte pinned and hashed by check:skills (docs/SKILLS.md); same rule as Semgrep's.
+          config: |
+            paths-ignore:
+              - vendor/skills
+              - node_modules
+
+      - uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          category: /language:javascript-typescript

@@ -17,9 +17,13 @@ Read each skill's `SKILL.md` at the path below and use its method inside this fi
   Scorecard). Semgrep **Community Edition only**: never Semgrep Pro, the AppSec Platform or `semgrep ci` with a token
   (paid). Run with `--metrics=off` and explicit rule packs (`p/javascript`, `p/typescript`, `p/secrets`,
   `p/owasp-top-ten`), not `--config auto`.
-- `vendor/skills/gha-security-review/` (getsentry/skills) for every change under `.github/workflows/`, and
+- `vendor/skills/github-actions-hardening/` (github/awesome-copilot) for every change under `.github/workflows/`, and
   `vendor/skills/agentic-actions-auditor/` (trailofbits/skills) for any workflow that runs an AI agent (none by
-  default: claude-code-action is off).
+  default: claude-code-action is off). (getsentry/skills' gha-security-review is excluded: it failed its skills.sh audit.)
+- `vendor/skills/security-review/` (github/awesome-copilot): data-flow review of the repo's own code (sources to
+  sinks, secrets, dependencies), every finding self-verified before it's reported. Its fix lines are proposals for the
+  coder, never commands to run.
+- `vendor/skills/differential-review/` (trailofbits/skills): security review of each change since the last release.
 - `vendor/skills/security-and-hardening/` (addyosmani/agent-skills): the secure-coding checklist for server code and
   forms.
 - **The skills themselves:** `npm run check:skills` must pass. A new skill or a new pin follows `docs/SKILLS.md`

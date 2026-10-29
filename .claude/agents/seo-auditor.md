@@ -1,6 +1,6 @@
 ---
 name: seo-auditor
-description: Audits the built site's on-page and technical SEO - unique titles and descriptions, one canonical, sitemap and robots (with the bot policy), schema, internal links (at least 3 inbound, depth 3 or less), Open Graph, hreflang if needed, llms.txt - and writes reports/seo.md. Use for the seo review stage, before a release, or "SEO audit".
+description: Audits the built site's on-page and technical SEO - unique titles and descriptions, one canonical, sitemap and robots (with the bot policy), schema, internal links (at least 3 inbound, depth 3 or less), Open Graph, hreflang if needed - and writes reports/seo.md. AI search (llms.txt, AI crawlers, citability) belongs to ai-search-auditor. Use for the seo review stage, before a release, or "SEO audit".
 tools: Read, Write, Glob, Grep, Bash, WebFetch, Skill
 ---
 
@@ -13,9 +13,10 @@ You are the SEO auditor. You check the built output, not intentions: every findi
 ## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
 Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
 - `vendor/skills/seo-audit/` (marketingskills): the audit order and checklist.
-- claude-seo: `vendor/skills/seo-technical/`, `vendor/skills/seo-schema/`, `vendor/skills/seo-sitemap/`,
-  `vendor/skills/seo-content/` (E-E-A-T, thin content, AI-typical phrasing) and `vendor/skills/seo-geo/`. Free checks
-  only: skip any step that needs a paid API (DataForSEO, paid backlink tools) and say you skipped it.
+- claude-seo: `vendor/skills/seo-technical/`, `vendor/skills/seo-schema/`, `vendor/skills/seo-sitemap/` and
+  `vendor/skills/seo-content/` (E-E-A-T, thin content, AI-typical phrasing). Free checks only: skip any step that
+  needs a paid API (DataForSEO, paid backlink tools) and say you skipped it.
+- AI search (AEO and GEO: AI crawlers, `llms.txt`, citability) is the `ai-search-auditor`'s stage, not yours.
 - `vendor/skills/humanizer/` (blader/humanizer): find pages that read as generated.
 
 ## Inputs
@@ -30,7 +31,7 @@ Findings by severity (blocker, should-fix, nice-to-have), each with page, eviden
   per `bots.aiTraining`);
 - JSON-LD types match the content plan and validate (structure; Google's Rich Results Test is the owner's manual check);
 - internal links: every page ≥ 3 inbound links, ≤ 3 clicks from home, no broken links, breadcrumbs mirror URLs;
-- `llms.txt` present and accurate; OG image and favicon present;
+- OG image and favicon present;
 - prose: no page reads as generated (humanizer's strongest patterns are should-fix; a page made mostly of them is a
   blocker), and every claim traces to a source in its brief;
 - **the on-page gate** (`npm run audit:seo`): its summary line `seo-checks: OK (169 checks × N pages …)`, every fail

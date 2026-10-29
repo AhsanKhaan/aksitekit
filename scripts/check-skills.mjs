@@ -10,6 +10,10 @@
 //   - a vendored file is missing, changed (sha256), extra, a symlink, or contains hidden Unicode (zero-width, bidi
 //     controls, tag characters) that could hide instructions from a reviewer;
 //   - a skill folder has no licence file, or vendor/skills holds a folder the lock doesn't list;
+//   - a vendored skill has no audit (the skills.sh scanners: Gen Agent Trust Hub, Socket, Snyk) or its verdict breaks
+//     the rule: 3/3 pass, or 2/3 where the only finding is Snyk's W011 (reads web pages); anything else is an
+//     exception or not-listed entry with a written note;
+//   - a vendored skill has no discovery record, or one dated from 2026-10-27 on that didn't come through Skillselion;
 //   - an agent names a vendor/skills/<skill> path that isn't locked, or the agents that name a skill differ from its
 //     usedBy in the lock;
 //   - an agent mentions an excluded source other than on a line that says it's excluded.
@@ -26,6 +30,8 @@ const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 const HIDDEN = /[\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF]|[\u{E0000}-\u{E007F}]/u;
 const USABLE = new Set(['approved', 'approved-with-limits']);
 const COOLING_DAYS = 7;
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const SKILLSELION_FROM = '2026-10-27'; // skills found from this day on must come through Skillselion (docs/SKILLS.md)
 
 function walk(dir) {
   const out = [];
@@ -79,6 +85,33 @@ for (const source of new Set([...skills.values()].map((s) => s.source))) {
   if (!/^[0-9a-f]{40}$/.test(source.commit ?? '')) fail(`${where}: commit must be a full 40-character SHA`);
   const age = (Date.parse(source.reviewed) - Date.parse(source.commitDate)) / 86_400_000;
   if (!(age >= COOLING_DAYS)) fail(`${where}: commit ${source.commitDate} is less than ${COOLING_DAYS} days older than its review (${source.reviewed})`);
+}
+
+// Audit and discovery: the security score and how the skill was found.
+function checkAudit(name, a) {
+  if (!a) return fail(`${name}: no audit in skills.lock.json (record the skills.sh scanners, docs/SKILLS.md)`);
+  if (!DATE.test(a.checked ?? '')) fail(`${name}: audit.checked must be a YYYY-MM-DD date`);
+  const scanners = [a.trustHub, a.socket, a.snyk];
+  const findings = a.findings ?? [];
+  if (a.verdict === 'pass') {
+    if (!scanners.every((s) => s === 'pass')) fail(`${name}: audit verdict "pass" needs all three scanners at pass`);
+  } else if (a.verdict === 'pass-w011') {
+    const ok = a.trustHub === 'pass' && a.socket === 'pass' && a.snyk === 'warn' && findings.length === 1 && findings[0] === 'W011';
+    if (!ok) fail(`${name}: audit verdict "pass-w011" allows only Snyk's W011 warning; anything else is an exception`);
+  } else if (a.verdict === 'exception' || a.verdict === 'not-listed') {
+    if (!String(a.note ?? '').trim()) fail(`${name}: audit verdict "${a.verdict}" needs a note saying why it's kept`);
+  } else {
+    fail(`${name}: audit verdict must be pass, pass-w011, exception or not-listed (found "${a.verdict}")`);
+  }
+}
+function checkDiscovery(name, d) {
+  if (!d?.via || !DATE.test(d.date ?? '')) return fail(`${name}: no discovery record (via and date) in skills.lock.json`);
+  if (d.date >= SKILLSELION_FROM && d.via !== 'skillselion') fail(`${name}: found on ${d.date}, so it must come through Skillselion (discovery.via "skillselion")`);
+  if (d.via === 'skillselion' && !String(d.query ?? '').trim()) fail(`${name}: discovery through Skillselion needs the query`);
+}
+for (const [name, { entry }] of skills) {
+  checkAudit(name, entry.audit);
+  checkDiscovery(name, entry.discovery);
 }
 
 // Files: exact set, hashes, no symlinks, no hidden Unicode, a licence in every folder.

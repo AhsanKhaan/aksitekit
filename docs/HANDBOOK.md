@@ -118,24 +118,26 @@ Fake sample inputs live in `research/inputs/examples/` (never read by the pipeli
 | 7 | design | designer | `docs/DESIGN.md` | `npm run gate:design` (WCAG AA contrast); fonts self-hosted |
 | 8 | build | coder | the site | `npm run verify` |
 | 9 | tests | harness | `tests/**` | `npm test`, `npm run test:e2e`, in CI too |
-| 10 | reconcile | reconciler | `reports/reconcile.md` | keyword map ↔ pages ↔ design ↔ briefs agree |
-| 11 | seo | seo-auditor | `reports/seo.md` | `check-out` in the build |
-| 12 | adsense | adsense-gatekeeper | `reports/adsense.md` | `npm run gate:adsense` |
-| 13 | security | secops-reviewer | `reports/security.md`, `docs/SECURITY.md` | §9 checks |
-| 14 | responsive | responsive-checker | `reports/responsive.md` | e2e at 320–1280 px |
-| 15 | performance | performance-auditor | `reports/performance.md` | Lighthouse and Core Web Vitals budgets (§11) |
-| 16 | preprod | orchestrator | — | `preprod.yml` green on the PR to the production branch |
-| 17 | cloudflare | cloudflare-reviewer | `reports/cloudflare.md` | only when hosting is Cloudflare; free-plan checklist |
-| 18 | go | **you** | — | your GO for that exact commit, typed in chat |
-| 19 | deploy | devsecops-deployer | — | deploy workflow, then `check:live` |
-| 20 | docs | doc-generator | `docs/PRD.md`, `DESIGN.md`, `ARCHITECTURE.md`, `SECURITY.md` | regenerated from the agents' outputs |
+| 10 | code-review | code-reviewer | `reports/code-review.md` | Verdict PASS with 0 blockers, for the current commit (`gate.mjs code-review`) |
+| 11 | reconcile | reconciler | `reports/reconcile.md` | keyword map ↔ pages ↔ design ↔ briefs agree |
+| 12 | seo | seo-auditor | `reports/seo.md` | `check-out` in the build |
+| 13 | ai-search | ai-search-auditor | `reports/ai-search.md` | `llms.txt` and `robots.txt` follow the bot policy (`gate.mjs ai-search`) |
+| 14 | adsense | adsense-gatekeeper | `reports/adsense.md` | `npm run gate:adsense` |
+| 15 | security | secops-reviewer | `reports/security.md`, `docs/SECURITY.md` | §9 checks |
+| 16 | responsive | responsive-checker | `reports/responsive.md` | e2e at 320–1280 px |
+| 17 | performance | performance-auditor | `reports/performance.md` | Lighthouse and Core Web Vitals budgets (§11) |
+| 18 | preprod | orchestrator | — | `preprod.yml` green on the PR to the production branch |
+| 19 | cloudflare | cloudflare-reviewer | `reports/cloudflare.md` | only when hosting is Cloudflare; free-plan checklist |
+| 20 | go | **you** | — | your GO for that exact commit, typed in chat |
+| 21 | deploy | devsecops-deployer | — | deploy workflow, then `check:live` |
+| 22 | docs | doc-generator | `docs/PRD.md`, `DESIGN.md`, `ARCHITECTURE.md`, `SECURITY.md` | regenerated from the agents' outputs |
 
 Every gate run is recorded in `reports/ledger.md` (format in `AGENTS.md` §5), so any session can resume.
 
 ---
 
 ## 5. The agents
-All 18 live in `.claude/agents/`; `AGENTS.md` §2 has the full map.
+All 20 live in `.claude/agents/`; `AGENTS.md` §2 has the full map.
 
 | Agent | Job | Main skills and tools |
 |---|---|---|
@@ -144,14 +146,16 @@ All 18 live in `.claude/agents/`; `AGENTS.md` §2 has the full map.
 | keyword-researcher | Keyword Planner CSVs → selected keywords → keyword map | the Step B scripts, `keyword-research`, `serp-analysis`, claude-seo `seo-cluster`, `programmatic-seo` |
 | content-strategist | Content plan, page briefs with voice notes, JSON-LD and schema plan, `llms.txt` | marketingskills `content-strategy`/`copywriting`/`schema`/`ai-seo`, claude-seo `seo-content-brief`/`seo-geo`/`seo-schema`, `humanizer` |
 | growth-strategist | The 90-day ADHD-friendly growth plan (§12) | marketing-loops, marketing-ideas, marketing-council (Hormozi lens), customer-research |
-| architect | Static or server code; Cloudflare Pages or Workers; URL and internal-link plan; `ARCHITECTURE.md` | `site-architecture`, `site-structure-optimizer`, claude-seo `seo-sitemap`/`seo-programmatic`, Cloudflare skills, Cloudflare docs MCP |
+| architect | Static or server code; Cloudflare Pages or Workers; URL and internal-link plan; `ARCHITECTURE.md` | `site-architecture`, `site-structure-optimizer`, claude-seo `seo-sitemap`/`seo-programmatic`, Anthropic feature-dev `code-architect`, `codebase-design`, `writing-plans`, Cloudflare skills, Cloudflare docs MCP |
 | designer | Visual identity as `DESIGN.md`: palette, SEO-friendly fonts, components, motion; UI/UX gaps vs competitors | **ui-ux-pro-max**, Vercel `web-design-guidelines` (pinned rules), `accessibility`, **awesome-design-md** (reference), **design.md** format, `replica-design` |
-| coder | Builds pages and their text from the keyword map, briefs and `DESIGN.md` | anthropics `frontend-design`, Vercel `react-best-practices` (Next.js), `copywriting`, `copy-editing`, `humanizer`, Cloudflare skills |
-| harness | Unit and e2e tests with a planted failing case per gate; wires them into CI | anthropics `webapp-testing`, Playwright MCP |
+| coder | Builds pages and their text from the keyword map, briefs and `DESIGN.md` | anthropics `frontend-design`, Vercel `react-best-practices` (Next.js) and `composition-patterns`, `copywriting`, `copy-editing`, `humanizer`, `verification-before-completion`, Cloudflare skills |
+| harness | Unit and e2e tests with a planted failing case per gate; wires them into CI | superpowers `test-driven-development`, `systematic-debugging`, `verification-before-completion`; `@playwright/test`, Playwright MCP |
+| code-reviewer | Reviews every diff before a PR: your rules, correctness, silent failures, tests, security regressions; fixes nothing | Anthropic pr-review-toolkit agents, superpowers `requesting-code-review`, Trail of Bits `differential-review`, `codebase-design` |
 | reconciler | Cross-checks keyword map, pages, design and briefs; parity vs competitors | `replica-diff` |
-| seo-auditor | On-page, technical, AEO/GEO and AI-search SEO; prose that reads as human | marketingskills `seo-audit`, claude-seo suite, `humanizer` |
+| seo-auditor | On-page and technical SEO; prose that reads as human | marketingskills `seo-audit`, claude-seo suite, `humanizer` |
+| ai-search-auditor | AEO and GEO: AI crawlers, `llms.txt`, answer-first passages, entities, dates and sources | marketingskills `ai-seo`/`schema`, claude-seo `seo-geo` |
 | adsense-gatekeeper | GO / NO-GO against AdSense policies; scans the codebase for required pages and forbidden code | `gate:adsense` |
-| secops-reviewer | All §9 security checks; supply-chain review of every skill or action before use | Trail of Bits `semgrep`/`supply-chain-risk-auditor`/`agentic-actions-auditor`, Sentry `gha-security-review`, `security-and-hardening`, gitleaks, ZAP, `check:skills` |
+| secops-reviewer | All §9 security checks; supply-chain review of every skill or action before use | Trail of Bits `semgrep`/`supply-chain-risk-auditor`/`agentic-actions-auditor`/`differential-review`, GitHub awesome-copilot `github-actions-hardening`/`security-review`, `security-and-hardening`, gitleaks, ZAP, `check:skills` |
 | cloudflare-reviewer | Free-plan Cloudflare checklist; only when you choose Cloudflare | Cloudflare MCP (reads; every write needs your yes) |
 | responsive-checker | Every page type from 320 to 1280 px | Vercel `web-design-guidelines` (pinned rules), Playwright |
 | performance-auditor | Lighthouse and Core Web Vitals budgets | `core-web-vitals`, `accessibility`, Cloudflare `web-perf`, Lighthouse CI, Chrome DevTools MCP |
@@ -182,14 +186,15 @@ an unapproved source or an agent naming an unlocked skill. `docs/SKILLS.md` list
 
 | Tier | Sources |
 |---|---|
-| Official | `anthropics/skills`, `cloudflare/skills`, `vercel-labs/agent-skills`, `vercel-labs/web-interface-guidelines`, Cloudflare MCP servers, `github/github-mcp-server`, `microsoft/playwright-mcp`, `ChromeDevTools/chrome-devtools-mcp`, `googleanalytics/google-analytics-mcp`, `GoogleChrome/lighthouse-ci`, `cloudflare/wrangler-action`, gitleaks, Semgrep, ZAP actions, `actions/*` |
+| Official | `anthropics/skills`, `anthropics/claude-plugins-official` (the `pr-review-toolkit` and `feature-dev` agent prompts; `claude-security` is proprietary and not used), `cloudflare/skills`, `vercel-labs/agent-skills`, `vercel-labs/web-interface-guidelines`, Cloudflare MCP servers, `github/github-mcp-server`, `microsoft/playwright-mcp`, `ChromeDevTools/chrome-devtools-mcp`, `googleanalytics/google-analytics-mcp`, `GoogleChrome/lighthouse-ci`, `cloudflare/wrangler-action`, gitleaks, Semgrep, ZAP actions, `actions/*` |
 | Security firm | `trailofbits/skills` |
-| Community (reviewed, then pinned) | `coreyhaines31/marketingskills`, `AgriciDaniel/claude-seo`, `aaron-he-zhu/aaron-marketing-skills`, `blader/humanizer`, `nextlevelbuilder/ui-ux-pro-max-skill`, `getsentry/skills`, `addyosmani/agent-skills`, `addyosmani/web-quality-skills`, `VoltAgent/awesome-design-md`, `google-labs-code/design.md` |
+| Community (reviewed, then pinned) | `coreyhaines31/marketingskills`, `AgriciDaniel/claude-seo`, `aaron-he-zhu/aaron-marketing-skills`, `blader/humanizer`, `nextlevelbuilder/ui-ux-pro-max-skill`, `github/awesome-copilot`, `obra/superpowers`, `mattpocock/skills`, `addyosmani/agent-skills`, `addyosmani/web-quality-skills`, `VoltAgent/awesome-design-md`, `google-labs-code/design.md` |
 | Caution | `Jakeschincariol/replica-skill` (young project; structure, parity and reader research only), `morluto/rea` (website tools only, approved by the owner with limits; `docs/MCP.md`) |
-| Excluded | `searchfit/searchfit-seo`, `affaan-m/ECC`, `AThevon/genjutsu`, `every-app/open-seo`, `aaron-he-zhu/seo-geo-claude-skills`, `zacker-tech/hormozi-skills`, `mrgoonie/claudekit-skills` (reasons in `docs/SKILLS.md`) |
+| Excluded | `getsentry/skills` (failed its skills.sh audit, 2026-10-28), `searchfit/searchfit-seo`, `affaan-m/ECC`, `AThevon/genjutsu`, `every-app/open-seo`, `aaron-he-zhu/seo-geo-claude-skills`, `zacker-tech/hormozi-skills`, `mrgoonie/claudekit-skills` (reasons in `docs/SKILLS.md`) |
 
-Star counts are not treated as proof of safety. Anything not in the lock needs your yes, after the secops-reviewer
-checks it.
+Star counts and install counts are not treated as proof of safety. Every skill is found through Skillselion and must
+pass its skills.sh audit (3/3, or 2/3 where the only finding is Snyk's W011, "reads web pages"); anything else needs
+your recorded exception (`docs/SKILLS.md`). Anything not in the lock needs your yes, after the secops-reviewer checks it.
 
 **MCP servers** (`.mcp.json`, explained in `docs/MCP.md`): free; all official except `rea`, which you approved with limits.
 - `cloudflare-docs`, `cloudflare-api`: reads are free; every write asks you; deletes are refused.
@@ -347,7 +352,7 @@ aksitekit/
 ├── .mcp.json                official, free MCP servers
 ├── .npmrc                   supply-chain rules (no install scripts, exact versions, 7-day minimum age)
 ├── .claude/
-│   ├── agents/              18 agents
+│   ├── agents/              20 agents
 │   ├── skills/              start, today, gate (+ gate.mjs, stages.json), keyword-pipeline, deploy-production
 │   ├── hooks/               secret and .env guard, push guard, secret scan after edits
 │   └── settings.json        permissions and hooks

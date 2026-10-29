@@ -130,6 +130,21 @@
       ]
     },
     {
+      "id": "code-review",
+      "agent": "code-reviewer",
+      "summary": "The branch diff reviewed against CLAUDE.md, docs/CONTRACT.md, tests and security regressions; Verdict PASS with 0 blockers for the current HEAD",
+      "outputs": [
+        "reports/code-review.md"
+      ],
+      "checks": [
+        "code-review-verdict"
+      ],
+      "npm": [
+        "lint",
+        "typecheck"
+      ]
+    },
+    {
       "id": "reconcile",
       "agent": "reconciler",
       "summary": "Keyword map ↔ pages ↔ design ↔ briefs agree; parity report against competitors",
@@ -152,6 +167,20 @@
       "checks": [],
       "npm": [
         "build",
+        "audit:seo"
+      ]
+    },
+    {
+      "id": "ai-search",
+      "agent": "ai-search-auditor",
+      "summary": "AEO and GEO: AI crawlers per the bot policy, llms.txt, answer-first passages, entities, dates and sources",
+      "outputs": [
+        "reports/ai-search.md"
+      ],
+      "checks": [
+        "ai-search-files"
+      ],
+      "npm": [
         "audit:seo"
       ]
     },

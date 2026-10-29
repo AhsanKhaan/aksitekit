@@ -24,7 +24,12 @@ interface Fake {
   usedBy?: string[];
   agent?: string; // text of .claude/agents/writer.md
   extraFolder?: boolean;
+  audit?: Record<string, unknown> | null; // null leaves it out
+  discovery?: Record<string, unknown> | null;
 }
+
+const PASS_AUDIT = { source: 'skills.sh', checked: '2026-10-27', trustHub: 'pass', socket: 'pass', snyk: 'pass', verdict: 'pass' };
+const FOUND = { via: 'skillselion', query: 'fake writing', date: '2026-10-27' };
 
 function project(f: Fake = {}) {
   const root = mkdtempSync(join(tmpdir(), 'check-skills-'));
@@ -45,6 +50,8 @@ function project(f: Fake = {}) {
         repo: 'example/fake-skills', status: f.status ?? 'approved', commit: 'a'.repeat(40),
         commitDate: f.commitDate ?? '2026-10-01T00:00:00Z', reviewed: '2026-10-25',
         vendored: { 'fake-skill': { usedBy: f.usedBy ?? ['writer'], upstreamPath: 'skills/fake-skill',
+          ...(f.audit === null ? {} : { audit: f.audit ?? PASS_AUDIT }),
+          ...(f.discovery === null ? {} : { discovery: f.discovery ?? FOUND }),
           files: Object.fromEntries(Object.entries(lockFiles).map(([rel, text]) => [rel, sha(text)])) } },
       },
       { repo: 'example/banned-skills', status: 'excluded', commit: 'b'.repeat(40), commitDate: '2026-01-01T00:00:00Z', reviewed: '2026-10-25' },
@@ -62,7 +69,7 @@ describe('the repository', () => {
     const r = run();
     expect(r.stderr).toBe('');
     expect(r.status).toBe(0);
-    expect(r.stdout).toMatch(/^check-skills: OK \(\d+ skills, \d+ files, \d+ sources, 18 agents\)/);
+    expect(r.stdout).toMatch(/^check-skills: OK \(\d+ skills, \d+ files, \d+ sources, 20 agents\)/);
   });
 });
 
@@ -116,6 +123,37 @@ describe('planted problems', () => {
     expect(unlocked.stderr).toContain("names vendor/skills/other, which isn't a locked vendored skill");
     const mismatch = project({ usedBy: ['writer', 'editor'] });
     expect(mismatch.stderr).toContain('usedBy is [editor, writer] but the agents that name vendor/skills/fake-skill are [writer]');
+  });
+
+  it('a skill needs a skills.sh audit, and "pass" means all three scanners pass', () => {
+    expect(project({ audit: null }).stderr).toContain('fake-skill: no audit in skills.lock.json');
+    const warned = project({ audit: { ...PASS_AUDIT, snyk: 'warn' } });
+    expect(warned.stderr).toContain('audit verdict "pass" needs all three scanners at pass');
+    expect(project({ audit: { ...PASS_AUDIT, verdict: 'fine' } }).stderr).toContain('audit verdict must be pass, pass-w011, exception or not-listed');
+  });
+
+  it('"pass-w011" allows only Snyk\'s W011 warning', () => {
+    const w011 = { ...PASS_AUDIT, snyk: 'warn', findings: ['W011'], verdict: 'pass-w011' };
+    expect(project({ audit: w011 }).status).toBe(0);
+    const credential = project({ audit: { ...w011, findings: ['W007'] } });
+    expect(credential.stderr).toContain('"pass-w011" allows only Snyk\'s W011 warning');
+    const socket = project({ audit: { ...w011, socket: 'warn' } });
+    expect(socket.stderr).toContain('"pass-w011" allows only Snyk\'s W011 warning');
+  });
+
+  it('an exception needs a written note', () => {
+    const silent = project({ audit: { ...PASS_AUDIT, trustHub: 'fail', verdict: 'exception' } });
+    expect(silent.stderr).toContain('audit verdict "exception" needs a note');
+    const kept = project({ audit: { ...PASS_AUDIT, trustHub: 'warn', verdict: 'exception', note: 'Owner kept it: scripts not vendored.' } });
+    expect(kept.status).toBe(0);
+  });
+
+  it('a skill needs a discovery record, through Skillselion from 2026-10-27 on', () => {
+    expect(project({ discovery: null }).stderr).toContain('fake-skill: no discovery record');
+    const elsewhere = project({ discovery: { via: 'find-skills', date: '2026-10-28' } });
+    expect(elsewhere.stderr).toContain('found on 2026-10-28, so it must come through Skillselion');
+    expect(project({ discovery: { via: 'find-skills', date: '2026-10-25' } }).status).toBe(0);
+    expect(project({ discovery: { via: 'skillselion', date: '2026-10-28' } }).stderr).toContain('needs the query');
   });
 
   it('an excluded source may be named only on a line that says it is excluded', () => {

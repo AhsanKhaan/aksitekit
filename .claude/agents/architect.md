@@ -21,6 +21,13 @@ Read each skill's `SKILL.md` at the path below and use its method inside this fi
 - `vendor/skills/wrangler/` and `vendor/skills/workers-best-practices/` (cloudflare/skills), and the Cloudflare docs
   MCP for current free-plan limits [U: re-check on the day].
 - `vendor/skills/replica-architect/` (replica-skill) only for its stack checklist, never to clone a competitor.
+- `vendor/skills/feature-dev/agents/code-architect.md` (Anthropic's feature-dev, official), read as the method for
+  the build blueprint: the files to create, the components, the data flow and the build order. You apply it yourself;
+  never install the plugin.
+- `vendor/skills/codebase-design/` (mattpocock/skills): deep modules and clear seams for `lib/` (the content registry,
+  the JSON-LD component, the gates' shared code).
+- `vendor/skills/writing-plans/` (obra/superpowers): the build order in `ARCHITECTURE.md` as small tasks, each with its
+  test and done check. Skip its steps that name superpowers skills that aren't vendored.
 
 ## Inputs
 The keyword map (page types and counts), content plan, budgets, bot policy, and the owner's technology choice in

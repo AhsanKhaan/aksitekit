@@ -39,7 +39,7 @@ Built with [Claude Code](https://code.claude.com). Not affiliated with or endors
 
 ## What it is
 AK Site Kit is a GitHub template for people who want to build a content website that earns from search traffic. You
-bring keyword ideas from Google Keyword Planner and a few competitor sites. A team of 18 Claude Code agents turns them
+bring keyword ideas from Google Keyword Planner and a few competitor sites. A team of 20 Claude Code agents turns them
 into a keyword map, a content plan, a design and then the site, and checks the result before it goes live.
 
 Every new site starts as its own copy of this template. Nothing is shared between sites, and nothing goes live without
@@ -75,11 +75,16 @@ on from there. In short: agents propose, scripts decide, you approve.
   page that still reads as generated.
 - **Search-ready structure.** One topic hub with its pages, at most three clicks deep, clean URLs, a sitemap, JSON-LD
   and `llms.txt`.
+- **Ready for AI search.** A separate review checks what answer engines need (AEO and GEO): AI crawlers allowed by your
+  bot policy, `llms.txt`, pages that answer the reader's question first, and facts with sources.
+- **Every change reviewed.** A code reviewer reads each change before a pull request, checking your rules, the logic,
+  the tests and security regressions, and the pipeline won't go on until its verdict is PASS for that exact commit.
 - **AdSense rules built in.** The required pages, consent for Europe and the UK, and no ad code until your account is
   approved.
 - **Security checks on every change.** Secret scanning and dependency and code scans run in CI today. Once your site
   exists, previews also get ZAP scans and checks for XSS, path traversal, leaked private URLs and email spoofing.
-- **Vetted skills.** The outside skills the agents use are reviewed, pinned to a commit at least 7 days old and
+- **Vetted skills.** The outside skills the agents use are found through Skillselion, must pass the skills.sh security
+  audit (Gen Agent Trust Hub, Socket and Snyk), and are reviewed, pinned to a commit at least 7 days old and
   hash-checked in CI ([docs/SKILLS.md](docs/SKILLS.md)).
 - **Free to run.** Free tools only. A step that would need a paid tool stops and asks you, with a free alternative.
 - **Your choice of technology.** Next.js is built in; any tool that outputs plain HTML pages works.
@@ -191,8 +196,9 @@ The next stages run one after another, each with its own check:
 - **Design:** colours, fonts and layout as design tokens in `docs/DESIGN.md`, checked for contrast.
 
 ### Step 8: Build and check
-The coder builds the pages from the briefs and the design, and the harness writes their tests. Then the reviews run:
-SEO, AdSense, security, responsive layouts from 320 to 1280 px, and speed (Lighthouse: Accessibility, Best Practices
+The coder builds the pages from the briefs and the design, the harness writes their tests, and the code reviewer
+checks the change. Then the reviews run: SEO, AI search, AdSense, security, responsive layouts from 320 to 1280 px, and
+speed (Lighthouse: Accessibility, Best Practices
 and SEO 100; Performance at least 90 on mobile). See [Status](#status): the starter site for this step is still being
 added.
 
@@ -257,7 +263,7 @@ you can change.
 
 ## Project structure
 ```text
-.claude/agents/       the 18 agents, one file each
+.claude/agents/       the 20 agents, one file each
 .claude/skills/       /start, /today, /gate, /keyword-pipeline, /deploy-production
 vendor/skills/        reviewed outside skills the agents read, hash-checked
 research/inputs/      your Keyword Planner files and competitors.csv
