@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { mapRowSchema, pageContentSchema, type MapRow, type PageContent } from '@/lib/content/schema';
 
 /**
- * The content registry (docs/TODO-step-c.md §1): every page the site builds, read at build time.
+ * The content registry (the Step C spec in docs/, §1): every page the site builds, read at build time.
  * - research/out/keyword-map.json (the keyword stage) decides which URLs exist and what each one targets; until it
  *   exists, the template's example map in content/examples/ stands in.
  * - content/pages/<slug>.json holds each page's text. A mapped URL without a content file isn't built yet; a content
