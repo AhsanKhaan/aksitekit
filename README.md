@@ -231,7 +231,7 @@ npm scripts (run them in a terminal):
 | `npm test` | Runs the unit tests |
 | `npm run research:all` | Turns the Keyword Planner files into the keyword map, without Claude |
 | `npm run check:skills` | Checks every vendored skill against its pinned hashes |
-| `npm run verify` | Runs every check (it stops at lint for now; see [Status](#status)) |
+| `npm run verify` | Runs every check |
 
 ## What you get
 | File | What it holds |
@@ -284,10 +284,9 @@ skills.lock.json      every outside skill, MCP server and GitHub Action, pinned
 | Vetted skills | Ready |
 | On-page SEO gate: 169 checks on every page, for keyword stuffing, thin pages, titles and trust links | Ready, with tests ([docs/SEO-GATE.md](docs/SEO-GATE.md)); runs once a site is built |
 | Starter website (Next.js, one example page of each type) and the site checks | Ready, with tests ([docs/TODO-step-c.md](docs/TODO-step-c.md)) |
-| `npm run lint` | Blocked: the Next.js lint rules don't support TypeScript 7 yet, and the fix is the owner's choice ([docs/TODO-step-c.md](docs/TODO-step-c.md#blocked)) |
+| `npm run lint` | Ready: ESLint 10 reads the code through TypeScript 6's API, alongside the TypeScript 7 compiler, until the lint rules support TypeScript 7 ([docs/TODO-step-c.md](docs/TODO-step-c.md#lint-on-typescript-7)) |
 
-`/start` takes you from keyword research through the build. Until lint is unblocked, `npm run verify` stops at lint;
-the checks after it pass when run on their own.
+`/start` takes you from keyword research through the build, and `npm run verify` passes end to end.
 
 ## Troubleshooting
 **`npm ci` fails with an engine error.** The kit needs Node.js 24.22 or newer in the 24 line. Check with

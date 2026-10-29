@@ -4,24 +4,24 @@
 export const SECRET_RULES = [
   { name: 'private key block', re: /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP |ENCRYPTED )?PRIVATE KEY(?: BLOCK)?-----/ },
   { name: 'AWS access key id', re: /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/ },
-  { name: 'GitHub token', re: /\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{60,})\b/ },
-  { name: 'Google API key', re: /\bAIza[0-9A-Za-z_-]{35}\b/ },
+  { name: 'GitHub token', re: /\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_\w{60,})\b/ },
+  { name: 'Google API key', re: /\bAIza[\w-]{35}\b/ },
   { name: 'Slack token', re: /\bxox[abprs]-[A-Za-z0-9-]{10,}\b/ },
-  { name: 'Slack webhook', re: /https:\/\/hooks\.slack\.com\/services\/[A-Za-z0-9/_-]{20,}/ },
+  { name: 'Slack webhook', re: /https:\/\/hooks\.slack\.com\/services\/[\w/-]{20,}/ },
   { name: 'Stripe live key', re: /\b[rs]k_live_[0-9A-Za-z]{20,}\b/ },
   { name: 'npm token', re: /\bnpm_[A-Za-z0-9]{36}\b/ },
-  { name: 'Anthropic or OpenAI key', re: /\bsk-(?:ant-|proj-)[A-Za-z0-9_-]{20,}/ },
+  { name: 'Anthropic or OpenAI key', re: /\bsk-(?:ant-|proj-)[\w-]{20,}/ },
   {
     name: 'Cloudflare deploy hook URL',
     re: /https:\/\/api\.cloudflare\.com\/client\/v4\/pages\/webhooks\/deploy_hooks\/[0-9a-f-]{20,}/,
   },
   {
     name: 'Cloudflare API token assignment',
-    re: /\b(?:CLOUDFLARE_API_TOKEN|CF_API_TOKEN|CLOUDFLARE_API_KEY)\b\s*[:=]\s*["']?[A-Za-z0-9_-]{30,}/,
+    re: /\b(?:CLOUDFLARE_API_TOKEN|CF_API_TOKEN|CLOUDFLARE_API_KEY)\s*[:=]\s*["']?[\w-]{30,}/,
   },
   {
     name: 'hard-coded credential',
-    re: /\b(?:api[_-]?key|secret|token|passw(?:or)?d)\b["']?\s*[:=]\s*["']([^"'\s]{16,})["']/i,
+    re: /\b(?:api[_-]?key|secret|token|passw(?:or)?d)["']?\s*[:=]\s*["']([^"'\s]{16,})["']/i,
     skip: (m) => /^[$<{%]|\$\{|\{\{|process\.env|example|placeholder|your[_-]|x{6,}|\*{4,}/i.test(m[1] ?? ''),
   },
 ];

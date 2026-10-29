@@ -27,7 +27,7 @@ const ROOT = process.env.SKILLS_ROOT || '.';
 const errors = [];
 const fail = (msg) => errors.push(msg);
 const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
-const HIDDEN = /[\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF]|[\u{E0000}-\u{E007F}]/u;
+const HIDDEN = /[\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF\u{E0000}-\u{E007F}]/u;
 const USABLE = new Set(['approved', 'approved-with-limits']);
 const COOLING_DAYS = 7;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -53,7 +53,7 @@ try {
   process.exit(1);
 }
 const vendorDir = lock.vendorDir;
-if (!/^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/.test(vendorDir || '') || vendorDir.split('/').includes('..')) {
+if (!/^[\w.-]+(?:\/[\w.-]+)*$/.test(vendorDir || '') || vendorDir.split('/').includes('..')) {
   console.error('check-skills: skills.lock.json vendorDir must be a relative folder inside the repo');
   process.exit(1);
 }
@@ -146,7 +146,7 @@ for (const [name, { entry }] of skills) {
     if (bad >= 0) fail(`${vendorDir}/${name}/${rel}:${bad + 1}: hidden Unicode character`);
   }
   for (const rel of Object.keys(expected)) if (!seen.has(rel)) fail(`${vendorDir}/${name}/${rel}: missing (skills.lock.json lists it)`);
-  if (!Object.keys(expected).some((rel) => /^(LICEN[CS]E|COPYING|NOTICE)/i.test(rel))) fail(`${vendorDir}/${name}: no licence file`);
+  if (!Object.keys(expected).some((rel) => /^(?:LICEN[CS]E|COPYING|NOTICE)/i.test(rel))) fail(`${vendorDir}/${name}: no licence file`);
 }
 
 // Agents: every vendored path they name is locked, and usedBy matches.

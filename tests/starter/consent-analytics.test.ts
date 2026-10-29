@@ -39,6 +39,7 @@ describe('consent', () => {
 describe('analytics', () => {
   it('drops query strings and fragments from every address (planted: a search term in the URL)', () => {
     expect(cleanUrl('https://example.com/a/?q=my+secret#top')).toBe('https://example.com/a/');
+    // eslint-disable-next-line no-script-url -- planted input: cleanUrl must drop script URLs
     expect(cleanUrl('javascript:alert(1)')).toBe('');
     expect(pageView('https://example.com/a/?x=1', 'T', 'https://example.com/?ref=2')).toEqual({ page_location: 'https://example.com/a/', page_title: 'T', page_referrer: 'https://example.com/' });
   });

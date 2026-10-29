@@ -43,6 +43,16 @@ describe('check:repo', () => {
     expect(bad.join('\n')).toMatch(/"postinstall" is a lifecycle hook/);
     expect(bad.join('\n')).toMatch(/"prebuild" is a lifecycle hook/);
   });
+
+  it('takes an npm alias pinned to an exact version, and fails an alias with a range, a tag or no version', () => {
+    const settings = { npmrc: 'ignore-scripts=true\nsave-exact=true\nmin-release-age=7\n', lockfile: true };
+    const aliases = { typescript: 'npm:@typescript/typescript6@6.0.2', '@typescript/native': 'npm:typescript@7.0.2' };
+    expect(supplyChainProblems({ ...settings, pkg: { devDependencies: aliases } })).toEqual([]);
+    const loose = { a: 'npm:@typescript/typescript6@^6.0.2', b: 'npm:typescript@latest', c: 'npm:typescript', d: 'npm:typescript@7.0.2 || 6.0.3' };
+    const bad = supplyChainProblems({ ...settings, pkg: { devDependencies: loose } });
+    expect(bad).toHaveLength(4);
+    for (const name of Object.keys(loose)) expect(bad.join('\n')).toMatch(new RegExp(`devDependencies\\.${name} = .* is not an exact version`));
+  });
 });
 
 describe('npm audit gate', () => {

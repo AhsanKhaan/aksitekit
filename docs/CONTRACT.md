@@ -7,7 +7,7 @@ dependency changed, it writes the request into its report instead.
 **Read first:** `docs/BLUEPRINT.md` (the approved plan). Everything in this repository is generic: no project-specific
 domain, brand, keys or IDs.
 
-**Step C is built** (`docs/TODO-step-c.md`; `lint` is blocked there). Steps A, B and D still call the npm scripts named
+**Step C is built** (`docs/TODO-step-c.md`). Steps A, B and D still call the npm scripts named
 below rather than Step C's files. Whatever the technology, `build.commands.build` ends with
 `node scripts/gen-public-files.mjs --after-build`, which writes `sitemap.xml` and `llms.txt` from the built pages.
 

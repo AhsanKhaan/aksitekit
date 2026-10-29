@@ -50,7 +50,7 @@ export const AI_PATTERNS = [
   { id: 'overused-word', re: /\b(?:additionally|crucial|pivotal|meticulous(?:ly)?|intricate|intricacies|tapestry|showcas(?:e|es|ing)|underscor(?:e|es|ing)|bolstered|garner(?:ed)?|vibrant|robust|enhance(?:s|d)?|leverage[sd]?|harness(?:ing)?|realm|navigat(?:e|ing) the)\b/gi },
   { id: 'sales-language', re: /\b(?:nestled|in the heart of|breathtaking|must-visit|stunning|renowned|groundbreaking|diverse array|boasts)\b/gi },
   { id: 'copula-avoidance', re: /\b(?:serves as an?|stands as an?|functions as an?)\b/gi },
-  { id: 'not-x-but-y', re: /\b(?:it's not (?:just|only|merely) [^.;!?]{1,60}(?:,|;|—) it's|not (?:just|only|merely) [^.;!?]{1,60}\bbut (?:also )?)/gi },
+  { id: 'not-x-but-y', re: /\b(?:it's not (?:just|only|merely) [^.;!?]{1,60}[,;—] it's|not (?:just|only|merely) [^.;!?]{1,60}\bbut (?:also )?)/gi },
   { id: 'em-dash', re: /—/g },
 ];
 /** Hits per 1,000 words at which a page fails, and the fewest words a page needs to be judged by rate. */
@@ -59,7 +59,7 @@ const MIN_WORDS = 150;
 
 /** { hits: [{ id, sample }], per1000, fail } for a page's visible text. */
 export function aiWritingScan(text) {
-  const words = (String(text).match(/[A-Za-z][A-Za-z'’-]*/g) ?? []).length;
+  const words = (String(text).match(/[A-Z][A-Z'’-]*/gi) ?? []).length;
   const hits = [];
   for (const p of AI_PATTERNS) for (const m of String(text).matchAll(p.re)) hits.push({ id: p.id, strong: !!p.strong, sample: m[0].slice(0, 60) });
   const weak = hits.filter((h) => !h.strong).length;
@@ -91,4 +91,4 @@ export function briefProblems(page, brief, briefPath) {
 }
 
 /** Placeholder text that must never reach a visitor (the same list check-repo uses on the sources). */
-export const PLACEHOLDER_TEXT = /\bTODO\b|\bFIXME\b|lorem ipsum|\bcoming soon\b|\[your[ -][a-z]+\]|\{\{[A-Z0-9_]+\}\}/i;
+export const PLACEHOLDER_TEXT = /\bTODO\b|\bFIXME\b|lorem ipsum|\bcoming soon\b|\[your[ -][a-z]+\]|\{\{\w+\}\}/i;

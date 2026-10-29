@@ -13,7 +13,7 @@ export function normalizeDomain(raw) {
     .replace(/:\d+$/, '')
     .replace(/^www\./, '')
     .replace(/\.$/, '');
-  return /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z0-9-]{1,62}$/.test(host) ? host : null;
+  return /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z0-9-]{1,62}$/.test(host) ? host : null;
 }
 
 /** The brand label of a domain: the label left of the public suffix ("tools.sizerpal.co.uk" → "sizerpal"). */

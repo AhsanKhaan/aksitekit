@@ -28,14 +28,14 @@ function protectedBranches() {
   return set;
 }
 
-const SECRET_VAR = /\$(?:\{|env:)?[A-Za-z0-9_]*(?:TOKEN|SECRET|PASSWORD|PASSWD|API_KEY|PRIVATE_KEY|ACCESS_KEY|_PAT)\b/i;
+const SECRET_VAR = /\$(?:\{|env:)?\w*(?:TOKEN|SECRET|PASSWORD|PASSWD|API_KEY|PRIVATE_KEY|ACCESS_KEY|_PAT)\b/i;
 const SECRET_NAME = /(?:TOKEN|SECRET|PASSWORD|PASSWD|API_KEY|PRIVATE_KEY|ACCESS_KEY|_PAT)$/i;
 
 function segments(command) {
   // Message text (heredoc bodies, -m/--body/--title values) is prose, not commands: mask it before splitting, so a
   // commit message that mentions ".env" or "push to main" isn't mistaken for the act.
   const masked = command
-    .replace(/<<-?\s*['"]?(\w+)['"]?[^\n]*\n[\s\S]*?\n\s*\1\s*(?=\n|$)/g, '<<MSG')
+    .replace(/<<-?\s*['"]?(\w+)(?:[^\w\n][^\n]*)?\n(?:[^\n]*\n)+?[^\S\n]*\1[^\S\n]*(?=\n|$)/g, '<<MSG')
     .replace(/(\s(?:-m|--message|--body|--title|--notes|-t|-b)(?:=|\s+))("(?:[^"\\]|\\.)*"|'[^']*')/g, '$1MSG');
   // Split on shell separators; good enough for the commands agents run.
   return masked.split(/\r?\n|&&|\|\||[;|&]/).map((s) => s.trim()).filter(Boolean);
@@ -58,10 +58,10 @@ function checkSecretsInShell(segment) {
   if ((cmd === 'env' || cmd === 'printenv') && toks.length === 1) block('printing the whole environment can expose secrets.');
   if (cmd === 'printenv' && toks.slice(1).some((t) => SECRET_NAME.test(t))) block('printing a secret variable is not allowed.');
   if (cmd === 'set' && toks.length === 1) block('printing the whole environment can expose secrets.');
-  if (/^(get-childitem|gci|dir|ls|get-item)$/.test(cmd) && toks.slice(1).some((t) => /^env:/i.test(t))) {
+  if (/^(?:get-childitem|gci|dir|ls|get-item)$/.test(cmd) && toks.slice(1).some((t) => /^env:/i.test(t))) {
     block('listing env: can expose secrets.');
   }
-  if (/^(echo|printf|write-output|write-host|print)$/.test(cmd) && SECRET_VAR.test(segment)) {
+  if (/^(?:echo|printf|write-output|write-host|print)$/.test(cmd) && SECRET_VAR.test(segment)) {
     block('echoing a secret variable is not allowed. Check whether it is set with a test that prints yes/no instead.');
   }
 }
@@ -78,8 +78,8 @@ function currentBranch(cwd) {
 function checkGit(segment, cwd) {
   const toks = tokens(segment);
   // git must be the command itself (optionally after VAR=value assignments), not a word in some text.
-  const gi = toks.findIndex((t) => !/^[A-Za-z_][A-Za-z0-9_]*=/.test(t));
-  if (gi === -1 || !/^git(\.exe)?$/i.test(toks[gi])) return;
+  const gi = toks.findIndex((t) => !/^[A-Z_]\w*=/i.test(t));
+  if (gi === -1 || !/^git(?:\.exe)?$/i.test(toks[gi])) return;
   let i = gi + 1;
   let gitCwd = cwd;
   while (i < toks.length && toks[i].startsWith('-')) {
@@ -89,7 +89,7 @@ function checkGit(segment, cwd) {
   }
   const sub = (toks[i] || '').toLowerCase();
   const args = toks.slice(i + 1);
-  if (sub === 'commit' && args.some((a) => a === '--no-verify' || /^-[a-zA-Z]*n[a-zA-Z]*$/.test(a))) {
+  if (sub === 'commit' && args.some((a) => a === '--no-verify' || /^-[A-Za-mo-z]*n[A-Za-z]*$/.test(a))) {
     block('never skip git hooks (--no-verify). Fix what the hook reports instead.');
   }
   if (sub !== 'push') return;
@@ -97,7 +97,7 @@ function checkGit(segment, cwd) {
   const flags = args.filter((a) => a.startsWith('-'));
   const positional = args.filter((a) => !a.startsWith('-'));
   if (flags.some((f) => f === '--no-verify')) block('never skip git hooks (--no-verify).');
-  if (flags.some((f) => /^--force/.test(f) || /^-[a-zA-Z]*f[a-zA-Z]*$/.test(f))) {
+  if (flags.some((f) => /^--force/.test(f) || /^-[A-Za-eg-z]*f[A-Za-z]*$/.test(f))) {
     block('force-pushing is not allowed. If history really must be rewritten, the owner does it.');
   }
   if (flags.some((f) => f === '--all' || f === '--mirror')) block(`--all/--mirror would push ${[...prod].join('/')}.`);
@@ -116,7 +116,7 @@ function checkGit(segment, cwd) {
 
 function checkDeploy(segment) {
   const toks = tokens(segment).map((t) => t.toLowerCase());
-  const wi = toks.findIndex((t) => /^wrangler(\.cmd|\.exe)?$/.test(t));
+  const wi = toks.findIndex((t) => /^wrangler(?:\.cmd|\.exe)?$/.test(t));
   if (wi === -1) return;
   const rest = toks.slice(wi + 1);
   if (rest.includes('deploy') || rest.includes('publish') || (rest[0] === 'versions' && rest.includes('upload'))) {
@@ -150,7 +150,7 @@ if (tool === 'Bash' || tool === 'PowerShell') {
   // Cloudflare API MCP (code mode): reads run freely; every write waits for the owner's yes; deletes never run.
   const code = String(ti.code || '');
   const methods = [
-    ...[...code.matchAll(/\bmethod\s*:\s*(["'`])?([A-Za-z]+)?\1?/g)].map((m) => (m[1] && m[2] ? m[2].toUpperCase() : '?')),
+    ...[...code.matchAll(/\bmethod\s*:\s*(["'`])?([A-Za-z]+)?/g)].map((m) => (m[1] && m[2] ? m[2].toUpperCase() : '?')),
     ...[...code.matchAll(/\.(post|put|patch|delete)\s*\(/gi)].map((m) => m[1].toUpperCase()),
   ];
   if (methods.includes('DELETE')) block('deleting anything in Cloudflare is never done by an agent. The owner does it in the dashboard.');

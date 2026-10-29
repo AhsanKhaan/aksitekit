@@ -50,7 +50,7 @@ export function robotsGroups(text) {
   /** @type {{ agents: string[], rules: { allow: boolean, path: string }[] } | null} */
   let current = null;
   for (const raw of String(text).split(/\r?\n/)) {
-    const m = raw.replace(/#.*/, '').trim().match(/^([A-Za-z-]+)\s*:\s*(.*)$/);
+    const m = raw.replace(/#.*/, '').trim().match(/^([A-Z-]+)\s*:\s*((?:\S.*)?)$/i);
     if (!m) continue;
     const key = m[1].toLowerCase();
     if (key === 'user-agent') {

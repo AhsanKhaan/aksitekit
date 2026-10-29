@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 /** RFC 2606 reserves example.com: the template builds against it until /start sets project.domain. */
 export const TEMPLATE_URL = 'https://example.com';
 export const TEMPLATE_NAME = 'Example Site';
-const FOLDER = /^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/;
+const FOLDER = /^[\w.-]+(?:\/[\w.-]+)*$/;
 export const DOMAIN = /^(?!-)[a-z0-9-]{1,63}(?:\.[a-z0-9-]{1,63})+$/;
 
 export function readConfig(file = process.env.FACTORY_CONFIG || 'factory.config.json') {
@@ -118,7 +118,7 @@ export function textOf(html) {
     .replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
 }
 
-export const wordsOf = (text) => String(text).match(/[A-Za-z0-9][A-Za-z0-9'’-]*/g) ?? [];
+export const wordsOf = (text) => String(text).match(/[A-Z0-9][A-Z0-9'’-]*/gi) ?? [];
 
 export function meta(html, name) {
   const head = headOf(html);

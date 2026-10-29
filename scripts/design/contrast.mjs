@@ -15,7 +15,7 @@ export function parseYamlSubset(text) {
   for (const raw of String(text).split(/\r?\n/)) {
     if (!raw.trim() || raw.trim().startsWith('#')) continue;
     const indent = raw.length - raw.trimStart().length;
-    const m = raw.trim().match(/^("[^"]+"|'[^']+'|[^:]+?)\s*:\s*(.*)$/);
+    const m = raw.trim().match(/^("[^"]+"|'[^']+'|[^:]*[^:\s])\s*:\s*((?:\S.*)?)$/);
     if (!m) throw new Error(`can't read the front-matter line "${raw.trim()}"`);
     const key = m[1].replace(/^["']|["']$/g, '');
     let value = m[2].replace(/\s+#.*$/, '').trim();

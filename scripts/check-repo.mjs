@@ -43,17 +43,20 @@ export function fileProblems(path, text) {
   return problems;
 }
 
+// "1.2.3", or an npm alias pinned the same way: "npm:typescript@7.0.2", "npm:@typescript/typescript6@6.0.2".
+const EXACT_VERSION = /^(?:npm:(?:@[a-z0-9][a-z0-9._~-]*\/)?[a-z0-9][a-z0-9._~-]*@)?\d+\.\d+\.\d+$/;
+
 /** Supply-chain settings (CLAUDE.md "Never"). */
 export function supplyChainProblems({ pkg, npmrc, lockfile }) {
   const problems = [];
   for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
     for (const [name, range] of Object.entries(pkg[section] ?? {})) {
-      if (!/^\d+\.\d+\.\d+$/.test(String(range))) problems.push(`package.json ${section}.${name} = "${range}" is not an exact version`);
+      if (!EXACT_VERSION.test(String(range))) problems.push(`package.json ${section}.${name} = "${range}" is not an exact version`);
     }
   }
   const lines = String(npmrc ?? '').split(/\r?\n/).map((l) => l.trim());
   for (const l of NPMRC_LINES) if (!lines.includes(l)) problems.push(`.npmrc must contain "${l}"`);
-  if (!lines.some((l) => /^min-release-age=([7-9]|\d{2,})$/.test(l))) problems.push('.npmrc must set min-release-age to 7 days or more');
+  if (!lines.some((l) => /^min-release-age=(?:[7-9]|\d{2,})$/.test(l))) problems.push('.npmrc must set min-release-age to 7 days or more');
   if (!lockfile) problems.push('package-lock.json is missing');
   for (const name of Object.keys(pkg.scripts ?? {})) {
     if (HOOKS.has(name) || /^(?:pre|post)/.test(name)) problems.push(`package.json script "${name}" is a lifecycle hook (it never runs under ignore-scripts); chain the step explicitly`);
