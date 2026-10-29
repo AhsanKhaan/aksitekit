@@ -19,7 +19,7 @@
     "outputDir": "out",
     "staticOutput": true,
     "commands": {
-      "build": "next build && node scripts/flatten-segments.mjs",
+      "build": "next build && node scripts/flatten-segments.mjs && node scripts/gen-public-files.mjs --after-build",
       "dev": "next dev"
     }
   },

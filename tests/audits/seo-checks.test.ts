@@ -57,7 +57,7 @@ function site(pages: Record<string, string>, exceptions: unknown[] = [], o: Opti
   writeFileSync(join(out, 'og.png'), 'png');
   writeFileSync(join(out, 'llms.txt'), '# llms');
   const config = {
-    outDir: out, siteUrl: SITE, siteName: 'Example Site', siteUrlEnv: 'NO_SUCH_ENV', indexableEnv: 'NO_SUCH_ENV', keywordMap: null,
+    outDir: out, siteUrl: SITE, siteName: 'Example Site', siteUrlEnv: 'NO_SUCH_ENV', indexableEnv: 'NO_SUCH_ENV', keywordMap: null as string | null,
     authorPathPrefix: '/authors/', editorialPath: '/editorial-policy/', disclosurePath: '/disclosure/', searchBots: ['Googlebot'],
     thresholds: {
       titleMinChars: 30, titleMaxChars: 60, titleMaxPx: 580, descMinChars: 70, descMaxChars: 160, descMaxPx: 920, densityMinWords: 50,

@@ -1,0 +1,54 @@
+{
+  "$comment": "Template example page (\"example\": true): an instance page, one worked case of its parent tool. Every count below comes from lib/tools/length.ts (tests/length.test.ts checks them).",
+  "url": "/handbook/length-checker/sample-title/",
+  "kind": "instance",
+  "example": true,
+  "name": "A sample title, checked",
+  "title": "Sample title checked: 78 characters, 18 too many",
+  "description": "A worked example: a 78-character page title, checked against the 60-character limit, then cut to 50 without losing what it says.",
+  "h1": "Checking a sample title that runs too long",
+  "updated": "2026-10-29",
+  "intro": [
+    "The sample is “How the starter site is planned, written, built, checked and finally published”. It has 78 characters and 12 words, so it runs 18 past the limit of 60."
+  ],
+  "answer": { "label": "The sample:", "value": "78 characters, 18 over the limit" },
+  "tool": "length-checker",
+  "toolPreset": { "kind": "title", "text": "How the starter site is planned, written, built, checked and finally published" },
+  "sections": [
+    {
+      "heading": "Where the extra length comes from",
+      "blocks": [
+        { "p": "The sample lists five steps where three would do. “Written” and “published” repeat what the page itself will explain, and “finally” adds eight characters, counting its space, without adding meaning." }
+      ]
+    },
+    {
+      "heading": "Cutting it to fit",
+      "blocks": [
+        {
+          "ol": [
+            "Drop “finally”, which says nothing the order of the list doesn't. That leaves 70.",
+            "Drop “written” and “published”, which the page covers in its text. That leaves 50.",
+            "Read what is left as a searcher would. “How the starter site is planned, built and checked” still says what the page is about."
+          ]
+        },
+        {
+          "table": {
+            "caption": "The sample before and after",
+            "head": ["Version", "Characters", "Words", "Fits 30–60?"],
+            "rows": [["Original", "78", "12", "No, 18 over"], ["Without “finally”", "70", "11", "No, 10 over"], ["Final", "50", "9", "Yes"]]
+          }
+        }
+      ]
+    },
+    {
+      "heading": "Why not stop at exactly 60?",
+      "blocks": [
+        { "p": "Nothing requires using every character allowed. Results pages also measure width rather than count, and a line near 50 leaves room for wide letters, which the SEO gate checks separately in pixels." },
+        { "p": "The shorter version is easier to scan too. Its first five words carry the subject, and the three verbs after them say what a reader will learn." }
+      ]
+    }
+  ],
+  "faq": [
+    { "q": "Can I check a meta description the same way?", "a": "Yes. Pick Meta description in the checker above; the range becomes 70 to 160 characters and the advice changes to match." }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "$comment": "Template example page (\"example\": true): a hub that explains a topic and links to its guides. It describes what the starter's own components render.",
+  "url": "/handbook/page-anatomy/",
+  "kind": "hub",
+  "example": true,
+  "name": "Page anatomy",
+  "title": "Page anatomy: the parts every built page shares",
+  "description": "The parts every page built from this kit shares: headings, breadcrumbs, a byline, structured data, and the links that tie it to the rest of the site.",
+  "h1": "Page anatomy",
+  "updated": "2026-10-29",
+  "intro": [
+    "Whatever its type, everything the kit builds is put together from the same parts. They serve two readers at once: the person reading, and the search engines and assistants that decide whether to show it."
+  ],
+  "sections": [
+    {
+      "heading": "At the top",
+      "blocks": [
+        {
+          "ul": [
+            "A skip link, so keyboard users can jump straight to the content.",
+            "The site name and the main navigation, with a link to every section.",
+            "Breadcrumbs that mirror the address: Home, then the section, then each level down."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "In the content",
+      "blocks": [
+        {
+          "ul": [
+            "Exactly one H1, which states what the reader will find.",
+            "A byline with the author's name and the date the text last changed. The date moves only when the words do, never on a rebuild.",
+            "Headings in order, with no level skipped, so the outline makes sense to a screen reader.",
+            "Tables with header cells and a caption, and any repeated unit written once in the header."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Behind the scenes",
+      "blocks": [
+        { "p": "Each one carries a title and a description of the right length, a canonical link to its own address, and a share image made at build time." },
+        { "p": "Structured data describes it in JSON-LD: a CollectionPage for hubs, a WebApplication for tools and an Article for guides, with the breadcrumbs and any questions marked up too. The visible text and the structured data say the same thing, because both come from one content file." }
+      ]
+    },
+    {
+      "heading": "Links in and out",
+      "blocks": [
+        { "p": "Nothing stands alone. Each address has at least three links pointing to it from elsewhere on the site, sits no more than three clicks from home, and links back to its parent and across to related pages. The build checks all of this and fails when a link is missing." }
+      ]
+    },
+    {
+      "heading": "At the bottom",
+      "blocks": [
+        { "p": "The footer links to About, Contact, the privacy policy, the terms and the editorial policy, to the author's own profile and to llms.txt, and it carries a short disclaimer. Both the SEO gate and the AdSense gate look for these everywhere, since readers and reviewers both want to know who stands behind what they read." }
+      ]
+    }
+  ]
+}
