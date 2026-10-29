@@ -42,14 +42,17 @@ copy of this repository instead of a long chat.
 | Step A: rules, 18 agents, 5 skills, gate runner, hooks, trusted-source lock, MCP config, doc templates | ✅ done | `CLAUDE.md`, `AGENTS.md`, `.claude/`, `skills.lock.json`, `.mcp.json`, `docs/` |
 | Step B: keyword pipeline (ingest → select → cluster), 55 tests [M] | ✅ done | `scripts/research/`, `research/`, `tests/research/` |
 | Step D: GitHub Actions (CI, security, Lighthouse, pre-prod, deploys, live check), Dependabot | ✅ done (not yet run on GitHub) | `.github/` |
-| **Step C: starter website and most gates** | ⏳ **deferred** | `docs/TODO-step-c.md` |
+| Step C: Next.js starter (one example page of each type), every gate script, 268 unit and 41 e2e tests [M: 2026-10-29 runs] | ✅ done; `lint` ⛔ blocked (below) | `app/`, `components/`, `lib/`, `content/`, `scripts/`, `tests/`, `docs/TODO-step-c.md` |
 
-**Until Step C is built,** `npm run verify` fails locally because the scripts it calls don't exist yet. On GitHub, CI
-runs in **template mode** instead: the site jobs (build, lint, e2e, Lighthouse, pre-production, deploys) show as
-*skipped*, and the template's own checks (tests, helper self-tests, gitleaks, Semgrep, npm audit) run and pass. What
-works today: the keyword pipeline (`npm run research:all`), its tests (`npx vitest run tests/research`),
-the gate runner (`node .claude/skills/gate/gate.mjs status`) and the CI helper self-tests
-(`node .github/scripts/selftest.mjs`).
+**Lint is blocked.** `npm run lint` can't run on the locked versions: eslint-config-next 16.4.2 loads typescript-eslint,
+which refuses TypeScript 7.0, and its React, import and accessibility plugins accept ESLint 9 at most [M: `npm run
+lint` and `npm view`, 2026-10-29]. The owner picks the fix (`docs/TODO-step-c.md` → Blocked). Until then `npm run
+verify` stops at lint, and every step after it passes when run on its own: typecheck, test, build (production-gate,
+check-out, the SEO gate with 0 fails) and test:e2e [M: 2026-10-29]. On the bare template (no `project.domain` yet), run
+the build with `SITE_URL=https://example.com`: the SEO gate refuses to guess a site URL.
+
+On GitHub, CI runs in **template mode**: the site jobs (build, lint, e2e, Lighthouse, pre-production, deploys) show as
+*skipped*, and the template's own checks (tests, helper self-tests, gitleaks, Semgrep, npm audit) run and pass.
 
 The approved design is `docs/BLUEPRINT.md`; who owns which files is `docs/CONTRACT.md`.
 
@@ -80,7 +83,7 @@ copy:
 | You choose | What happens |
 |---|---|
 | **Next.js** | The built-in starter (`docs/TODO-step-c.md` §1): static export to `out/`, the shipped commands, ready to fill. |
-| **Another technology** (Astro, Eleventy, Hugo, Vite, SvelteKit, Remix, …) | The architect sets its build and dev commands and output folder in `factory.config.json` → `build`, lists the npm packages it needs (supply-chain checklist), and the coder builds the site in it. |
+| **Another technology** (Astro, Eleventy, Hugo, Vite, SvelteKit, Remix, …) | The architect sets its build and dev commands and output folder in `factory.config.json` → `build`, lists the npm packages it needs (supply-chain checklist), and the coder builds the site in it. The build command ends with `node scripts/gen-public-files.mjs --after-build`, which writes `sitemap.xml` and `llms.txt` from the pages it built. |
 | **Not sure** | The architect recommends one at the architecture stage, from what your keyword map needs, and you decide. |
 
 Whatever you pick, the rest stays the same: the agents, keyword pipeline, content and SEO rules, security checks,
@@ -325,19 +328,19 @@ lens for offers and distribution ideas.
 ---
 
 ## 13. npm scripts
-The names are frozen in `docs/CONTRACT.md`. "Step C" means not implemented yet (`docs/TODO-step-c.md`).
+The names are frozen in `docs/CONTRACT.md`. Every script exists; ⛔ marks the one that can't run yet.
 
 | Script | Does | State |
 |---|---|---|
 | `research:ingest` / `research:select` / `research:cluster` / `research:all` | The keyword pipeline (§7) | ✅ |
-| `dev`, `build`, `serve` | Dev server and production build in **your chosen technology** (`scripts/framework.mjs` runs `build.commands`; the build adds `production-gate`, `check-out` and the SEO gate), local static server for `build.outputDir` | `framework.mjs` ✅; the rest Step C |
-| `lint`, `typecheck`, `test`, `test:e2e` | ESLint, TypeScript, Vitest, Playwright | configs in Step C; `tests/research` already runs with `npx vitest run tests/research` |
-| `check:repo`, `check:release`, `check:live`, `check:security` | Repo hygiene, publish gate, live-site check, security checks | Step C |
+| `dev`, `build`, `serve` | Dev server and production build in **your chosen technology** (`scripts/framework.mjs` runs `build.commands`; the build adds `production-gate`, `check-out` and the SEO gate), local static server for `build.outputDir` | ✅ |
+| `lint`, `typecheck`, `test`, `test:e2e` | ESLint, TypeScript, Vitest, Playwright | `typecheck`, `test`, `test:e2e` ✅; `lint` ⛔ (§1) |
+| `check:repo`, `check:release`, `check:live`, `check:security` | Repo hygiene, publish gate, live-site check, security checks | ✅ (`check:release` fails on the template by design: example pages, no briefs) |
 | `audit:seo`, `check:seo-live` | The on-page SEO gate on the build output (also run by `build`), and its live checks against a URL (`docs/SEO-GATE.md`) | ✅ (`audit:seo` needs a build) |
-| `audit`, `audit:perf`, `audit:a11y`, `audit:unique`, `audit:ga`, `audit:lighthouse` | CVE gate, lab speed, accessibility, duplicate text, GA4 privacy, Lighthouse CI | Step C (`audit:lighthouse` runs a pinned `npx @lhci/cli@0.15.1`) |
-| `gate:adsense`, `gate:design` | AdSense gate, contrast gate | Step C |
-| `growth:today` | Today's growth task | Step C |
-| `verify` | check:repo → audit → lint → typecheck → test → build → test:e2e | needs Step C |
+| `audit`, `audit:perf`, `audit:a11y`, `audit:unique`, `audit:ga`, `audit:lighthouse` | CVE gate, lab speed, accessibility, duplicate text, GA4 privacy, Lighthouse CI | ✅ (`audit:ga` skips without a GA4 ID; `audit:lighthouse` runs a pinned `npx @lhci/cli@0.15.1`) |
+| `gate:adsense`, `gate:design` | AdSense gate, contrast gate | ✅ (NO-GO on the template's example pages; `gate:design` reads `docs/DESIGN.md`, written at the design stage) |
+| `growth:today` | Today's growth task | ✅ (reads `growth/plan.json`, written at the growth stage) |
+| `verify` | check:repo → audit → lint → typecheck → test → build → test:e2e | stops at `lint` until it's unblocked |
 
 ---
 
@@ -362,6 +365,11 @@ aksitekit/
 │   ├── zap/rules.tsv        reviewed ZAP exceptions
 │   ├── dependabot.yml
 │   └── README.md            CI/CD details, secrets, variables, private-repo caveats
+├── app/, components/, lib/  the Next.js starter: page templates, trust pages, JSON-LD, consent, the example tool
+├── content/                 site facts (site.json), page text (pages/*.json), the example keyword map (examples/)
+├── scripts/                 the gates (production-gate, check-out, check-repo, audit, check-live, check-security,
+│                            adsense-gate), public files, the local server, design/, growth/, audits/, lib/
+├── tests/                   unit tests with a planted failing case per gate; e2e/ for Playwright
 ├── research/
 │   ├── inputs/              your files (competitors.csv, kp/*.csv, kd.csv) + README export guide + fake examples
 │   └── out/                 generated keywords, selection, keyword map
@@ -370,7 +378,7 @@ aksitekit/
 ├── docs/
 │   ├── BLUEPRINT.md         the approved design
 │   ├── CONTRACT.md          file ownership, npm scripts, data formats
-│   ├── TODO-step-c.md       starter website and gates, still to build
+│   ├── TODO-step-c.md       starter website and gates: what's built, what's blocked
 │   ├── SKILLS.md, MCP.md    trusted sources and MCP servers explained
 │   └── templates/           PRD, DESIGN, ARCHITECTURE, SECURITY, CONTENT-STRATEGY, GROWTH-90
 └── growth/                  90-day plan data (generated)
@@ -410,5 +418,7 @@ The full list is in `CLAUDE.md`. The essentials:
 - No check can guarantee AdSense approval or rankings; Google decides both.
 - DR and keyword difficulty come from you or a paid tool; the template ships neither.
 - In template mode CI checks only what exists (tests, helper self-tests, secret and code scans); the site jobs start once
-  Step C and a project exist.
-- The starter website (Step C) is a to-do; each project's look comes from its designer stage.
+  a project exists.
+- The starter website is generic on purpose: its example pages describe the kit itself and are replaced at the build
+  stage, and each project's look comes from its designer stage.
+- `npm run lint` is blocked until the owner picks a fix for ESLint 10 and TypeScript 7 (§1).

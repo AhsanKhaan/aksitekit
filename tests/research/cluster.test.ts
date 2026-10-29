@@ -118,7 +118,7 @@ describe('buildMap', () => {
     for (const r of selected) expect(owners.get(r.keyword), r.keyword).toHaveLength(1);
     expect(owners.size).toBe(selected.length);
     expect(map.discarded).toEqual([{ keyword: 'online calculator', reason: 'generic', detail: expect.any(String) }]);
-    expect(checkMap({ pendingKd: 0, ...map }, { cap: 10, selected })).toEqual([]);
+    expect(checkMap({ pendingKd: 0, ...map } as Parameters<typeof checkMap>[0], { cap: 10, selected })).toEqual([]);
     for (const p of map.pages) expect(p.url).toMatch(URL_PATTERN);
   });
 
@@ -137,7 +137,7 @@ describe('buildMap', () => {
       ['sizer for example widgets', 'secondary-cap'],
       ['the example widget sizer', 'secondary-cap'],
     ]);
-    expect(checkMap({ pendingKd: 0, ...capped }, { cap: 2, selected: variants })).toEqual([]);
+    expect(checkMap({ pendingKd: 0, ...capped } as Parameters<typeof checkMap>[0], { cap: 2, selected: variants })).toEqual([]);
     expect(buildMap(variants, { cap: 0 }).pages[0].secondary).toEqual([]);
   });
 
@@ -162,15 +162,15 @@ describe('checkMap (the gate)', () => {
 
   it('fails when two URLs share a primary keyword (cannibalization)', () => {
     const map = base();
-    map.pages.push({ ...map.pages[0], url: '/widget/widget-sizer-2/', cluster: 'widget-sizer-2', primary: 'Example  Widget Sizer', secondary: [] });
+    map.pages.push({ ...map.pages[0]!, url: '/widget/widget-sizer-2/', cluster: 'widget-sizer-2', primary: 'Example  Widget Sizer', secondary: [] });
     const v = checkMap(map, { cap: 10 });
     expect(v.some((m) => m.startsWith('cannibalization: /widget/example-widget-sizer/ and /widget/widget-sizer-2/ share the primary keyword'))).toBe(true);
   });
 
   it('fails on stuffing, double owners, bad URLs and missing selected keywords', () => {
     const map = base();
-    map.pages[0].secondary = ['a', 'b', 'c', 'example widget sizer chart'];
-    map.pages[1].url = '/Widget/x/';
+    map.pages[0]!.secondary = ['a', 'b', 'c', 'example widget sizer chart'];
+    map.pages[1]!.url = '/Widget/x/';
     const v = checkMap(map, { cap: 3, selected: [{ keyword: 'example widget sizer' }, { keyword: 'example gizmo' }] });
     expect(v.join('\n')).toMatch(/4 secondary keywords is over maxSecondaryKeywordsPerPage 3/);
     expect(v.join('\n')).toMatch(/"example widget sizer chart" is owned twice/);

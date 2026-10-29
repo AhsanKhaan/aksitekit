@@ -1,0 +1,58 @@
+{
+  "$comment": "Template example page (\"example\": true): a tool page. The counting and every example below come from lib/tools/length.ts, which tests/length.test.ts checks.",
+  "url": "/handbook/length-checker/",
+  "kind": "tool",
+  "example": true,
+  "name": "Length checker",
+  "title": "Length checker for titles and meta descriptions",
+  "description": "Check a page title (30–60 characters) or a meta description (70–160) against the limits this kit enforces, with advice on what to add or cut.",
+  "h1": "Title and description length checker",
+  "updated": "2026-10-29",
+  "intro": [
+    "Paste a page title or a meta description, and the checker counts it the way the kit's SEO gate does. It says whether the text fits, and by how much it misses if it doesn't. Everything runs inside your browser, so what you type stays on your device."
+  ],
+  "tool": "length-checker",
+  "toolPreset": { "kind": "title", "text": "Length checker for titles and meta descriptions" },
+  "sections": [
+    {
+      "heading": "The limits and why they exist",
+      "blocks": [
+        {
+          "ul": [
+            "A page title needs 30 to 60 characters. Very short ones leave out words a searcher would look for; long ones get cut off with an ellipsis in search results.",
+            "A meta description needs 70 to 160 characters. It is the summary a search result may show under the heading, so it should say what the reader gets.",
+            "In this kit both ranges are hard rules: a content file outside them fails the build before any HTML is written."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "How the counting works",
+      "blocks": [
+        { "p": "Runs of spaces count as one, and spaces at either end don't count, because that is how a browser shows the text. Every other character counts once, including punctuation and the spaces between words. A few symbols, such as some emoji, count as two, exactly as they do in the gate." }
+      ]
+    },
+    {
+      "heading": "Characters are not the whole story",
+      "blocks": [
+        { "p": "Search results have a fixed width, and letters differ in size: a W takes far more room than an i. The SEO gate also estimates the width in pixels and warns past about 580 pixels for a heading in results, or 920 for a summary. Text that passes here can still draw that warning if it is full of wide letters." }
+      ]
+    },
+    {
+      "heading": "Writing one that fits",
+      "blocks": [
+        {
+          "ol": [
+            "Start with the words someone would search for, which are usually the words in the address.",
+            "Add the one detail that sets the page apart, such as who it is for or what it shows.",
+            "Stop there. The kit never adds the site name to a content page on its own, so all 60 characters are yours."
+          ]
+        }
+      ]
+    }
+  ],
+  "faq": [
+    { "q": "Why does the build fail instead of warning?", "a": "Text outside its range is a few seconds' fix in a content file, so the kit treats it as an error. Catching it at build time means no page goes live with a cut-off heading in search results." },
+    { "q": "Does the checker send my text anywhere?", "a": "No. It runs in your browser and makes no network requests." }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "$comment": "Template example page (\"example\": true): the section hub for the example keyword map in content/examples/. Replace it with the project's own sections.",
+  "url": "/handbook/",
+  "kind": "category",
+  "example": true,
+  "name": "Handbook",
+  "title": "Handbook: how the starter site is built and checked",
+  "description": "How the starter is put together: each page type, what it is for, where it sits in the address scheme, and the checks it must pass.",
+  "h1": "The starter handbook",
+  "updated": "2026-10-29",
+  "intro": [
+    "The kit builds a small set of page types, and every page on a site is one of them. Knowing the type tells you its address, its layout and the rules it is held to.",
+    "This section holds one of each, written about the kit itself so that no niche is implied. A real project keeps the structure and replaces the words."
+  ],
+  "sections": [
+    {
+      "heading": "The page types",
+      "blocks": [
+        {
+          "table": {
+            "caption": "Page types and their addresses",
+            "head": ["Type", "Address", "What it is for"],
+            "rows": [
+              ["Home", "/", "Introduces the site and links to every section"],
+              ["Section hub", "/section/", "Lists everything in one section"],
+              ["Tool", "/section/tool/", "Does a job in the browser, with the working shown"],
+              ["Worked example", "/section/tool/case/", "Settles one common case of a tool in full"],
+              ["Topic hub", "/section/topic/", "Explains a topic and links to its guides"],
+              ["Guide", "/section/topic/question/", "Answers one question in depth"],
+              ["Trust pages", "/about/, /contact/ and three more", "Say who runs the site and how it handles data"]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "heading": "Addresses follow fixed rules",
+      "blocks": [
+        { "p": "Every address is lowercase, ends with a slash and is at most three levels deep. Breadcrumbs mirror it, so a reader always sees where they are." },
+        { "p": "The research decides each address once. A content file with no matching row in the keyword map fails the build, and so does a worked example or guide whose parent is missing, because it would have no way in." }
+      ]
+    },
+    {
+      "heading": "Word floors, never targets",
+      "blocks": [
+        { "p": "Each type has a minimum amount of text before the AdSense review will pass it: 300 words for hubs and the home page, 600 for tools, 800 for guides, and 200 for trust pages. These are floors to reach with useful detail. Padding a page to reach one is against the kit's own rules." }
+      ]
+    }
+  ]
+}

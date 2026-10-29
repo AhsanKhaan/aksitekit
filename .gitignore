@@ -28,3 +28,10 @@ Thumbs.db
 
 # Claude Code worktrees for parallel sessions (temporary checkouts, never committed)
 .claude/worktrees/
+
+# generated before each build by scripts/gen-public-files.mjs (edit the generator, not these)
+public/robots.txt
+public/_headers
+
+# Lighthouse CI reports
+.lighthouseci/

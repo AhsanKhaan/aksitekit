@@ -122,8 +122,8 @@ describe('parseKpExport', () => {
       source: 'fake-a.example',
       line: 4,
     });
-    expect(rows[0].monthly).toHaveLength(12);
-    expect(rows[0].monthly[0]).toEqual({ month: '2025-10', min: 1000, max: 10000 });
+    expect(rows[0]!.monthly).toHaveLength(12);
+    expect(rows[0]!.monthly[0]).toEqual({ month: '2025-10', min: 1000, max: 10000 });
     expect(rows[1]).toMatchObject({
       volume: { min: 2400, max: 2400, label: 'M' },
       seasonality: 1.21,
@@ -137,7 +137,7 @@ describe('parseKpExport', () => {
   it('reads a UTF-8 comma CSV without title rows', () => {
     const { meta, rows } = parseKpExport(Buffer.from(utf8Csv(fakeRows)), { file: 'kp/b.csv', source: 'b' });
     expect(meta).toMatchObject({ encoding: 'utf-8', delimiter: ',', rows: 2 });
-    expect(rows[0].bid.high).toBe(1234.5);
+    expect(rows[0]!.bid.high).toBe(1234.5);
   });
 
   it('fails without exactly 12 monthly columns', () => {

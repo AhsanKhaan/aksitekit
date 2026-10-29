@@ -1,0 +1,43 @@
+{
+  "$comment": "Template example page (\"example\": true). The coder replaces it with the project's home page from the content strategy; production-gate.mjs fails a production build while it remains.",
+  "url": "/",
+  "kind": "home",
+  "example": true,
+  "name": "Home",
+  "title": "Example Site: a starter built from AK Site Kit",
+  "description": "The example home page of AK Site Kit: a handbook of the page types it builds, a working tool, and the checks every page passes before launch.",
+  "h1": "What a site built from the kit looks like",
+  "updated": "2026-10-29",
+  "intro": [
+    "This is the example that ships with AK Site Kit. Every new project starts from it, so the build, the tests and the quality gates have real pages to check from the first day.",
+    "Each kind of page the kit builds appears here once: a section hub, a tool, a worked example of that tool, a topic hub and a guide. A project replaces all of them with its own pages, written from its own research."
+  ],
+  "sections": [
+    {
+      "heading": "What is here",
+      "blocks": [
+        {
+          "ul": [
+            "The [handbook](/handbook/) lists every page type and what each one is for.",
+            "The [length checker](/handbook/length-checker/) tests a page title or meta description against the limits the kit enforces.",
+            "[Page anatomy](/handbook/page-anatomy/) names the parts every built page shares, and its guide follows one page from research to launch."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "What every page passes",
+      "blocks": [
+        { "p": "Before anything goes live, scripts read each built page: one title and description of the right length, one H1, a canonical address that points to itself, a share image, at least three links from other pages, and no page more than three clicks from home." },
+        { "p": "The on-page SEO gate then runs a long list of further checks, from keyword stuffing to heading order, and a single failure stops the deploy. Nobody has to remember the rules, because the build refuses to forget them." }
+      ]
+    },
+    {
+      "heading": "Replacing the example",
+      "blocks": [
+        { "p": "The keyword stage writes the project's keyword map, which decides which addresses exist. The coder then deletes these pages and writes the real ones from their briefs." },
+        { "p": "A production build refuses to run while any page marked as an example remains, so none of this text can reach a live site by accident." }
+      ]
+    }
+  ]
+}
