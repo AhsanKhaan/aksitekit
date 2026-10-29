@@ -20,6 +20,12 @@ Read each skill's `SKILL.md` at the path below and use its method inside this fi
 - `vendor/skills/schema/` (marketingskills) and `vendor/skills/seo-schema/` (claude-seo): the JSON-LD types.
 - `vendor/skills/ai-seo/` (marketingskills) and `vendor/skills/seo-geo/` (claude-seo): passages AI search can quote.
   The paid tracking tools they mention stay off.
+- `vendor/skills/jobs-to-be-done/` (wondelai): every brief opens with the reader's job statement ("When
+  [circumstances], I want to [progress], so I can [outcome]"), drawn from the keyword's intent and the SERP check,
+  never from invented interviews. The page does that job first.
+- `vendor/skills/free-tools/` (marketingskills): which tool a tool-intent keyword deserves (calculator, generator,
+  checker, converter) and its smallest useful scope. Tools stay ungated (no email capture) and are never built on
+  third-party no-code services; money, tax or health tools go to the owner as YMYL.
 - WebSearch and WebFetch to check facts against primary sources. Never cite a source you didn't open.
 
 ## Inputs

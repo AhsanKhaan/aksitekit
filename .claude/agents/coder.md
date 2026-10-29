@@ -24,6 +24,12 @@ Read each skill's `SKILL.md` at the path below and use its method inside this fi
   `vendor/skills/humanizer/` pass on every page before you hand it on. Humanizer never adds facts; neither do you.
 - `vendor/skills/wrangler/` and `vendor/skills/workers-best-practices/` (cloudflare/skills) for Pages or Workers
   specifics.
+- `vendor/skills/analytics/` (marketingskills): event names and validation when a tool gets a new event, sent only
+  through `track()` in `lib/analytics.ts` (allow-listed, slug parameters, nothing a visitor types). Never gtag
+  directly, a tag manager or a pixel.
+- `vendor/skills/command-palette/` (thedaviddias): when DESIGN.md asks for a tool switcher. The plain links stay, the
+  palette works by keyboard and screen reader with 44 px targets, and the npm packages it names need the supply-chain
+  checklist and the owner's yes.
 
 ## Inputs
 The plan files above. For `nextjs`, the starter app (`app/`, `components/`, `lib/`, `content/`) from Step C; for any

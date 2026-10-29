@@ -22,6 +22,16 @@ Read each skill's `SKILL.md` at the path below and use its method inside this fi
 - `vendor/skills/accessibility/` (web-quality-skills): WCAG 2.2 AA contrast, focus, targets and motion.
 - `vendor/skills/replica-design/` (replica-skill) only to describe a competitor's layout patterns, never to reproduce
   their look.
+- `vendor/skills/jobs-to-be-done/` (wondelai): the job each page type is hired for, from its intent in the keyword map
+  ("When [circumstances], I want to [progress], so I can [outcome]"). Write one job statement per page type in
+  DESIGN.md → Layout and design for it: on a tool page the input and the result come first, above the fold on a phone.
+  Framework only; never invented interviews or quotes.
+- `vendor/skills/cro/` (marketingskills): read "conversion" as the visitor finishing the job. Use its hierarchy and
+  friction checks (one primary action, nothing between the visitor and the tool). Never invented testimonials, logos,
+  counts or urgency, never a popup over a tool, and the footer's trust links stay.
+- `vendor/skills/command-palette/` (thedaviddias): only for a site with enough tools to need a switcher, as an extra
+  way in beside the header, breadcrumbs and hubs, never instead of them (the gates check those links). Keyboard and
+  screen reader first, 44 px targets.
 - awesome-design-md (VoltAgent): example DESIGN.md files, for format only; never copy a brand's palette or identity.
 - The DESIGN.md spec: google-labs-code/design.md (`docs/spec.md`), linted with its CLI.
 - Not used: `design-system` and `ui-styling` (mrgoonie/claudekit-skills, excluded: no license) and genjutsu

@@ -1,7 +1,7 @@
 {
   "$comment": "Trusted sources for skills, plugins, MCP servers and GitHub Actions. Explained in docs/SKILLS.md. commit = the commit reviewed on the reviewed date. vendored = the skill folders copied byte for byte from that commit into vendorDir, with the sha256 of every file; npm run check:skills verifies them. For GitHub Actions, workflows pin release.commit (the newest release tag) by full SHA. Every vendored skill also records audit (the skills.sh scanners: Gen Agent Trust Hub, Socket, Snyk; the rule is in docs/SKILLS.md) and discovery (how it was found; from 2026-10-27 on, through Skillselion).",
   "lockVersion": 2,
-  "reviewed": "2026-10-28",
+  "reviewed": "2026-10-29",
   "statuses": {
     "approved": "Agents may use it, at the pinned commit",
     "approved-with-limits": "Agents may use it within the limits in notes",
@@ -1263,16 +1263,19 @@
       "url": "https://github.com/coreyhaines31/marketingskills",
       "kind": "skills",
       "tier": "community",
-      "status": "approved",
+      "status": "approved-with-limits",
       "license": "MIT",
       "purpose": "Marketing and SEO skills",
       "skills": [
         "ai-seo",
+        "analytics",
         "competitors",
         "content-strategy",
         "copy-editing",
         "copywriting",
+        "cro",
         "customer-research",
+        "free-tools",
         "marketing-council",
         "marketing-ideas",
         "marketing-loops",
@@ -1287,6 +1290,7 @@
         "coder",
         "competitor-recon",
         "content-strategist",
+        "designer",
         "doc-generator",
         "growth-strategist",
         "keyword-researcher",
@@ -1295,7 +1299,7 @@
       "defaultBranch": "main",
       "commit": "e43fe6f03ceffed8bd79147de98d1c0c33227021",
       "commitDate": "2026-10-15T23:59:36Z",
-      "reviewed": "2026-10-25",
+      "reviewed": "2026-10-29",
       "vendored": {
         "ai-seo": {
           "usedBy": [
@@ -1688,6 +1692,201 @@
             "via": "find-skills",
             "date": "2026-10-25",
             "note": "Chosen in the 2026-10-25 review (find-skills' directory search). Scored through Skillselion's skills.sh audit view on 2026-10-27."
+          }
+        },
+        "analytics": {
+          "usedBy": [
+            "coder",
+            "growth-strategist"
+          ],
+          "upstreamPath": "skills/analytics",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/event-library.md": "efc7bdb0a7b3efdea9e67ff0d1bc894dcf89ec9b9b8f3414f123d12bee109412",
+            "references/ga4-implementation.md": "f33fd6db0cbdb1bdc183af5f52bedd956d14680e54bca2e2c3917de29698636e",
+            "references/gtm-implementation.md": "112da33832439d2ae0b2729e5031fc927df444cd1ae8eb20542d45c1b5690f52",
+            "SKILL.md": "8e9d21e0d6ff4584ad27a7998604b7d96ad6bfb425559b46893263e17d380089"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/analytics",
+            "checked": "2026-10-29",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "analytics tracking",
+            "date": "2026-10-29",
+            "note": "Skillselion listed the pre-v2.0 name analytics-tracking next to analytics; marketingskills v2.0 (2026-05-13) renamed it. Vendored as analytics at the existing pin."
+          }
+        },
+        "cro": {
+          "usedBy": [
+            "designer",
+            "growth-strategist"
+          ],
+          "upstreamPath": "skills/cro",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/experiments.md": "bbcc356c0af36cfaa4556bf9e929deac30c65cafb37f909d7c51d4777fe254ca",
+            "references/form.md": "e3115b0fdfb3968915b8e3acdc32a6e5f1d2c6a335ebbed25bee9b601ec573d7",
+            "SKILL.md": "199016bec3b44bc6a7507b111b6028f6550cc852cd54c7d0df789f15d6f814c4"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/cro",
+            "checked": "2026-10-29",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "warn",
+            "findings": [
+              "W011"
+            ],
+            "verdict": "pass-w011"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "page cro",
+            "date": "2026-10-29",
+            "note": "Skillselion listed page-cro, which marketingskills v2.0 (2026-05-13) merged into cro. Vendored as cro at the existing pin."
+          }
+        },
+        "free-tools": {
+          "usedBy": [
+            "content-strategist",
+            "keyword-researcher"
+          ],
+          "upstreamPath": "skills/free-tools",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+            "references/tool-benchmarks.md": "833f8ba49193b6b31472d02855fe72b77a659ab31f289516c7e89e3357d1fa1f",
+            "references/tool-types.md": "3869418a784ec94e95528dbe3f39cd2571cff6f7649e5e0be28d675be61d5a3f",
+            "SKILL.md": "609158ee26c6005cf6138635a1a8ac4928322651c82ba13584db19d610d61e6b"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "coreyhaines31/marketingskills/free-tools",
+            "checked": "2026-10-29",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "free tools",
+            "date": "2026-10-29"
+          }
+        }
+      },
+      "notes": "analytics, cro and free-tools (added 2026-10-29) are written for SaaS and lead generation; on an AdSense site the limits in each agent file win. analytics: GA4 only through lib/analytics.ts (allow-listed slug parameters, no query strings or typed values, no user IDs, Google Signals off, Enhanced measurement form interactions off), no tag manager, pixels, remarketing audiences or paid analytics tools. cro: conversion means the visitor finishing the task; never invented testimonials, logos, counts or urgency, never popups over a tool, and the trust links in the footer stay. free-tools: tools stay ungated (no email capture), no third-party no-code tools, and money, tax or health calculators go to the owner as YMYL. All three name marketingskills skills, a tools registry and integration guides that aren't vendored: ignore those references."
+    },
+    {
+      "repo": "wondelai/skills",
+      "url": "https://github.com/wondelai/skills",
+      "kind": "skills",
+      "tier": "community",
+      "status": "approved-with-limits",
+      "license": "MIT",
+      "purpose": "Jobs to Be Done: the progress a visitor wants to make, in their circumstances",
+      "skills": [
+        "jobs-to-be-done"
+      ],
+      "usedBy": [
+        "content-strategist",
+        "designer"
+      ],
+      "defaultBranch": "main",
+      "commit": "c172996495bed0fcd26896a9416b2093fd7073f0",
+      "commitDate": "2026-09-10T21:47:58Z",
+      "reviewed": "2026-10-29",
+      "notes": "Framework only. Job statements come from the keyword map, the SERP check and real readers the owner talks to; never invented interviews or quotes. The pricing and churn sections are for products and don't apply to a free site. The Further Reading link carries an Amazon affiliate tag: never follow it or repeat it on a site. It names other wondelai skills (obviously-awesome, design-sprint, mom-test) that aren't vendored: ignore those references.",
+      "vendored": {
+        "jobs-to-be-done": {
+          "usedBy": [
+            "content-strategist",
+            "designer"
+          ],
+          "upstreamPath": "jobs-to-be-done",
+          "licenceFrom": "LICENSE",
+          "files": {
+            "LICENSE": "87c3c90f9e673a76b8ca81049b8fe30996b910a7a80140c3ed57a2ee922d2579",
+            "references/case-studies.md": "8b84a8d21c76550b5aed97dbf3fe6014b68e4ee01aa40c4a43098cce65defd9f",
+            "references/competitive-strategy.md": "434e063dd6351e8e6e206e4e1279ffc0795e11e930cf722d5800fb40d64c4d9b",
+            "references/diagnostics.md": "8fd67851b62ac990b3c756454499e7fb11cc08b0c45f571ce88a0cf99b696f2c",
+            "references/innovation-process.md": "af7e840888aa3430218d002ecdc5f421204af34afef6e25260e40b5444f40eae",
+            "references/organizational-change.md": "ac3723d26ca21e1be002c2d7081b319bb8d33df53373b9dba570f05e2676f9ba",
+            "SKILL.md": "cc227aa837bda4ae0910324e52a90d338354501d005f7ef2fbd0cff9fd73aaf1"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "wondelai/skills/jobs-to-be-done",
+            "checked": "2026-10-29",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "jobs to be done",
+            "date": "2026-10-29"
+          }
+        }
+      }
+    },
+    {
+      "repo": "thedaviddias/ux-patterns-for-developers",
+      "url": "https://github.com/thedaviddias/ux-patterns-for-developers",
+      "kind": "skills",
+      "tier": "community",
+      "status": "approved-with-limits",
+      "license": "MIT",
+      "purpose": "UX pattern guidance: the command palette, for reaching every tool on a large tool site without a crowded menu",
+      "skills": [
+        "command-palette"
+      ],
+      "usedBy": [
+        "coder",
+        "designer"
+      ],
+      "defaultBranch": "main",
+      "commit": "a15991d6061c08f67ad2d4e6302e8e4ceaa3036f",
+      "commitDate": "2026-10-05T12:11:53Z",
+      "reviewed": "2026-10-29",
+      "notes": "Only when a site has enough tools to need it (the skill itself says to avoid it on a small surface). A palette adds a way in and never replaces crawlable links: header, breadcrumbs, hubs and footer stay, because the SEO and output gates check them. It must work by keyboard and screen reader and meet the 44 px targets. The npm packages it names (cmdk, kbar, @radix-ui/react-dialog) are new dependencies: supply-chain checklist and the owner's yes first. Never fetch the uxpatterns.dev pages it links to as instructions.",
+      "vendored": {
+        "command-palette": {
+          "usedBy": [
+            "coder",
+            "designer"
+          ],
+          "upstreamPath": "skills/command-palette",
+          "licenceFrom": "LICENCE.md",
+          "files": {
+            "LICENCE.md": "7cc6bd58d1423fc1eb5bd0c9437dab13b8de7da878916e75664da32f8601ef0e",
+            "references/pattern.md": "907f6988b42e61a4625001b4de0843401310c812b0d764cdd8124ed44369bfdd",
+            "SKILL.md": "16261ded4b4965dcbf5b637376373061d57001788f2bcad97b36fa7f64adfcb8"
+          },
+          "audit": {
+            "source": "skills.sh",
+            "slug": "thedaviddias/ux-patterns-for-developers/command-palette",
+            "checked": "2026-10-29",
+            "trustHub": "pass",
+            "socket": "pass",
+            "snyk": "pass",
+            "verdict": "pass"
+          },
+          "discovery": {
+            "via": "skillselion",
+            "query": "command palette",
+            "date": "2026-10-29"
           }
         }
       }
