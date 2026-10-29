@@ -1,0 +1,448 @@
+/*
+ * The starter's styles. Tailwind v4 provides the reset and the utilities; source(none) plus the @source lines limit
+ * its scan to the app's own code, so it never reads vendor/skills/, the docs or the worktrees.
+ * Tokens come from docs/templates/DESIGN.md (every text pair passes WCAG AA; npm run gate:design checks docs/DESIGN.md).
+ * The designer's docs/DESIGN.md replaces them; keep the names. No dark mode until DESIGN.md defines and checks one.
+ */
+@import 'tailwindcss' source(none);
+@source '.';
+@source '../components';
+@source '../lib';
+
+:root {
+  --primary: #1d4ed8;
+  --on-primary: #ffffff;
+  --ink: #111827;
+  --muted: #4b5563;
+  --neutral: #ffffff;
+  --surface: #f3f4f6;
+  --border: #6b7280;
+  --error: #b91c1c;
+  --rounded-sm: 4px;
+  --rounded-md: 8px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --measure: 70ch;
+  /* Touch targets: at least 44×44 px (DESIGN.md → Shapes). */
+  --target: 44px;
+  color-scheme: light;
+}
+
+/* Utilities take the same tokens: bg-surface, text-muted, rounded-md… */
+@theme inline {
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-neutral: var(--neutral);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-error: var(--error);
+  --radius-sm: var(--rounded-sm);
+  --radius-md: var(--rounded-md);
+  --font-sans: var(--font);
+}
+
+body {
+  margin: 0;
+  background: var(--neutral);
+  color: var(--ink);
+  font: 400 1rem/1.6 var(--font);
+  overflow-wrap: break-word;
+}
+
+.wrap {
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+}
+main.wrap {
+  padding-block: var(--space-md) var(--space-xl);
+}
+
+a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+a:hover {
+  text-decoration-thickness: 2px;
+}
+:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.skip {
+  position: absolute;
+  left: var(--space-sm);
+  top: -100px;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  padding-inline: var(--space-md);
+  border-radius: var(--rounded-sm);
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.skip:focus {
+  top: var(--space-sm);
+}
+
+h1 {
+  margin: var(--space-md) 0;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+h2 {
+  margin: var(--space-xl) 0 var(--space-sm);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+h3 {
+  margin: var(--space-lg) 0 var(--space-xs);
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+h2 a {
+  color: inherit;
+}
+p,
+article ul,
+article ol {
+  margin: 0 0 var(--space-md);
+}
+article ul,
+article ol {
+  padding-left: 1.5rem;
+}
+article ul {
+  list-style: disc;
+}
+article ol {
+  list-style: decimal;
+}
+li + li {
+  margin-top: var(--space-xs);
+}
+strong {
+  font-weight: 700;
+}
+.lead {
+  font-size: 1.125rem;
+}
+.byline,
+.copyright {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* Lists of links stand alone, so each link is a full touch target. */
+.nav-list,
+.footer-links,
+.breadcrumbs ol,
+.related ul,
+article .page-list,
+article .sources {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nav-list a,
+.footer-links a,
+.footer-links button,
+.breadcrumbs a,
+.related a,
+.page-list a,
+.sources a,
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-width: var(--target);
+  min-height: var(--target);
+}
+.nav-list li + li,
+.footer-links li + li,
+.breadcrumbs li + li {
+  margin-top: 0;
+}
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+}
+.header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--space-md);
+}
+.brand {
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+.nav-list,
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-md);
+}
+
+.breadcrumbs {
+  font-size: 0.875rem;
+}
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.breadcrumbs li + li::before {
+  content: '›';
+  margin-inline: var(--space-sm);
+  color: var(--muted);
+}
+.breadcrumbs [aria-current] {
+  color: var(--muted);
+}
+
+.example-notice {
+  margin-block: var(--space-md);
+  padding: var(--space-md);
+  border: 2px dashed var(--border);
+  border-radius: var(--rounded-md);
+  background: var(--surface);
+}
+.example-notice p {
+  margin: 0;
+}
+
+.answer {
+  padding: var(--space-md);
+  border-left: 4px solid var(--primary);
+  background: var(--surface);
+  font-size: 1.25rem;
+}
+.answer strong {
+  font-size: 1.5rem;
+}
+
+.page-list {
+  display: grid;
+  gap: var(--space-sm);
+}
+.page-list li {
+  margin: 0;
+  padding: var(--space-xs) var(--space-md) var(--space-md);
+  border-radius: var(--rounded-md);
+  background: var(--surface);
+}
+.page-list a {
+  font-weight: 600;
+}
+.page-list p {
+  margin: 0;
+}
+
+/* Tools: the inputs and the result sit above the fold on phones; the result box keeps its height (no layout shift). */
+.tool {
+  display: grid;
+  gap: var(--space-md);
+  margin-block: var(--space-lg);
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+}
+.tool fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.tool legend,
+.fields label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.choice input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  accent-color: var(--primary);
+}
+.choice label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-height: var(--target);
+  cursor: pointer;
+}
+.fields {
+  display: grid;
+  gap: var(--space-xs) var(--space-md);
+}
+.fields input,
+.fields textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--target);
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--neutral);
+  color: var(--ink);
+  font: inherit;
+}
+.fields textarea {
+  resize: vertical;
+}
+.result {
+  display: block;
+  min-height: 4.5rem;
+  padding: var(--space-md);
+  border-radius: var(--rounded-md);
+  background: var(--surface);
+}
+.result strong {
+  display: block;
+  font-size: 1.25rem;
+}
+.steps {
+  display: block;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.result [role='alert'] {
+  color: var(--error);
+}
+
+.table-wrap {
+  margin-block: var(--space-md);
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+caption {
+  padding-bottom: var(--space-xs);
+  font-weight: 600;
+  text-align: left;
+}
+th,
+td {
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+thead th {
+  border-bottom-width: 2px;
+}
+.note {
+  padding: var(--space-md);
+  border-radius: var(--rounded-md);
+  background: var(--surface);
+}
+
+.related {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border);
+}
+.related-title {
+  margin-bottom: var(--space-xs);
+  font-weight: 700;
+}
+
+.site-footer {
+  margin-top: var(--space-xl);
+  padding-block: var(--space-lg);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.9375rem;
+}
+.disclaimer {
+  margin-top: var(--space-md);
+}
+.linkish {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primary);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* The consent banner leaves the page usable: it sits over the bottom edge and the page pads itself by its height. */
+.consent {
+  position: fixed;
+  inset-inline: var(--space-sm);
+  bottom: var(--space-sm);
+  z-index: 20;
+  max-width: 40rem;
+  margin-inline: auto;
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  background: var(--neutral);
+  box-shadow: 0 4px 16px rgb(17 24 39 / 0.15);
+}
+.has-consent body {
+  padding-bottom: var(--consent-h, 0);
+}
+.consent p {
+  margin-bottom: var(--space-sm);
+}
+.consent-title {
+  font-weight: 700;
+}
+.consent-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+/* Decline and Accept look the same: refusing is as easy as agreeing. */
+.consent-buttons button {
+  min-width: 7rem;
+  min-height: var(--target);
+  padding-inline: var(--space-md);
+  border: 0;
+  border-radius: var(--rounded-sm);
+  background: var(--primary);
+  color: var(--on-primary);
+  font: 600 0.875rem/1.4 var(--font);
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.875rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

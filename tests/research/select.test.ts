@@ -1,11 +1,15 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { selectKeywords } from '../../scripts/research/lib/select.mjs';
+import { selectKeywords as selectKeywordsJs } from '../../scripts/research/lib/select.mjs';
 import { brandLabel, brandTerms, matchesBrand, normalizeDomain, tokenize } from '../../scripts/research/lib/inputs.mjs';
 import { DEFAULT_RESEARCH, cleanupProjects, flat, readOut, readOutJson, row, run, tempProject, utf16Export } from './helpers';
 
 afterAll(cleanupProjects);
+
+// The module's JSDoc types its rows as plain objects; these tests read the fields it copies through.
+type Picked = { keyword: string; kd?: number | null; reason?: string; detail?: string };
+const selectKeywords = selectKeywordsJs as unknown as (...args: Parameters<typeof selectKeywordsJs>) => { selected: Picked[]; pending: Picked[]; rejected: Picked[] };
 
 const config = { minVolume: 1000, maxKd: 30, maxSeasonality: 2.5 };
 const kdMap = (entries: [string, number][]) => new Map(entries.map(([k, kd]) => [k.replaceAll(' ', ''), { keyword: k, kd, source: 'serp-check', checked: null }]));
@@ -26,7 +30,7 @@ describe('selectKeywords', () => {
       ['example christmas widget planner', 'seasonal'],
       ['example gadget converter', 'seasonal'],
     ]);
-    expect(r.rejected[0].detail).toMatch(/peak\/median 100 is above maxSeasonality 2.5/);
+    expect(r.rejected[0]!.detail).toMatch(/peak\/median 100 is above maxSeasonality 2.5/);
   });
 
   it('rejects low volume on the bucket lower bound', () => {
@@ -93,10 +97,10 @@ describe('brand helpers', () => {
 
   it('matches split and joined forms, not longer words', () => {
     const [brand] = brandTerms('widgetwise.example');
-    expect(matchesBrand(tokenize('widget wise sizer'), brand)).toBe(true);
-    expect(matchesBrand(tokenize('best widgetwise sizer'), brand)).toBe(true);
-    expect(matchesBrand(tokenize('widgetwiser sizer'), brand)).toBe(false);
-    expect(matchesBrand(tokenize('widget-wise.example'), brandTerms('widget-wise.example')[0])).toBe(true);
+    expect(matchesBrand(tokenize('widget wise sizer'), brand!)).toBe(true);
+    expect(matchesBrand(tokenize('best widgetwise sizer'), brand!)).toBe(true);
+    expect(matchesBrand(tokenize('widgetwiser sizer'), brand!)).toBe(false);
+    expect(matchesBrand(tokenize('widget-wise.example'), brandTerms('widget-wise.example')[0]!)).toBe(true);
   });
 });
 

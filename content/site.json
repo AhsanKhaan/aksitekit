@@ -1,0 +1,25 @@
+{
+  "$comment": "Site-wide facts the coder fills in from the owner's answers at /start: the real person behind the site, the contact address, the disclaimer. \"example\": true marks the template's own example values; production-gate.mjs fails a production build until it is false. Never invent a person, a credential or a review.",
+  "example": true,
+  "tagline": "A worked example of a site built from AK Site Kit: one page of each type, ready to replace.",
+  "owner": {
+    "name": "Example Owner",
+    "about": "The owner's real name goes here before launch: AdSense and readers both look for the person who runs the site."
+  },
+  "author": {
+    "slug": "example-editor",
+    "name": "Example Editor",
+    "role": "Writes and checks every page",
+    "bio": [
+      "This is the template's example author. Before launch the owner replaces it with the real person who writes and checks the pages: their name, what they know about the subject and how they learned it, and how readers can reach them.",
+      "An author page earns trust when every claim on it can be checked. List real qualifications and real experience only, with links where they exist, and never a made-up persona.",
+      "A useful bio answers three questions a reader brings: why this person can write on the subject, how they check what they publish, and where else their work can be found. A degree, years in a related job or a public project all count, as long as a reader can confirm them."
+    ]
+  },
+  "contact": {
+    "email": "",
+    "responseDays": 5
+  },
+  "disclaimer": "Disclaimer: the pages on this site are general information, not professional advice. Check figures that matter against a primary source.",
+  "trustUpdated": "2026-10-28"
+}

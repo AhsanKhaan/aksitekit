@@ -7,8 +7,9 @@ dependency changed, it writes the request into its report instead.
 **Read first:** `docs/BLUEPRINT.md` (the approved plan). Everything in this repository is generic: no project-specific
 domain, brand, keys or IDs.
 
-**Step C is deferred:** its instructions are in `docs/TODO-step-c.md`. Steps A, B and D must not depend on Step C files
-existing; they call the npm scripts named below, which Step C implements later.
+**Step C is built** (`docs/TODO-step-c.md`; `lint` is blocked there). Steps A, B and D still call the npm scripts named
+below rather than Step C's files. Whatever the technology, `build.commands.build` ends with
+`node scripts/gen-public-files.mjs --after-build`, which writes `sitemap.xml` and `llms.txt` from the built pages.
 
 **Technology is a choice, not a given.** `/start` asks every new copy: Next.js (the built-in starter) or any other
 technology. The choice lives in `factory.config.json` → `build` (`framework`, `outputDir`, `commands.build`,
@@ -21,7 +22,7 @@ folder.
 |---|---|---|
 | A: governance and agents | `CLAUDE.md`, `AGENTS.md`, `README.md`, `.claude/**`, `.mcp.json`, `skills.lock.json`, `docs/templates/**`, `docs/SKILLS.md`, `docs/MCP.md` | app code, scripts, workflows |
 | B: keyword pipeline | `scripts/research/**`, `research/**`, `tests/research/**` | everything else |
-| C: starter app and gates | `app/**`, `components/**`, `lib/**`, `content/**`, `public/**`, `scripts/*.mjs`, `scripts/audits/**`, `scripts/design/**`, `scripts/growth/**`, `tests/**` except `tests/research/**`, root configs (`next.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `vitest.config.ts`, `playwright.config.ts`, `postcss.config.mjs`, `lighthouserc.json`) | `scripts/research/**`, `.claude/**`, `.github/**` |
+| C: starter app and gates | `app/**`, `components/**`, `lib/**`, `content/**`, `public/**`, `scripts/*.mjs`, `scripts/lib/**`, `scripts/audits/**`, `scripts/design/**`, `scripts/growth/**`, `tests/**` except `tests/research/**`, root configs (`next.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `vitest.config.ts`, `playwright.config.ts`, `postcss.config.mjs`, `lighthouserc.json`) | `scripts/research/**`, `.claude/**`, `.github/**` |
 | D: CI/CD | `.github/**` | everything else |
 | E: integration | anything, after A–D land | none |
 

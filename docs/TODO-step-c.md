@@ -1,8 +1,9 @@
-# TODO: Step C, starter app and gates (deferred)
+# Step C: starter app and gates
 
-Status: **not started**. Build this when a project needs it. Read `docs/BLUEPRINT.md` and `docs/CONTRACT.md` first;
-Step C owns the files listed for it in the contract. Free tools only: if anything below would need a paid tool, stop and
-ask the owner, and if refused, use a free alternative.
+Status: **built** (2026-10-29), except `npm run lint`, which is **blocked** ([Blocked](#blocked)). What was built and
+where is under [Built](#built); the spec below is kept as the reference the gates are held to. Step C owns the files
+listed for it in `docs/CONTRACT.md`. Free tools only: if anything below would need a paid tool, stop and ask the owner,
+and if refused, use a free alternative.
 
 **Two parts.** Sections 2–4 (public files, gates, tests) apply to **every technology**: the gates read the built site
 from `factory.config.json` → `build.outputDir` (never a hard-coded `out/`), so they work whatever produced it. Section 1
@@ -62,3 +63,60 @@ payload, a missing DMARC record) to prove it fails when it should.
 
 ## Done when
 `npm run verify` passes on a fresh clone, and each gate fails on its planted case.
+
+## Built
+Results on 2026-10-29, Windows, Node 24.22.0, on the locked dependencies [M: these runs]:
+
+| Check | Result |
+|---|---|
+| `npm run check:skills`, `check:repo`, `audit` | pass |
+| `npm run lint` | **blocked** (below) |
+| `npm run typecheck` (TypeScript 7.0.2) | pass |
+| `npm test` | 268 pass, 7 skipped (the release-only cases), 24 files |
+| `npm run build` | pass: production-gate, gen-public-files, `next build`, check-out (12 pages), the SEO gate (0 fail, 75 warn) |
+| `npm run test:e2e` | 41 pass, 1 skipped (consent with analytics: the template has no GA4 ID) |
+| `npm run audit:a11y`, `audit:unique` | pass (0 axe violations on 13 pages; every page ≥ 96% unique) |
+| `node .github/scripts/selftest.mjs` | 8 pass |
+| `npm run gate:adsense`, `check:release` | NO-GO / fail on the template, as they should: its pages are examples with no briefs |
+| `npm run gate:design` | waits for `docs/DESIGN.md` (the design stage writes it; the template file passes its 8 pairs) |
+
+On the bare template (no `project.domain`), build with `SITE_URL=https://example.com`: the SEO gate refuses to guess a
+site URL (its own test says so), while the other gates and the app fall back to example.com.
+
+| Part | Files |
+|---|---|
+| Starter app | `app/` (home, `[category]` routes 3 levels deep, trust pages, author page, 404, share images, icons), `components/`, `lib/` (registry, content schema, JSON-LD, metadata, consent, analytics, the example tool), `app/globals.css` (Tailwind v4, DESIGN.md tokens, 44 px targets) |
+| Example content | `content/site.json`, `content/pages/*.json`, `content/examples/keyword-map.json`: one page of each type, about the kit itself so no niche is implied, all `"example": true` |
+| Public files | `scripts/gen-public-files.mjs`, `scripts/lib/public-files.mjs` |
+| Gates | `scripts/production-gate.mjs`, `check-out.mjs`, `check-repo.mjs`, `audit.mjs` (+ `audit-exceptions.json`), `check-live.mjs`, `check-security.mjs`, `adsense-gate.mjs`, `design/contrast.mjs`, `growth/today.mjs`, `audits/{perf,a11y,unique-text,ga-live}.mjs`, `tests/content.test.ts` (check:release) |
+| Shared | `scripts/lib/site.mjs` (config, site URL, build context, HTML readers), `scripts/lib/content-rules.mjs` (floors, policy terms, AI-writing scan, brief check) |
+| Serving | `scripts/serve-out.mjs` (CDN-like: `_headers`, 308 slash redirects, 405 on writes, 404 page), `scripts/flatten-segments.mjs` |
+| Tests | `tests/starter/`, `tests/gates/` (a planted failing case for every gate), `tests/content.test.ts`, `tests/e2e/site.spec.ts` |
+
+**Every technology:** `build.commands.build` ends with `node scripts/gen-public-files.mjs --after-build`, which writes
+`sitemap.xml` and `llms.txt` from the pages the build wrote (the Next.js default in `factory.config.json` does). The
+npm `build` script writes `robots.txt`, `_headers` and `security.txt` before the build.
+
+## Blocked
+`npm run lint` can't run on the locked versions (eslint 10.13.0, typescript 7.0.2, @types/node 26.6.5, from Dependabot
+on 2026-10-25). It fails before linting a file [M: `npm run lint`, 2026-10-29]:
+
+```text
+Error: typescript-eslint does not support TS 7.0.
+    at …/node_modules/eslint-config-next/node_modules/typescript-eslint/dist/index.js:52:11
+```
+
+eslint-config-next 16.4.2 loads typescript-eslint 8.x (TypeScript < 6.1), and its React, import and jsx-a11y plugins
+accept ESLint 9 at most [M: `npm view`, 2026-10-28]. The owner decided to keep the versions; the options for lint that
+keep them are with the owner. `eslint.config.mjs` holds the rules the project wants once lint runs. Until then
+`npm run verify` stops at lint, and every step after it passes when run on its own (table above).
+
+## Follow-ups (outside Step C's files)
+- `.github/workflows/ci.yml` (Step D): set `SITE_URL` for the build when `project.domain` is empty, or the template's
+  own CI build stops at the SEO gate; and a Dependabot rule that holds major ESLint and TypeScript bumps for review.
+- `.claude/agents/architect.md` (Step A): tell the architect that a non-Next.js `build.commands.build` ends with
+  `node scripts/gen-public-files.mjs --after-build`.
+- `package.json` (Phase E): a `lint:design` script for the design stage's spec lint, and `"type": "module"` (Vitest
+  warns that it loads `vitest.config.ts` as CommonJS).
+- `scripts/adsense-gate.mjs` judges page types from `research/out/keyword-map.json` only, so on the template it holds the
+  example tool to the guide floor; it fails there anyway on the example pages.

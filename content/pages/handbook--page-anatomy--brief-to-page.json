@@ -1,0 +1,63 @@
+{
+  "$comment": "Template example page (\"example\": true): a guide under its hub. It describes the kit's real pipeline (AGENTS.md, CLAUDE.md).",
+  "url": "/handbook/page-anatomy/brief-to-page/",
+  "kind": "guide",
+  "example": true,
+  "name": "From brief to page",
+  "title": "From brief to page: how one page is written and checked",
+  "description": "How an address goes from research to launch in this kit: the content file, the checks at build time, the reviews and the owner's go-ahead.",
+  "h1": "From brief to page",
+  "updated": "2026-10-29",
+  "intro": [
+    "Everything in this kit starts as a row in the keyword map and ends as a static HTML file on the host. In between, agents propose and scripts decide: each step writes a file, and a gate passes or fails it before the next step starts."
+  ],
+  "sections": [
+    {
+      "heading": "The address comes first",
+      "blocks": [
+        { "p": "The keyword stage reads the owner's keyword research and gives every keyword exactly one owner URL. That row in the keyword map decides that the address exists, what type it is and which search it targets. No content file is built without one." }
+      ]
+    },
+    {
+      "heading": "The brief",
+      "blocks": [
+        { "p": "The content strategist then writes a brief for each address: the question it answers, the sources its facts must come from, and the structured data it needs. The writer works from the brief, not from memory, and every claim on the finished text has to trace back to a source it lists." }
+      ]
+    },
+    {
+      "heading": "The content file",
+      "blocks": [
+        { "p": "The coder turns the brief into a content file. For this guide it is content/pages/handbook--page-anatomy--brief-to-page.json: the address, with its slashes turned into double hyphens." },
+        { "p": "The file holds the title, description, headings, text, any table or questions, and the tool to show if there is one. The build validates every file and stops with the reason if anything is out of range." }
+      ]
+    },
+    {
+      "heading": "Checks at build time",
+      "blocks": [
+        {
+          "ul": [
+            "The production gate refuses a production build with missing settings or example content left in.",
+            "The output check reads every built file for one title, one H1, a self-canonical, a share image, inbound links and click depth.",
+            "The SEO gate runs its on-page checks everywhere, and a single failure stops the deploy."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Reviews before launch",
+      "blocks": [
+        { "p": "Once the build is green, review agents look at the site as a whole: search and AI-search visibility, AdSense readiness, security, layout on small screens and speed. Each review writes a report, and its own script decides pass or fail." }
+      ]
+    },
+    {
+      "heading": "The owner's go-ahead",
+      "blocks": [
+        { "p": "Nothing deploys on a passing build alone. The owner types a go-ahead for the exact commit in chat, the deploy runs, and a final check reads the live site to confirm what visitors and search engines now see." },
+        { "p": "If that check fails, the deploy is fixed forward or rolled back, and the reason goes into the ledger with every other gate result, so the next session starts from the record instead of from memory." }
+      ]
+    }
+  ],
+  "faq": [
+    { "q": "Can a page skip the brief?", "a": "No. A content file without a keyword-map row fails the build, and the release check compares each page's sources with its brief." }
+  ]
+}

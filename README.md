@@ -90,7 +90,7 @@ on from there. In short: agents propose, scripts decide, you approve.
 - **Your choice of technology.** Next.js is built in; any tool that outputs plain HTML pages works.
 - **A 90-day plan you can follow.** One task a day, 25 to 45 minutes, shown by `/today`.
 
-The checks that run on the built site arrive with the starter site; [Status](#status) shows what's ready today.
+The checks that run on the built site come with the starter site; [Status](#status) shows what's ready today.
 
 ## Prerequisites
 | You need | Why | Check it with |
@@ -199,8 +199,8 @@ The next stages run one after another, each with its own check:
 The coder builds the pages from the briefs and the design, the harness writes their tests, and the code reviewer
 checks the change. Then the reviews run: SEO, AI search, AdSense, security, responsive layouts from 320 to 1280 px, and
 speed (Lighthouse: Accessibility, Best Practices
-and SEO 100; Performance at least 90 on mobile). See [Status](#status): the starter site for this step is still being
-added.
+and SEO 100; Performance at least 90 on mobile). The Next.js starter ships one example page of each type, which the
+coder replaces with your pages.
 
 ### Step 9: Go live
 1. Set up Cloudflare and GitHub once: [.github/README.md → Setup](.github/README.md#setup-the-owner-once-per-project).
@@ -231,7 +231,7 @@ npm scripts (run them in a terminal):
 | `npm test` | Runs the unit tests |
 | `npm run research:all` | Turns the Keyword Planner files into the keyword map, without Claude |
 | `npm run check:skills` | Checks every vendored skill against its pinned hashes |
-| `npm run verify` | Runs every check (needs the starter site; see [Status](#status)) |
+| `npm run verify` | Runs every check (it stops at lint for now; see [Status](#status)) |
 
 ## What you get
 | File | What it holds |
@@ -283,10 +283,11 @@ skills.lock.json      every outside skill, MCP server and GitHub Action, pinned
 | CI and security scans | Ready (site checks wait for a project; see [Template mode](.github/README.md#template-mode)) |
 | Vetted skills | Ready |
 | On-page SEO gate: 169 checks on every page, for keyword stuffing, thin pages, titles and trust links | Ready, with tests ([docs/SEO-GATE.md](docs/SEO-GATE.md)); runs once a site is built |
-| Starter website and most site checks | Being added ([docs/TODO-step-c.md](docs/TODO-step-c.md)) |
+| Starter website (Next.js, one example page of each type) and the site checks | Ready, with tests ([docs/TODO-step-c.md](docs/TODO-step-c.md)) |
+| `npm run lint` | Blocked: the Next.js lint rules don't support TypeScript 7 yet, and the fix is the owner's choice ([docs/TODO-step-c.md](docs/TODO-step-c.md#blocked)) |
 
-Today `/start` takes you from keyword research to a finished plan and design. The build stage waits for the starter
-site.
+`/start` takes you from keyword research through the build. Until lint is unblocked, `npm run verify` stops at lint;
+the checks after it pass when run on their own.
 
 ## Troubleshooting
 **`npm ci` fails with an engine error.** The kit needs Node.js 24.22 or newer in the 24 line. Check with

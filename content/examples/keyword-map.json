@@ -1,0 +1,51 @@
+{
+  "$comment": "The template's example keyword map: CLEARLY FAKE DATA, not research. lib/registry.ts uses it only while research/out/keyword-map.json doesn't exist, so the starter builds one page of each type. The pages describe the kit itself, so no niche is implied. The keyword stage writes the real map; then delete content/examples/ and every content file marked \"example\": true (production-gate.mjs fails a production build until you do).",
+  "pendingKd": 0,
+  "pages": [
+    {
+      "url": "/handbook/length-checker/",
+      "type": "tool",
+      "category": "handbook",
+      "primary": "title length checker",
+      "secondary": ["meta description length"],
+      "intent": "tool",
+      "cluster": "length-checker",
+      "parent": null,
+      "evidence": { "note": "example row, fake data" }
+    },
+    {
+      "url": "/handbook/length-checker/sample-title/",
+      "type": "instance",
+      "category": "handbook",
+      "primary": "sample title length",
+      "secondary": [],
+      "intent": "tool",
+      "cluster": "length-checker",
+      "parent": "/handbook/length-checker/",
+      "evidence": { "note": "example row, fake data" }
+    },
+    {
+      "url": "/handbook/page-anatomy/",
+      "type": "hub",
+      "category": "handbook",
+      "primary": "page anatomy",
+      "secondary": [],
+      "intent": "informational",
+      "cluster": "page-anatomy",
+      "parent": null,
+      "evidence": { "note": "example row, fake data" }
+    },
+    {
+      "url": "/handbook/page-anatomy/brief-to-page/",
+      "type": "guide",
+      "category": "handbook",
+      "primary": "brief to page",
+      "secondary": [],
+      "intent": "informational",
+      "cluster": "page-anatomy",
+      "parent": "/handbook/page-anatomy/",
+      "evidence": { "note": "example row, fake data" }
+    }
+  ],
+  "discarded": []
+}

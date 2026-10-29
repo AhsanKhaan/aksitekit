@@ -3,7 +3,8 @@
 `skills.lock.json` is the machine-readable list; this page explains it. **Agents use only what's listed here, at the
 pinned commit, within its status.** Anything else needs the owner's yes first.
 
-Reviewed on 2026-10-25; the v2 skills change (`docs/PROPOSAL-v2.md`, approved by the owner) was reviewed on 2026-10-28.
+Reviewed on 2026-10-25; the v2 skills change (`docs/PROPOSAL-v2.md`, approved by the owner) was reviewed on 2026-10-28,
+and the intent and UX skills (the owner's request in chat) on 2026-10-29.
 For a vendored skill source, the commit is its newest commit at least 7 days old. For other
 sources, it's the repository's default-branch HEAD on that day (from the public API). The license is GitHub's detected
 SPDX id, or the repository's own statement where GitHub detects none. For GitHub Actions, the release pin is the newest
@@ -74,15 +75,15 @@ nothing newer than a week is pinned.
 | `ai-search-auditor` | `ai-seo` (coreyhaines31/marketingskills), `schema` (coreyhaines31/marketingskills), `seo-geo` (AgriciDaniel/claude-seo) |
 | `architect` | `codebase-design` (mattpocock/skills), `feature-dev` (anthropics/claude-plugins-official), `replica-architect` (Jakeschincariol/replica-skill), `seo-programmatic` (AgriciDaniel/claude-seo), `seo-sitemap` (AgriciDaniel/claude-seo), `site-architecture` (coreyhaines31/marketingskills), `site-structure-optimizer` (aaron-he-zhu/aaron-marketing-skills), `workers-best-practices` (cloudflare/skills), `wrangler` (cloudflare/skills), `writing-plans` (obra/superpowers) |
 | `code-reviewer` | `codebase-design` (mattpocock/skills), `differential-review` (trailofbits/skills), `pr-review-toolkit` (anthropics/claude-plugins-official), `requesting-code-review` (obra/superpowers) |
-| `coder` | `composition-patterns` (vercel-labs/agent-skills), `copy-editing` (coreyhaines31/marketingskills), `copywriting` (coreyhaines31/marketingskills), `frontend-design` (anthropics/skills), `humanizer` (blader/humanizer), `react-best-practices` (vercel-labs/agent-skills), `verification-before-completion` (obra/superpowers), `workers-best-practices` (cloudflare/skills), `wrangler` (cloudflare/skills) |
+| `coder` | `analytics` (coreyhaines31/marketingskills), `command-palette` (thedaviddias/ux-patterns-for-developers), `composition-patterns` (vercel-labs/agent-skills), `copy-editing` (coreyhaines31/marketingskills), `copywriting` (coreyhaines31/marketingskills), `frontend-design` (anthropics/skills), `humanizer` (blader/humanizer), `react-best-practices` (vercel-labs/agent-skills), `verification-before-completion` (obra/superpowers), `workers-best-practices` (cloudflare/skills), `wrangler` (cloudflare/skills) |
 | `competitor-recon` | `competitors` (coreyhaines31/marketingskills), `replica-architect` (Jakeschincariol/replica-skill), `replica-diff` (Jakeschincariol/replica-skill), `replica-entrepreneur` (Jakeschincariol/replica-skill), `replica-recon` (Jakeschincariol/replica-skill), `reverse-engineer-anything` (morluto/rea) |
-| `content-strategist` | `ai-seo` (coreyhaines31/marketingskills), `content-strategy` (coreyhaines31/marketingskills), `copywriting` (coreyhaines31/marketingskills), `humanizer` (blader/humanizer), `schema` (coreyhaines31/marketingskills), `seo-content-brief` (AgriciDaniel/claude-seo), `seo-geo` (AgriciDaniel/claude-seo), `seo-schema` (AgriciDaniel/claude-seo) |
-| `designer` | `accessibility` (addyosmani/web-quality-skills), `replica-design` (Jakeschincariol/replica-skill), `ui-ux-pro-max` (nextlevelbuilder/ui-ux-pro-max-skill), `web-design-guidelines` (vercel-labs/agent-skills), `web-interface-guidelines` (vercel-labs/web-interface-guidelines) |
+| `content-strategist` | `ai-seo` (coreyhaines31/marketingskills), `content-strategy` (coreyhaines31/marketingskills), `copywriting` (coreyhaines31/marketingskills), `free-tools` (coreyhaines31/marketingskills), `humanizer` (blader/humanizer), `jobs-to-be-done` (wondelai/skills), `schema` (coreyhaines31/marketingskills), `seo-content-brief` (AgriciDaniel/claude-seo), `seo-geo` (AgriciDaniel/claude-seo), `seo-schema` (AgriciDaniel/claude-seo) |
+| `designer` | `accessibility` (addyosmani/web-quality-skills), `command-palette` (thedaviddias/ux-patterns-for-developers), `cro` (coreyhaines31/marketingskills), `jobs-to-be-done` (wondelai/skills), `replica-design` (Jakeschincariol/replica-skill), `ui-ux-pro-max` (nextlevelbuilder/ui-ux-pro-max-skill), `web-design-guidelines` (vercel-labs/agent-skills), `web-interface-guidelines` (vercel-labs/web-interface-guidelines) |
 | `devsecops-deployer` | `wrangler` (cloudflare/skills) |
 | `doc-generator` | `copy-editing` (coreyhaines31/marketingskills), `humanizer` (blader/humanizer) |
-| `growth-strategist` | `customer-research` (coreyhaines31/marketingskills), `marketing-council` (coreyhaines31/marketingskills), `marketing-ideas` (coreyhaines31/marketingskills), `marketing-loops` (coreyhaines31/marketingskills) |
+| `growth-strategist` | `analytics` (coreyhaines31/marketingskills), `cro` (coreyhaines31/marketingskills), `customer-research` (coreyhaines31/marketingskills), `marketing-council` (coreyhaines31/marketingskills), `marketing-ideas` (coreyhaines31/marketingskills), `marketing-loops` (coreyhaines31/marketingskills) |
 | `harness` | `systematic-debugging` (obra/superpowers), `test-driven-development` (obra/superpowers), `verification-before-completion` (obra/superpowers) |
-| `keyword-researcher` | `keyword-research` (aaron-he-zhu/aaron-marketing-skills), `programmatic-seo` (coreyhaines31/marketingskills), `seo-cluster` (AgriciDaniel/claude-seo), `serp-analysis` (aaron-he-zhu/aaron-marketing-skills) |
+| `keyword-researcher` | `free-tools` (coreyhaines31/marketingskills), `keyword-research` (aaron-he-zhu/aaron-marketing-skills), `programmatic-seo` (coreyhaines31/marketingskills), `seo-cluster` (AgriciDaniel/claude-seo), `serp-analysis` (aaron-he-zhu/aaron-marketing-skills) |
 | `performance-auditor` | `accessibility` (addyosmani/web-quality-skills), `core-web-vitals` (addyosmani/web-quality-skills), `web-perf` (cloudflare/skills) |
 | `reconciler` | `replica-diff` (Jakeschincariol/replica-skill) |
 | `responsive-checker` | `web-design-guidelines` (vercel-labs/agent-skills), `web-interface-guidelines` (vercel-labs/web-interface-guidelines) |
@@ -122,7 +123,9 @@ nothing newer than a week is pinned.
 | [morluto/rea](https://github.com/morluto/rea) | caution | approved-with-limits | MIT | REA (reverse engineer anything): its website tools inspect a competitor's public pages (DOM and accessibility structure, scripts, resources, network metadata) and parse its JavaScript bundles statically (routes, vendor fingerprints) (`reverse-engineer-anything`) | competitor-recon | 2026-10-25 | `3b79af28e807` 2026-10-14 | 1 skill, 8 files | — |
 | [affaan-m/ECC](https://github.com/affaan-m/ECC) | excluded | excluded | MIT | Claude Code configuration collection | — | 2026-10-25 | `90606c8315ee` 2026-10-20 | — | — |
 | [AgriciDaniel/claude-seo](https://github.com/AgriciDaniel/claude-seo) | community | approved-with-limits | MIT | SEO audit and planning skills (`seo-cluster`, `seo-content`, `seo-content-brief`, `seo-geo`, `seo-programmatic`, `seo-schema`, `seo-sitemap`, `seo-technical`) | ai-search-auditor, architect, content-strategist, keyword-researcher, seo-auditor | 2026-10-25 | `4b99de2f7de7` 2026-10-04 | 8 skills, 33 files | — |
-| [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) | community | approved | MIT | Marketing and SEO skills (`ai-seo`, `competitors`, `content-strategy`, `copy-editing`, `copywriting`, `customer-research`, `marketing-council`, `marketing-ideas`, `marketing-loops`, `programmatic-seo`, `schema`, `seo-audit`, `site-architecture`) | ai-search-auditor, architect, coder, competitor-recon, content-strategist, doc-generator, growth-strategist, keyword-researcher, seo-auditor | 2026-10-25 | `e43fe6f03cef` 2026-10-15 | 13 skills, 75 files | — |
+| [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) | community | approved-with-limits | MIT | Marketing and SEO skills (`ai-seo`, `analytics`, `competitors`, `content-strategy`, `copy-editing`, `copywriting`, `cro`, `customer-research`, `free-tools`, `marketing-council`, `marketing-ideas`, `marketing-loops`, `programmatic-seo`, `schema`, `seo-audit`, `site-architecture`). Limits for `analytics`, `cro` and `free-tools` in the lock's notes | ai-search-auditor, architect, coder, competitor-recon, content-strategist, designer, doc-generator, growth-strategist, keyword-researcher, seo-auditor | 2026-10-29 | `e43fe6f03cef` 2026-10-15 | 16 skills, 88 files | — |
+| [wondelai/skills](https://github.com/wondelai/skills) | community | approved-with-limits | MIT | Jobs to Be Done: the progress a visitor wants to make, in their circumstances (`jobs-to-be-done`) | content-strategist, designer | 2026-10-29 | `c172996495be` 2026-09-10 | 1 skill, 7 files | — |
+| [thedaviddias/ux-patterns-for-developers](https://github.com/thedaviddias/ux-patterns-for-developers) | community | approved-with-limits | MIT | UX pattern guidance: the command palette, to reach every tool on a large tool site without a crowded menu (`command-palette`) | coder, designer | 2026-10-29 | `a15991d6061c` 2026-10-05 | 1 skill, 3 files | — |
 | [Jakeschincariol/replica-skill](https://github.com/Jakeschincariol/replica-skill) | caution | approved-with-limits | MIT | Competitor recon, stack description, feature parity scoring and reader research (`replica-architect`, `replica-design`, `replica-diff`, `replica-entrepreneur`, `replica-recon`) | architect, competitor-recon, designer, reconciler | 2026-10-25 | `77c9436fb3d1` 2026-10-03 | 5 skills, 19 files | — |
 | [getsentry/skills](https://github.com/getsentry/skills) | excluded | excluded | Apache-2.0 | GitHub Actions security review | — | 2026-10-28 | `f57ada2d0b64` 2026-10-15 | — | — |
 | [github/awesome-copilot](https://github.com/github/awesome-copilot) | community | approved | MIT | GitHub's curated collection of community agent skills: GitHub Actions hardening and a code security review (`github-actions-hardening`, `security-review`) | secops-reviewer | 2026-10-28 | `613efc8c21d9` 2026-10-19 | 2 skills, 14 files | — |
@@ -151,6 +154,32 @@ Full 40-character SHAs, and the sha256 of every vendored file, are in `skills.lo
 | `@google/design.md` | npm | 0.4.0 | 2026-07-27 | `npm run lint:design` (requested from Phase E) |
 | `@lhci/cli` | npm | 0.15.1 | 2025-06-25 | `npm run audit:lighthouse` |
 | `rea-agents` | npm | 6.5.0 | 2026-10-14 | `.mcp.json` → `rea` (6.7.0 and 6.8.0 were under 7 days old) |
+
+## Findings from the 2026-10-29 review (intent and UX skills, the owner's request)
+The owner asked for skills that match each page's layout to the searcher's intent (a tool used straight away, every
+other tool easy to reach) and show which features visitors use most. Each was found with Skillselion, scored on
+skills.sh on 2026-10-29, read file by file at a commit at least 7 days old, then vendored and hashed.
+1. **Added** [M: skills.sh, 2026-10-29]:
+   - marketingskills `analytics` (3/3), `cro` (2/3, Snyk's only finding W011) and `free-tools` (3/3), at the
+     existing pin `e43fe6f03cef`, so its other 13 skills need no re-review. Skillselion still lists their pre-v2.0
+     names (`analytics-tracking`, `page-cro`, `free-tool-strategy`), which marketingskills renamed or merged on
+     2026-05-13; they're vendored under the current names.
+   - wondelai `jobs-to-be-done` (3/3), a new source.
+   - thedaviddias `command-palette` (3/3), a new source.
+2. **What the review found:** Markdown only, no scripts, network calls, install steps, hooks, telemetry or hidden
+   characters [M: `check:skills`]. Evals were left out.
+3. **Limits** (each agent file and the lock's notes). The three marketingskills skills are written for SaaS and lead
+   generation:
+   - analytics stays inside the starter's privacy rules: no typed values, no tag manager, no pixels, Google Signals off;
+   - cro means the visitor finishing the task: no invented social proof or urgency, no popups over a tool;
+   - free tools stay ungated, and money, tax or health tools go to the owner as YMYL.
+
+   The other two:
+   - `jobs-to-be-done` carries an Amazon affiliate link in its reading list, never repeated on a site;
+   - `command-palette` is only an extra way in for large tool sites, never instead of crawlable links, and the npm
+     packages it names need the supply-chain checklist.
+4. **Not found:** a heatmap or session-recording skill. A free tool such as Microsoft Clarity would add a third-party
+   script (CSP, consent and privacy-policy changes), so it stays the owner's decision.
 
 ## Findings from the 2026-10-28 review (the v2 plan, `docs/PROPOSAL-v2.md`)
 Every skill was found with Skillselion, scored on skills.sh on 2026-10-27, read file by file at a commit at least 7 days
@@ -295,6 +324,9 @@ Merging the pull request that changes a status is the owner's yes. Fill a row fo
 | `trailofbits/skills` → `differential-review` | approve | 2026-10-28 | v2 plan; 3/3, same pinned commit |
 | `vercel-labs/agent-skills` → `composition-patterns` | approve | 2026-10-28 | v2 plan; 3/3, same pinned commit |
 | `keyword-research`, `agentic-actions-auditor`, `web-design-guidelines`, `verification-before-completion` | keep as exceptions | 2026-10-28 | v2 plan; reasons in each skill's `audit.note` in `skills.lock.json` |
+| `coreyhaines31/marketingskills` → `analytics`, `cro`, `free-tools` | approve with limits | 2026-10-29 | The owner, in chat ("Yes, review them"); same pinned commit; limits in the lock's notes |
+| `wondelai/skills` | approve with limits | 2026-10-29 | The owner, in chat; `jobs-to-be-done` (3/3, Markdown only) |
+| `thedaviddias/ux-patterns-for-developers` | approve with limits | 2026-10-29 | The owner, in chat; `command-palette` (3/3, Markdown only) |
 
 ## Adding a skill or updating a pin
 0. **Find and score it:** search Skillselion (`search_skillselion`, 2–6 words, one topic) and open the skill's
