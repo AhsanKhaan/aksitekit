@@ -22,6 +22,9 @@ Read each skill's `SKILL.md` at the path below and use its method inside this fi
   makes. WebSearch only; its DataForSEO path stays off.
 - `vendor/skills/programmatic-seo/` (marketingskills): when a cluster suits template pages; it must still pass the
   thin-content rules.
+- `vendor/skills/free-tools/` (marketingskills): its tool types (calculator, generator, analyzer, tester) help spot
+  keywords that want a working tool rather than an article; those get `tool` intent. Its lead-capture and promotion
+  sections don't apply.
 - Claude's WebSearch for the free SERP check. No other search or keyword API.
 
 ## Inputs

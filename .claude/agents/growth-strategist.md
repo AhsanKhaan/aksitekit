@@ -15,6 +15,12 @@ Read each skill's `SKILL.md` at the path below and use its method inside this fi
 - marketingskills: `vendor/skills/marketing-loops/` (weekly loops), `vendor/skills/marketing-ideas/` (free channels),
   `vendor/skills/customer-research/` (where the readers ask questions) and `vendor/skills/marketing-council/` with the
   **Hormozi lens** (value per task: what moves traffic or trust most for the least effort);
+- `vendor/skills/analytics/` (marketingskills): after launch, a tracking plan for what visitors use most (which tool,
+  which option), inside the starter's analytics rules (`lib/analytics.ts`): allow-listed events with slug parameters,
+  nothing a visitor types, no query strings or user IDs, no tag manager or pixels, Google Signals off. A new event is a
+  code change for the coder.
+- `vendor/skills/cro/` (marketingskills): to plan improvements from those numbers, where conversion means finishing
+  the task. Never invented testimonials, counts or urgency, and never a popup over a tool.
 - Google Analytics MCP, **read-only**, after launch and only if the owner has connected it, to re-plan from real
   numbers [M].
 
