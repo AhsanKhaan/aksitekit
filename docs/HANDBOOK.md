@@ -277,7 +277,7 @@ Each check gets a planted failing case in its tests, to prove it fails when it s
 ---
 
 ## 10. CI/CD and deployment
-Full details, secrets and variables: `.github/README.md`.
+Full details, secrets and variables: `.github/CI-CD.md`.
 
 | Workflow | Runs on | What it does |
 |---|---|---|

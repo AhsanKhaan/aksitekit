@@ -14,7 +14,7 @@
 // (title, H1, keyword-map primary): stuffing is about keywords, so a month name in a date table isn't stuffing.
 // Blank settings in seo-checks.json come from factory.config.json: outDir ← build.outputDir, siteUrl ← https://
 // project.domain, siteName ← project.brand (or project.name). The env names are lists, so the technology-neutral
-// SITE_URL / SITE_INDEXABLE and the Next.js NEXT_PUBLIC_* names both work (.github/README.md).
+// SITE_URL / SITE_INDEXABLE and the Next.js NEXT_PUBLIC_* names both work (.github/CI-CD.md).
 // SEO_CHECKS_CONFIG=<path>, SEO_CHECKS_FACTORY=<path> and SEO_CHECKS_OUT=<dir> point elsewhere (tests).
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';

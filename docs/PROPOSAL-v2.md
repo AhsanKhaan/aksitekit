@@ -17,7 +17,7 @@ measured (source named), **[P]** proxy or estimate, or **[U]** unverified.
   `codeql.yml` and `scorecard.yml`, which start once the repository is public. Two things are not built:
   - **Build provenance (`actions/attest`)** waits for the repository to be public. Its availability on private
     repositories wasn't confirmed [U].
-  - **The `main` ruleset** is a GitHub settings change for the owner (`.github/README.md` → Setup).
+  - **The `main` ruleset** is a GitHub settings change for the owner (`.github/CI-CD.md` → Setup).
 - **Found while building section 6:** the full dev tree fails npm's peer-dependency check, because ESLint 10 and
   TypeScript 7 are newer than `eslint-config-next`'s plugins and `typescript-eslint` accept [M: `npm sbom`, 2026-10-28].
   Step C has to settle those versions (a Phase E `package.json` change) before `npm run lint` can work.

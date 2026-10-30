@@ -3,7 +3,7 @@
 # Template mode (.github/scripts/site-ready.mjs): until a project exists (/start set project.domain and Step C built the
 # scripts, docs/TODO-step-c.md), the `site` job skips instead of failing; the `tests` job (unit tests, workflow helper
 # self-tests) always runs, so the template's own CI stays meaningful.
-# Security (.github/README.md): actions pinned to full commit SHAs; read-only token; no secrets (callers pass none);
+# Security (.github/CI-CD.md): actions pinned to full commit SHAs; read-only token; no secrets (callers pass none);
 # never pull_request_target; install scripts blocked by .npmrc (ignore-scripts=true).
 name: ci
 

@@ -9,7 +9,7 @@
 #   zap-baseline:   ZAP baseline against that preview, decided by zap-gate.mjs.
 # It skips in template mode (.github/scripts/site-ready.mjs: project.domain empty, or Step C's scripts not built yet:
 # nothing to release), and the preview jobs skip without LIVE_PAGES_HOST or PREVIEW_URL (no Cloudflare project yet).
-# Security (.github/README.md): actions and images pinned; read-only token (plus checks/statuses read to find the
+# Security (.github/CI-CD.md): actions and images pinned; read-only token (plus checks/statuses read to find the
 # preview); no secrets; never pull_request_target; event values reach scripts through env only.
 name: preprod
 

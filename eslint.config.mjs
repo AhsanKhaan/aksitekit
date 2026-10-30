@@ -45,7 +45,7 @@ export default defineConfig([
     rules: { 'react/no-danger': 'off' },
   },
   {
-    // Node scripts: the gates, the workflow helpers (.github/README.md: ESLint covers .github/scripts) and the hooks.
+    // Node scripts: the gates, the workflow helpers (.github/CI-CD.md: ESLint covers .github/scripts) and the hooks.
     // Config files by script extension only: ESLint 10 lints every file a `files` pattern names, factory.config.json too.
     files: ['scripts/**/*.mjs', '.github/scripts/**/*.mjs', '.claude/**/*.mjs', '*.config.{js,mjs,cjs,ts,mts,cts}'],
     rules: { 'no-console': 'off' },
