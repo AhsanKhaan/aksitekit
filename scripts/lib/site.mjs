@@ -50,7 +50,7 @@ export function buildContext(cfg, env = process.env) {
   return 'local';
 }
 
-/** Indexable builds: technology-neutral SITE_INDEXABLE, or the Next.js name (.github/README.md). */
+/** Indexable builds: technology-neutral SITE_INDEXABLE, or the Next.js name (.github/CI-CD.md). */
 /** @param {Env} [env] */
 export const indexable = (env = process.env) => (env.SITE_INDEXABLE || env.NEXT_PUBLIC_INDEXABLE) === 'true';
 

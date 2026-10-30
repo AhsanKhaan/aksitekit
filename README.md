@@ -107,7 +107,7 @@ code enforces them.
 | Rule | What enforces it |
 |---|---|
 | No secrets read, printed or committed (`.env*`, `.dev.vars*`, keys, tokens) | `.claude/hooks/guard.mjs` blocks it before Claude runs the tool; a secret scan runs after every edit (`.claude/hooks/post-edit.mjs`); `npm run check:repo` and gitleaks in CI |
-| No push to `main`, no force-push, no skipped hooks | `guard.mjs`, and branch protection on `main` once you turn it on ([Setup](.github/README.md#setup-the-owner-once-per-project)) |
+| No push to `main`, no force-push, no skipped hooks | `guard.mjs`, and branch protection on `main` once you turn it on ([Setup](.github/CI-CD.md#setup-the-owner-once-per-project)) |
 | Nothing deploys without your GO for that exact commit | `/deploy-production` waits for `GO <commit>` in chat; on a public repository, the `production` environment's required reviewer too |
 | No ad code or `ads.txt` before AdSense approves your account | `npm run gate:adsense` |
 | No stuffed, thin or duplicate pages | The SEO gate in every build ([docs/SEO-GATE.md](docs/SEO-GATE.md)) and `npm run audit:unique` |
@@ -203,7 +203,7 @@ GitHub copies the files into a new repository with a single commit, unlinked fro
 
 **Public or private?** Public is recommended for a site you'll deploy. On GitHub Free, a private repository can't use
 the `production` approval gate, environment secrets or branch protection, and it gets 2,000 Actions minutes a month
-[M: docs.github.com, 2026-10-25] ([details](.github/README.md#private-repo-caveats-m-checked-on-docsgithubcom-2026-10-25)).
+[M: docs.github.com, 2026-10-25] ([details](.github/CI-CD.md#private-repo-caveats-m-checked-on-docsgithubcom-2026-10-25)).
 A public repository shows everything you commit, including the Keyword Planner files in `research/inputs/kp/`, so keep
 those out of git if you go public.
 
@@ -285,7 +285,7 @@ starter ships one example page of each type, which the coder replaces with your 
 report in `reports/`.
 
 ### Step 9: Go live
-1. Set up Cloudflare and GitHub once: [.github/README.md → Setup](.github/README.md#setup-the-owner-once-per-project).
+1. Set up Cloudflare and GitHub once: [.github/CI-CD.md → Setup](.github/CI-CD.md#setup-the-owner-once-per-project).
    It lists the two secrets and the variables by name, the `production` environment, the Cloudflare Pages settings and
    branch protection.
 2. Open a pull request to `main`. The pre-production checks run on it.
@@ -426,7 +426,7 @@ and the other project docs): they're yours, not the kit's.
 |---|---|
 | Agents, rules and the pipeline (`/start`, gates, ledger) | Ready |
 | Keyword pipeline (Keyword Planner files → keyword map) | Ready, with tests |
-| CI and security scans | Ready (site checks wait for a project; see [Template mode](.github/README.md#template-mode)) |
+| CI and security scans | Ready (site checks wait for a project; see [Template mode](.github/CI-CD.md#template-mode)) |
 | Vetted skills | Ready |
 | On-page SEO gate: 169 checks on every page, for keyword stuffing, thin pages, titles and trust links | Ready, with tests ([docs/SEO-GATE.md](docs/SEO-GATE.md)); runs once a site is built |
 | Starter website (Next.js, one example page of each type) and the site checks | Ready, with tests ([docs/TODO-step-c.md](docs/TODO-step-c.md)) |
@@ -544,7 +544,7 @@ reasons in [docs/SKILLS.md](docs/SKILLS.md).
 1. Check [Troubleshooting](#troubleshooting) and the [FAQ](#faq).
 2. Ask Claude in your project: `/gate status`, or "why did the seo stage fail?".
 3. Read the reference docs: [docs/HANDBOOK.md](docs/HANDBOOK.md) for how everything works,
-   [.github/README.md](.github/README.md) for CI and deploys, [docs/SEO-GATE.md](docs/SEO-GATE.md) for SEO gate
+   [.github/CI-CD.md](.github/CI-CD.md) for CI and deploys, [docs/SEO-GATE.md](docs/SEO-GATE.md) for SEO gate
    failures.
 4. Still stuck? Open an issue on the kit's repository with the command you ran, its output and the commit
    (`git rev-parse --short HEAD`). Never paste a secret, token or key.

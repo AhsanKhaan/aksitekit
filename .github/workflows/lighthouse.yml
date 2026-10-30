@@ -4,7 +4,7 @@
 # The build output folder (factory.config.json → build.outputDir, whatever technology built it) is served with
 # scripts/serve-out.mjs on port 4321 (the _headers rules applied, as on Cloudflare) unless lighthouserc.json starts its
 # own server (startServerCommand) or reads the folder directly (staticDistDir).
-# Security (.github/README.md): actions pinned to full commit SHAs; read-only token; no secrets.
+# Security (.github/CI-CD.md): actions pinned to full commit SHAs; read-only token; no secrets.
 name: lighthouse
 
 on:

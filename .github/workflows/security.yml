@@ -7,7 +7,7 @@
 #   never the custom domain unless given by hand.
 # Every ZAP target must be one of this project's own hosts (.github/scripts/target-url.mjs). Pass or fail is decided
 # by .github/scripts/zap-gate.mjs with the reviewed exceptions in .github/zap/rules.tsv.
-# Security (.github/README.md): actions and images pinned (commit SHA, image digest, binary checksum); read-only token,
+# Security (.github/CI-CD.md): actions and images pinned (commit SHA, image digest, binary checksum); read-only token,
 # no secrets; ZAP never writes issues; never pull_request_target; event values reach scripts through env only.
 name: security
 

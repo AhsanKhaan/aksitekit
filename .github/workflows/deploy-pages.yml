@@ -1,7 +1,7 @@
 # Production deploy to Cloudflare Pages (wrangler pages deploy of the build output folder, factory.config.json →
 # build.outputDir, whatever technology built it), only when factory.config.json hosting.target is
 # cloudflare-pages; deploy-workers.yml covers cloudflare-workers. The owner's GO for each commit is the approval on the
-# `production` environment (required reviewers; .github/README.md has the plan limits for private repos).
+# `production` environment (required reviewers; .github/CI-CD.md has the plan limits for private repos).
 # Triggers:
 #   - by hand (workflow_dispatch) from the production branch: deploys its head, or `commit`, an earlier commit on it
 #     (the rollback path);
@@ -10,8 +10,8 @@
 # Every deploy first runs the full CI gates (ci.yml, called as a reusable workflow) on the exact commit it deploys, and
 # deploys only when they pass and a project exists (template mode deploys nothing). No workflow_run trigger: it would
 # check out code from another run with this repository's secrets in reach (Semgrep: workflow-run-target-code-checkout).
-# After the deploy, check:live runs against LIVE_SITE_URL; on failure, roll back (.github/README.md, Rollback) and fix forward.
-# Security (.github/README.md): actions pinned to full commit SHAs; deploys only commits on the production branch, after
+# After the deploy, check:live runs against LIVE_SITE_URL; on failure, roll back (.github/CI-CD.md, Rollback) and fix forward.
+# Security (.github/CI-CD.md): actions pinned to full commit SHAs; deploys only commits on the production branch, after
 # the CI gates pass on that exact commit; secrets only in the approved job, passed to wrangler-action
 # inputs, never to run:; no dependency cache in the job that holds secrets; one production deploy at a time.
 name: deploy-pages

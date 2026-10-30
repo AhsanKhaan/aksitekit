@@ -5,7 +5,7 @@
 # dashboard toggle or a lost header fails within a day.
 # Targets come from repo variables LIVE_SITE_URL (https://example.com) and LIVE_PAGES_HOST (<project>.pages.dev);
 # the job skips while LIVE_SITE_URL is unset (before the first production deploy).
-# Security (.github/README.md): schedule and manual runs only; actions pinned to full commit SHAs; read-only token;
+# Security (.github/CI-CD.md): schedule and manual runs only; actions pinned to full commit SHAs; read-only token;
 # no secrets; the targets reach the scripts through env, never interpolated into run:.
 name: live-check
 

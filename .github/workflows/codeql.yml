@@ -2,7 +2,7 @@
 # Free on public repositories only: on a private one, code scanning needs a GitHub Code Security licence (paid), so
 # every job here is skipped while the repository is private and starts on its own once it's public. Semgrep CE in
 # security.yml runs either way; OpenSSF Scorecard's SAST check counts CodeQL, not Semgrep.
-# Security (.github/README.md): actions pinned by commit SHA (skills.lock.json); read-only token plus
+# Security (.github/CI-CD.md): actions pinned by commit SHA (skills.lock.json); read-only token plus
 # security-events: write for the results; no secrets; never pull_request_target.
 name: codeql
 

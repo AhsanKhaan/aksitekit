@@ -2,7 +2,7 @@
 # dependencies, token permissions, branch protection, code review, SAST, licence, security policy, SBOM).
 # Free on public repositories only: on a private one the action needs GitHub Advanced Security (paid), so every job
 # here is skipped while the repository is private and starts on its own once it's public.
-# Security (.github/README.md): actions pinned by commit SHA (skills.lock.json); read-only token plus the two writes the
+# Security (.github/CI-CD.md): actions pinned by commit SHA (skills.lock.json); read-only token plus the two writes the
 # action needs to publish and upload; no secrets; runs on the default branch only.
 name: scorecard
 

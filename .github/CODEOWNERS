@@ -1,4 +1,4 @@
-# Every change needs the owner's review once a ruleset on main requires code-owner review (.github/README.md → Setup).
+# Every change needs the owner's review once a ruleset on main requires code-owner review (.github/CI-CD.md → Setup).
 # The files that decide what agents may do and what passes are listed on their own so a later, wider rule can't
 # silently drop them.
 *                       @AhsanKhaan
