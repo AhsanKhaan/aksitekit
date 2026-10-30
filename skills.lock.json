@@ -3057,7 +3057,8 @@
       "published": "2026-07-27",
       "source": "google-labs-code/design.md",
       "license": "Apache-2.0 (repository)",
-      "usedIn": "npm run lint:design (requested from Phase E)"
+      "usedIn": "npm run lint:design (devDependency)",
+      "notes": "Supply-chain checklist 2026-10-30: published by google-wombot, no install scripts in its 88 lockfile packages, registry signatures verified. Its zod ^3 (3.25.76) has high advisory GHSA-mrhx-c7xc-m3w5 with no fix; the owner accepted it in audit-exceptions.json until 2027-01-30."
     },
     {
       "name": "@lhci/cli",

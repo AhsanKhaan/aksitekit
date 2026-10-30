@@ -29,6 +29,7 @@
     "audit:lighthouse": "npx --yes @lhci/cli@0.15.1 autorun",
     "gate:adsense": "node scripts/adsense-gate.mjs",
     "gate:design": "node scripts/design/contrast.mjs",
+    "lint:design": "designmd lint --format markdown docs/DESIGN.md",
     "research:ingest": "node scripts/research/kp-ingest.mjs",
     "research:select": "node scripts/research/keyword-select.mjs",
     "research:cluster": "node scripts/research/cluster.mjs",
@@ -43,6 +44,7 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@google/design.md": "0.4.0",
     "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.6.5",

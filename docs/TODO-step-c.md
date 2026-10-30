@@ -151,7 +151,9 @@ aliases is unverified [U]; check its first npm pull request after this lands.
   own CI build stops at the SEO gate; and a Dependabot rule that holds major ESLint and TypeScript bumps for review.
 - `.claude/agents/architect.md` (Step A): tell the architect that a non-Next.js `build.commands.build` ends with
   `node scripts/gen-public-files.mjs --after-build`.
-- `package.json` (Phase E): a `lint:design` script for the design stage's spec lint, and `"type": "module"` (Vitest
-  warns that it loads `vitest.config.ts` as CommonJS).
+- `package.json` (Phase E): `"type": "module"` (Vitest warns that it loads `vitest.config.ts` as CommonJS). This isn't a
+  one-line change. 11 test files use `__dirname`, which ES modules don't have. One of them is `tests/e2e/site.spec.ts`,
+  which Playwright would then load as ESM. They need `import.meta.dirname` first, then a full build and e2e run.
+  (`lint:design` is done: the devDependency `@google/design.md` 0.4.0, added 2026-10-30.)
 - `scripts/adsense-gate.mjs` judges page types from `research/out/keyword-map.json` only, so on the template it holds the
   example tool to the guide floor; it fails there anyway on the example pages.

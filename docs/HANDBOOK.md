@@ -119,7 +119,7 @@ Fake sample inputs live in `research/inputs/examples/` (never read by the pipeli
 | 4 | strategy | content-strategist | `docs/CONTENT-STRATEGY.md`, content plan, briefs, JSON-LD plan | briefs for wave 1 exist; schema plan per page type |
 | 5 | growth | growth-strategist | `docs/GROWTH-90.md`, `growth/plan.json` | plan validates (one task a day, ≤ 45 min, a done check each) |
 | 6 | architecture | architect | `docs/ARCHITECTURE.md`, `hosting.target` | Pages vs Workers rule applied (§10) |
-| 7 | design | designer | `docs/DESIGN.md` | `npm run gate:design` (WCAG AA contrast); fonts self-hosted |
+| 7 | design | designer | `docs/DESIGN.md` | `npm run lint:design` (the official DESIGN.md linter), `npm run gate:design` (WCAG AA contrast); fonts self-hosted |
 | 7a | design-approval | **you** | — | your `APPROVE <hash>` for that exact version of `docs/DESIGN.md` |
 | 8 | build | coder | the site | both approvals still match their files; `npm run verify` |
 | 9 | tests | harness | `tests/**` | `npm test`, `npm run test:e2e`, in CI too |
@@ -342,6 +342,7 @@ The names are frozen in `docs/CONTRACT.md`. Every script exists; ⛔ marks the o
 | `audit:seo`, `check:seo-live` | The on-page SEO gate on the build output (also run by `build`), and its live checks against a URL (`docs/SEO-GATE.md`) | ✅ (`audit:seo` needs a build) |
 | `audit`, `audit:perf`, `audit:a11y`, `audit:unique`, `audit:ga`, `audit:lighthouse` | CVE gate, lab speed, accessibility, duplicate text, GA4 privacy, Lighthouse CI | ✅ (`audit:ga` skips without a GA4 ID; `audit:lighthouse` runs a pinned `npx @lhci/cli@0.15.1`) |
 | `gate:adsense`, `gate:design` | AdSense gate, contrast gate | ✅ (NO-GO on the template's example pages; `gate:design` reads `docs/DESIGN.md`, written at the design stage) |
+| `lint:design` | The official DESIGN.md linter (`@google/design.md`): format, token references, colour values | ✅ (reads `docs/DESIGN.md`, written at the design stage) |
 | `growth:today` | Today's growth task | ✅ (reads `growth/plan.json`, written at the growth stage) |
 | `verify` | check:repo → audit → lint → typecheck → test → build → test:e2e | ✅ (on the bare template, with `SITE_URL=https://example.com`) |
 

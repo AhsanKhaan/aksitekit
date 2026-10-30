@@ -487,7 +487,7 @@ function missingFor(script, scripts, seen = new Set()) {
   for (const [tool, cfg] of Object.entries(TOOL_CONFIG)) {
     if (new RegExp(`(^|[\\s&;])(npx[^&;]*)?${tool.replace(/[/@]/g, '\\$&')}(@[\\d.]+)?(\\s|$)`).test(cmd) && !existsSync(abs(cfg))) missing.push(cfg);
   }
-  const needsModules = /(?:^|[\s&;])(?:next|eslint|tsc|vitest|playwright)(?:\s|$)/.test(cmd);
+  const needsModules = /(?:^|[\s&;])(?:next|eslint|tsc|vitest|playwright|designmd)(?:\s|$)/.test(cmd);
   if (needsModules && !existsSync(abs('node_modules'))) missing.push('node_modules (run npm ci)');
   return [...new Set(missing)];
 }

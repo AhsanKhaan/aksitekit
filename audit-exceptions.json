@@ -1,4 +1,12 @@
 {
   "$comment": "Reviewed exceptions for scripts/audit.mjs (npm run audit). Each entry: id (GHSA), package, reason, reviewed (the owner's review date) and expires (at most 3 months later). An expired or incomplete entry fails the gate. Add one only with the owner's yes in chat, never to get a build green.",
-  "advisories": []
+  "advisories": [
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "zod",
+      "reason": "Only the zod 3.25.76 nested under the devDependency @google/design.md 0.4.0 (npm run lint:design), which needs zod ^3 and has no fixed release. Its CLI is one bundle with zod inlined, so an override can't patch it. Its only input is the repo's own docs/DESIGN.md, so the worst case is a lint run running out of memory. The site's own zod is 4.6.7, outside the vulnerable range (< 4.6.6). Drop this when @google/design.md moves to zod 4.",
+      "reviewed": "2026-10-30",
+      "expires": "2027-01-30"
+    }
+  ]
 }
