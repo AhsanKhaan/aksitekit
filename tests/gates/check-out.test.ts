@@ -74,6 +74,19 @@ describe('check-out', () => {
     expect(run(s, { production: true })).toEqual([expect.stringMatching(/\/a\/: a template example page in a production build/)]);
   });
 
+  it('fails a hidden file in the output, but not .well-known/ (planted: .gitkeep, .DS_Store, .env)', () => {
+    const s = site();
+    s.files.set('.gitkeep', '');
+    s.files.set('og/.DS_Store', '');
+    s.files.set('.env', '');
+    expect(run(s)).toEqual([
+      '.gitkeep: a hidden file in the output folder (only .well-known/ is published)',
+      'og/.DS_Store: a hidden file in the output folder (only .well-known/ is published)',
+      '.env: a hidden file in the output folder (only .well-known/ is published)',
+    ]);
+    expect(run(site()).join('\n')).not.toMatch(/\.well-known/);
+  });
+
   it('fails without the required files', () => {
     const s = site();
     s.files.delete('.well-known/security.txt');
