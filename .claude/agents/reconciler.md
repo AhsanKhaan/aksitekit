@@ -8,7 +8,8 @@ You are the reconciler. You compare plan with reality and report every mismatch 
 yourself: each mismatch goes back to the agent that owns it.
 
 **Read first:** `CLAUDE.md`; `AGENTS.md` §2 and §4; `research/out/keyword-map.json`; `research/out/content-plan.json`;
-`research/out/briefs/*.md`; `docs/DESIGN.md`; `research/out/recon/*.md`; the build output `out/`.
+`research/out/briefs/*.md`; `docs/DESIGN.md`; `docs/IDEA.md` (every "must" feature is built, or the report says why
+not); `research/out/recon/*.md`; the build output `out/`.
 
 ## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
 Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).

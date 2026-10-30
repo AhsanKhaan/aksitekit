@@ -8,7 +8,9 @@ You are the content strategist. You decide what gets written, in which order, an
 the most useful answer, without padding and without copying anyone.
 
 **Read first:** `CLAUDE.md`; `AGENTS.md` §1 and §4; `research/out/keyword-map.json`; `research/out/selected.json`;
-`research/out/recon/*.md`; `docs/templates/CONTENT-STRATEGY.md`; `factory.config.json` → `project`, `bots`.
+`research/out/recon/*.md`; `docs/IDEA.md` (the owner-approved idea: wave 1 delivers its §6 slice where the keyword map
+supports it, and each brief's job statement starts from its §2 jobs); `docs/templates/CONTENT-STRATEGY.md`;
+`factory.config.json` → `project`, `bots`.
 
 ## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
 Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).

@@ -7,8 +7,10 @@
 //   node .claude/skills/gate/gate.mjs record <stage> <PASS|FAIL|BLOCKED|SKIPPED> "<evidence>"
 //
 // Exit codes: 0 PASS or SKIPPED, 1 FAIL, 2 usage error, 3 BLOCKED (a script, file, tool or owner input is missing).
-// `record` writes PASS only for manual stages (preprod, go), whose evidence is the owner's confirmation.
+// `record` writes PASS only for manual stages (idea-approval, design-approval, preprod, go), whose evidence is the
+// owner's confirmation. An approval stage pins its file by content hash: the owner types APPROVE <hash>.
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,8 +24,13 @@ const RESULTS = ['PASS', 'FAIL', 'BLOCKED', 'SKIPPED'];
 const PLACEHOLDER = /\{\{[A-Z0-9_]+\}\}/;
 const TODO_C = 'docs/TODO-step-c.md';
 
+const IDEA_INPUT = 'research/inputs/idea.md';
+
 const abs = (p) => path.join(ROOT, ...p.split('/'));
 const readJson = (p) => JSON.parse(readFileSync(abs(p), 'utf8'));
+const readText = (p) => readFileSync(abs(p), 'utf8').replace(/\r\n/g, '\n');
+// What the owner approves: the first 12 hex of the file's sha256, line endings normalised so a checkout can't change it.
+const fileHash = (p) => createHash('sha256').update(readText(p)).digest('hex').slice(0, 12);
 
 class Outcome extends Error {
   constructor(result, evidence, next) {
@@ -83,6 +90,53 @@ function config() {
   }
 }
 
+// A markdown file's "## " sections, in order; the text before the first one has the heading ''.
+function sections(text) {
+  const out = [{ heading: '', body: '' }];
+  for (const line of text.split('\n')) {
+    const m = line.match(/^## (.+)$/);
+    if (m) out.push({ heading: m[1].trim(), body: '' });
+    else out[out.length - 1].body += `${line}\n`;
+  }
+  return out;
+}
+
+// The owner's idea, in their own words, from intake.
+function ownerIdea() {
+  if (!existsSync(abs(IDEA_INPUT))) fail(`${IDEA_INPUT} is missing`, 'owner: describe the idea in their own words (/start intake)');
+  const own = sections(readText(IDEA_INPUT)).find((s) => /in the owner'?s words/i.test(s.heading));
+  const words = own ? own.body.replace(/<!--[\s\S]*?-->/g, '').trim() : '';
+  if (!words) fail(`${IDEA_INPUT} → "## In the owner's words" is empty`, 'owner: describe the idea in their own words (/start intake)');
+  return words;
+}
+
+// More than 15 words in a blockquote or between quotation marks: someone's text copied rather than described.
+function longQuote(line) {
+  const words = (s) => s.split(/\s+/).filter(Boolean).length;
+  if (/^\s*>/.test(line) && words(line.replace(/^\s*>\s*/, '')) > 15) return 'blockquote';
+  return [...line.matchAll(/["“]([^"”]+)["”]/g)].some((m) => words(m[1]) > 15) ? 'quote' : null;
+}
+
+// Each approval stage against the file it pins: the latest ledger row must be a PASS whose APPROVE <hash> matches the
+// file now. Returns the problems as { evidence, next }; an empty list means every approval is current.
+function staleApprovals() {
+  const by = latest();
+  const problems = [];
+  for (const s of STAGES.filter((x) => x.approves)) {
+    if (!existsSync(abs(s.approves))) {
+      problems.push({ evidence: `${s.approves} doesn't exist yet`, next: `run the stage that writes it, then ${s.id}` });
+      continue;
+    }
+    const now = fileHash(s.approves);
+    const row = by[s.id];
+    const approved = row?.result === 'PASS' ? row.evidence.match(/\bAPPROVE ([0-9a-f]{12})\b/i)?.[1].toLowerCase() : undefined;
+    const how = `owner: read ${s.approves} and type APPROVE ${now}; then gate.mjs record ${s.id} PASS "owner typed: APPROVE ${now}"`;
+    if (!approved) problems.push({ evidence: `the owner hasn't approved ${s.approves} (now ${now})`, next: how });
+    else if (approved !== now) problems.push({ evidence: `${s.approves} changed since the owner approved it (${approved} → ${now})`, next: how });
+  }
+  return problems;
+}
+
 // ---------- outputs ----------
 
 function expandOutputs(stage) {
@@ -139,8 +193,9 @@ const CHECKS = {
       fail('factory.config.json → build.outputDir must be a relative folder inside the repo (for example "out" or "dist")');
     }
     if (!String(b.commands?.build || '').trim()) fail(`factory.config.json → build.commands.build is empty for "${framework}"`, 'architect: set the build command');
+    const idea = ownerIdea().split(/\s+/).length;
     const seed = [...list].sort((a, b) => a.dr - b.dr || a.domain.localeCompare(b.domain))[0];
-    return `domain ${domain}; ${list.length} competitor(s); seed ${seed.domain} (DR ${seed.dr} [M: owner]); technology ${framework} → ${out}/`;
+    return `domain ${domain}; ${list.length} competitor(s); seed ${seed.domain} (DR ${seed.dr} [M: owner]); technology ${framework} → ${out}/; idea ${idea} words [M]`;
   },
 
   'recon-no-copy'() {
@@ -151,16 +206,90 @@ const CHECKS = {
       if (!/https?:\/\//.test(text)) fail(`${p} lists no source URLs (record every public page visited)`);
       const lines = text.split(/\r?\n/);
       lines.forEach((line, i) => {
-        if (/^\s*>/.test(line) && line.replace(/^\s*>\s*/, '').split(/\s+/).filter(Boolean).length > 15) {
-          fail(`${p}:${i + 1} quotes more than 15 words (blockquote). Describe structure; don't copy text`);
-        }
-        for (const m of line.matchAll(/["“]([^"”]+)["”]/g)) {
-          if (m[1].split(/\s+/).filter(Boolean).length > 15) fail(`${p}:${i + 1} quotes more than 15 words. Describe structure; don't copy text`);
-        }
+        const q = longQuote(line);
+        if (q) fail(`${p}:${i + 1} quotes more than 15 words${q === 'blockquote' ? ' (blockquote)' : ''}. Describe structure; don't copy text`);
       });
       notes.push(c.domain);
     }
     return `recon for ${notes.length} competitor(s), no long quotes`;
+  },
+
+  'recon-idea'() {
+    for (const c of competitors()) {
+      const p = `research/out/recon/${c.domain}.md`;
+      const part = sections(readText(p)).find((s) => /against the owner'?s idea/i.test(s.heading));
+      if (!part || !part.body.trim()) {
+        fail(`${p} has no "## Against the owner's idea" section (how this competitor serves each thing the owner wants visitors to do)`, 'competitor-recon adds it');
+      }
+    }
+    return "every recon file measures its competitor against the owner's idea";
+  },
+
+  'idea-brief'() {
+    const p = 'docs/IDEA.md';
+    const text = readText(p);
+    const parts = sections(text);
+    const part = (re, name) => parts.find((s) => re.test(s.heading)) ?? fail(`${p} has no "## ${name}" section`, 'idea-groomer writes it from docs/templates/IDEA.md');
+    const own = part(/owner'?s idea/i, "1. The owner's idea");
+    const jobs = part(/\bjobs\b/i, '2. Visitors and their jobs');
+    const cover = part(/coverage/i, '3. Coverage by competitor');
+    part(/where we can win/i, '4. Where we can win');
+    const feats = part(/^(?:\d+\.\s*)?features\b/i, '5. Features');
+    part(/wave[\s-]*1/i, '6. Wave 1');
+    part(/positioning/i, '7. Positioning');
+    part(/out of scope/i, '8. Out of scope');
+    const open = part(/open questions/i, '9. Open questions for the owner');
+
+    const flat = (s) => s.replace(/<!--[\s\S]*?-->/g, '').replace(/^\s*>\s?/gm, '').replace(/\s+/g, ' ').trim();
+    if (!flat(own.body).includes(flat(ownerIdea()))) fail(`${p} → §1 must quote ${IDEA_INPUT} → "In the owner's words" unchanged`);
+
+    const jobIds = [...new Set([...jobs.body.matchAll(/\bJ\d+\b/g)].map((m) => m[0]))];
+    if (!jobIds.length) fail(`${p} → §2 names no jobs (J1, J2, …)`);
+    const unmatched = competitors().map((c) => c.domain).filter((d) => !cover.body.toLowerCase().includes(d));
+    if (unmatched.length) fail(`${p} → §3 doesn't cover ${unmatched.join(', ')}: match the idea against every recon file`);
+    const uncovered = jobIds.filter((j) => !new RegExp(`\\b${j}\\b`).test(cover.body));
+    if (uncovered.length) fail(`${p} → §3 doesn't say how competitors serve ${uncovered.join(', ')}`);
+
+    const lines = feats.body.split('\n').filter((l) => l.trim().startsWith('|'));
+    const cells = (l) => l.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map((c) => c.trim());
+    const head = lines.length ? cells(lines[0]).map((h) => h.toLowerCase()) : [];
+    const col = Object.fromEntries(['feature', 'job', 'priority', 'evidence'].map((k) => [k, head.findIndex((h) => h.startsWith(k))]));
+    if (Object.values(col).includes(-1)) fail(`${p} → §5 needs a table with Feature, Job, Priority and Evidence columns`);
+    const rows = lines.slice(1).filter((l) => !/^\|[\s|:-]+\|$/.test(l.trim())).map(cells);
+    if (!rows.length) fail(`${p} → §5 lists no features`);
+    const served = new Set();
+    for (const r of rows) {
+      const name = r[col.feature] || '(unnamed)';
+      const priority = String(r[col.priority] || '').toLowerCase().replace('’', "'");
+      if (!['must', 'should', 'could', "won't"].includes(priority)) fail(`${p} → §5 "${name}": priority must be must, should, could or won't`);
+      if (['', '-', '—', 'n/a', 'none'].includes(String(r[col.evidence] || '').toLowerCase())) fail(`${p} → §5 "${name}" has no evidence (a recon file and section, or the owner's idea)`);
+      const ids = String(r[col.job] || '').match(/\bJ\d+\b/g) || [];
+      const unknown = ids.filter((j) => !jobIds.includes(j));
+      if (!ids.length || unknown.length) fail(`${p} → §5 "${name}" must name a job from §2${unknown.length ? ` (${unknown.join(', ')} isn't one)` : ''}`);
+      for (const j of ids) served.add(j);
+    }
+    const must = rows.filter((r) => r[col.priority].toLowerCase() === 'must').length;
+    if (!must) fail(`${p} → §5 has no "must" feature, so wave 1 has nothing to build`);
+    const orphans = jobIds.filter((j) => !served.has(j));
+    if (orphans.length) fail(`${p} → §5 has no feature for ${orphans.join(', ')}: give each job one, or a "won't" row with the reason`);
+
+    let owners = false;
+    text.split('\n').forEach((line, i) => {
+      const h = line.match(/^## (.+)$/);
+      if (h) owners = /owner/i.test(h[1]); // the owner's own words may be quoted in full
+      else if (!owners && longQuote(line)) fail(`${p}:${i + 1} quotes more than 15 words. Describe what recon found; don't copy text`);
+    });
+
+    const asks = open.body.split('\n').filter((l) => /^\s*[-*] \[ \]/.test(l)).length;
+    if (asks) blocked(`${p} → §9 has ${asks} unanswered question(s) for the owner`, `owner: answer them; the orchestrator writes the answers in ${IDEA_INPUT} → "Owner answers" and idea-groomer re-runs`);
+    const hash = fileHash(p);
+    return `${jobIds.length} job(s), ${rows.length} feature(s) (${must} must), ${competitors().length} competitor(s) matched [M]; content ${hash}: the owner approves it with APPROVE ${hash}`;
+  },
+
+  'approvals-current'() {
+    const problems = staleApprovals();
+    if (problems.length) blocked(problems.map((x) => x.evidence).join('; '), problems[0].next);
+    return `owner approvals match ${STAGES.filter((s) => s.approves).map((s) => s.approves).join(' and ')}`;
   },
 
   'json-outputs'(stage) {
@@ -449,6 +578,10 @@ function runStage(stage, opts) {
   let next;
   try {
     if (!applies(stage)) throw new Outcome('SKIPPED', 'hosting target is not Cloudflare', null);
+    if (stage.approves && existsSync(abs(stage.approves))) {
+      const h = fileHash(stage.approves);
+      blocked(`manual stage: the owner reads ${stage.approves} (now ${h}) and types APPROVE ${h}, or says what to change`, `record it: gate.mjs record ${stage.id} PASS "owner typed: APPROVE ${h}"`);
+    }
     if (stage.manual) blocked(`manual stage: ${stage.manual}`, `record it: gate.mjs record ${stage.id} PASS "<evidence>"`);
     const before = STAGES.slice(0, STAGES.indexOf(stage)).filter((s) => applies(s) && !['PASS', 'SKIPPED'].includes(latest()[s.id]?.result));
     if (before.length) process.stdout.write(`warning: earlier stage(s) not passed yet: ${before.map((s) => s.id).join(', ')}\n`);
@@ -490,7 +623,7 @@ function status() {
   for (const s of STAGES) {
     const r = by[s.id];
     const state = !applies(s) ? 'n/a (not Cloudflare)' : r ? `${r.result} (attempt ${r.attempt}, ${r.when})` : '-';
-    process.stdout.write(`${s.id.padEnd(13)} ${s.agent.padEnd(20)} ${state}\n`);
+    process.stdout.write(`${s.id.padEnd(16)} ${s.agent.padEnd(20)} ${state}\n`);
   }
   const n = nextStage(by);
   process.stdout.write(`\nnext: ${n ? `${n.id} (${n.agent}): ${n.summary}` : 'all stages passed'}\n`);
@@ -512,6 +645,17 @@ function record(id, result, evidence) {
   if (id === 'go' && result === 'PASS' && !/\bGO [0-9a-f]{7,40}\b/i.test(evidence)) {
     return usage('the go stage needs the owner\'s words, e.g. "owner typed: GO 1a2b3c4"');
   }
+  if (id === 'go' && result === 'PASS') {
+    const stale = staleApprovals();
+    if (stale.length) return usage(`no GO while an approval is out of date: ${stale.map((x) => x.evidence).join('; ')}`);
+  }
+  if (stage.approves && result === 'PASS') {
+    if (!existsSync(abs(stage.approves))) return usage(`${stage.approves} doesn't exist yet`);
+    const now = fileHash(stage.approves);
+    const typed = evidence.match(/\bAPPROVE ([0-9a-f]{12})\b/i)?.[1].toLowerCase();
+    if (!typed) return usage(`the ${id} stage needs the owner's words, e.g. "owner typed: APPROVE ${now}"`);
+    if (typed !== now) return usage(`the owner approved ${typed}, but ${stage.approves} is ${now} now: show them the current file and ask again`);
+  }
   const nx = STAGES.slice(STAGES.indexOf(stage) + 1).find(applies);
   const attempt = appendLedger(stage, result, `gate.mjs record ${id}`, evidence, result === 'PASS' ? nx?.id ?? 'done' : 'see evidence');
   process.stdout.write(`${id}: ${result} recorded (attempt ${attempt})\n`);
@@ -529,7 +673,7 @@ function main(argv) {
   if (!cmd || cmd === '--help' || cmd === '-h') return usage();
   if (cmd === 'status') return status();
   if (cmd === 'list') {
-    for (const s of STAGES) process.stdout.write(`${s.id.padEnd(13)} ${s.agent.padEnd(20)} ${[...(s.checks || []).map((c) => `check:${c}`), ...(s.npm || []).map((n) => `npm:${n}`)].join(' ') || (s.manual ? 'manual' : 'outputs')}\n`);
+    for (const s of STAGES) process.stdout.write(`${s.id.padEnd(16)} ${s.agent.padEnd(20)} ${[...(s.checks || []).map((c) => `check:${c}`), ...(s.npm || []).map((n) => `npm:${n}`)].join(' ') || (s.manual ? 'manual' : 'outputs')}\n`);
     return 0;
   }
   if (cmd === 'record') return record(rest[0], rest[1], rest.slice(2).join(' '));

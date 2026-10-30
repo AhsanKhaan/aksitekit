@@ -10,6 +10,7 @@ names and data formats are fixed in `docs/CONTRACT.md`.
 | **Free tools only, ask first** | Never use a paid tool, API, plan or trial. A stage that would need one stops and asks the owner (tool, cost, purpose). If the owner says no, the agent proposes a free alternative |
 | **Trusted sources only** | Skills are vendored in `vendor/skills/`: copied byte for byte from a reviewed commit at least 7 days old, with a sha256 for every file in `skills.lock.json` (`npm run check:skills`). MCP servers and GitHub Actions are pinned there too. `pending-review` and `excluded` sources need the owner's yes. Every skill is found through Skillselion and passes its skills.sh audit (3/3, or 2/3 with only W011). See `docs/SKILLS.md` |
 | **Agents propose, scripts decide** | Each stage writes a file; its gate passes or fails it. A stage is done only when its gate passes and the ledger says so |
+| **Owner approves the idea and the design** | The owner reads `docs/IDEA.md` and `docs/DESIGN.md` and types `APPROVE <hash>` for each (the file's content hash). `gate.mjs` records only a hash that matches the file as it is now; build and the GO refuse while either file differs from the approved version |
 | **Owner GO before production** | Nothing merges to the production branch or deploys without the owner typing `GO <sha>` for that exact commit |
 | **Never copy competitors** | Recon records structure and UX gaps from public pages; no copied text, images, code or design assets. Quotes ≤ 15 words with a source |
 | **Never scrape Google or bypass CAPTCHAs** | No automated Google queries, no CAPTCHA solving, no automation against a site's terms. KD comes from the free SERP check (Claude's WebSearch plus the owner's input) |
@@ -37,8 +38,8 @@ Each agent has a file in `.claude/agents/`; its "Skills and tools" section lists
 
 | # | Agent | Job | Main skills / MCP | Writes | Gate |
 |---|---|---|---|---|---|
-| 1 | `orchestrator` | Runs `/start`: intake, then each stage in order; records the ledger | the ledger, `/gate` | `factory.config.json`, `research/inputs/competitors.csv`, `reports/ledger.md` | each stage's gate |
-| 2 | `competitor-recon` | Structure, page types, stack, feature matrix, reader complaints and UX gaps of each competitor (public pages only) | `replica-recon`, `replica-architect`, `replica-diff`, `replica-entrepreneur`, marketingskills `competitors`, Playwright MCP, rea website tools (optional) | `research/out/recon/<competitor>.md` | `gate.mjs recon` (one file per competitor, no copied passages); `npm run audit:unique` after the build |
+| 1 | `orchestrator` | Runs `/start`: intake (with the owner's idea), then each stage in order; asks the owner's questions and approvals; records the ledger | the ledger, `/gate` | `factory.config.json`, `research/inputs/competitors.csv`, `research/inputs/idea.md`, `reports/ledger.md` | each stage's gate |
+| 2 | `competitor-recon` | Structure, page types, stack, feature matrix, reader complaints, UX gaps, and how it serves the owner's idea, for each competitor (public pages only) | `replica-recon`, `replica-architect`, `replica-diff`, `replica-entrepreneur`, marketingskills `competitors`, Playwright MCP, rea website tools (optional) | `research/out/recon/<competitor>.md` | `gate.mjs recon` (one file per competitor, no copied passages); `npm run audit:unique` after the build |
 | 3 | `keyword-researcher` | Keyword Planner CSVs → selected keywords → one owner URL per keyword | `keyword-research`, `serp-analysis`, claude-seo `seo-cluster`, marketingskills `programmatic-seo` / `free-tools` | `research/out/{keywords,selected,keyword-map}.json`, `research/inputs/kd.csv` | `npm run research:ingest` → `research:select` → `research:cluster` |
 | 4 | `content-strategist` | Content strategy, wave-1 briefs with voice notes, JSON-LD plan, `llms.txt` inputs | marketingskills `content-strategy` / `copywriting` / `schema` / `ai-seo` / `free-tools`, claude-seo `seo-content-brief` / `seo-geo` / `seo-schema`, `humanizer`, `jobs-to-be-done` | `docs/CONTENT-STRATEGY.md`, `research/out/content-plan.json`, `research/out/briefs/*.md` | `gate.mjs strategy` |
 | 5 | `growth-strategist` | The 90-day ADHD-friendly growth plan | marketingskills `marketing-loops`, `marketing-ideas`, `marketing-council` (Hormozi lens), `customer-research`, `analytics`, `cro` | `docs/GROWTH-90.md`, `growth/plan.json` | `gate.mjs growth` → `npm run growth:today` |
@@ -57,6 +58,7 @@ Each agent has a file in `.claude/agents/`; its "Skills and tools" section lists
 | 18 | `doc-generator` | Regenerates the project docs from the agents' outputs | `docs/templates/`, marketingskills `copy-editing`, `humanizer` | `docs/PRD.md`, `docs/DESIGN.md`, `docs/ARCHITECTURE.md`, `docs/SECURITY.md`, §6 of this file | `gate.mjs docs` (no placeholders left), `npm run check:repo` |
 | 19 | `code-reviewer` | Reviews the branch diff before a PR: project rules, ownership, correctness, silent failures, tests, security regressions; fixes nothing | Anthropic pr-review-toolkit agents (read as checklists), superpowers `requesting-code-review`, trailofbits `differential-review`, `codebase-design` | `reports/code-review.md` | `gate.mjs code-review` (Verdict PASS, 0 blockers, for the current HEAD), `npm run lint`, `npm run typecheck` |
 | 20 | `ai-search-auditor` | AEO and GEO: AI crawlers per the bot policy, `llms.txt`, answer-first passages, entities, dates, sources | marketingskills `ai-seo` / `schema`, claude-seo `seo-geo` | `reports/ai-search.md` | `gate.mjs ai-search` (`llms.txt` title, `robots.txt` follows `bots`), `npm run audit:seo` |
+| 21 | `idea-groomer` | Grooms the owner's idea against every recon file: visitors' jobs, coverage by competitor, gaps, ranked features with evidence, the wave-1 slice, positioning, open questions | `jobs-to-be-done`, `replica-diff`, `replica-entrepreneur` | `docs/IDEA.md` | `gate.mjs idea`, then the owner's `APPROVE <hash>` (`idea-approval`) |
 
 **Who runs where.** Subagents can't start other subagents, and they can't talk to the owner. So the orchestrator and
 the deployer run **in the main session** (through `/start` and `/deploy-production`); they hand single stages to the
@@ -66,11 +68,12 @@ question; it never guesses.
 ## 3. Pipeline flow
 ```text
 /start
-  intake ── owner: domain, competitors + DR ──► seed = lowest-DR competitor
-  recon (competitors, public pages only)
+  intake ── owner: domain, competitors + DR, the idea ──► seed = lowest-DR competitor
+  recon (competitors, public pages only, each measured against the idea)
+  idea ── idea-groomer: the idea × recon ──► docs/IDEA.md ──► owner: APPROVE <hash>
   keywords ── owner drops Keyword Planner CSVs in research/inputs/kp/ ──► ingest → select → cluster
   strategy + growth (90 days)
-  architecture → design
+  architecture → design ──► owner: APPROVE <hash> for docs/DESIGN.md
   build + tests
   code-review (the diff, before any PR)
   reconcile
@@ -90,14 +93,17 @@ outputs, runs the npm gates in order, and appends the result to the ledger. Scri
 
 | Stage | Agent | Output file(s) | Gate command(s) |
 |---|---|---|---|
-| intake | orchestrator | `factory.config.json` (`project.domain`, `competitors[]`), `research/inputs/competitors.csv` | `node .claude/skills/gate/gate.mjs intake` |
-| recon | competitor-recon | `research/out/recon/<competitor>.md` | `node .claude/skills/gate/gate.mjs recon` |
+| intake | orchestrator | `factory.config.json` (`project.domain`, `competitors[]`), `research/inputs/competitors.csv`, `research/inputs/idea.md` | `node .claude/skills/gate/gate.mjs intake` |
+| recon | competitor-recon | `research/out/recon/<competitor>.md`, each with `## Against the owner's idea` | `node .claude/skills/gate/gate.mjs recon` |
+| idea | idea-groomer | `docs/IDEA.md` | `node .claude/skills/gate/gate.mjs idea` (nine sections; the owner's words unchanged; every job and competitor covered; every feature with a priority, a job and evidence; BLOCKED while §9 has an unanswered question) |
+| idea-approval | owner | — | the owner types `APPROVE <hash>` for `docs/IDEA.md` as it is now; recorded with `gate.mjs record idea-approval` |
 | keywords | keyword-researcher | `research/out/keywords.json`, `selected.json`, `keyword-map.json` | `npm run research:ingest`, `npm run research:select`, `npm run research:cluster` (**B**) |
 | strategy | content-strategist | `docs/CONTENT-STRATEGY.md`, `research/out/content-plan.json`, `research/out/briefs/*.md` | `node .claude/skills/gate/gate.mjs strategy` |
 | growth | growth-strategist | `docs/GROWTH-90.md`, `growth/plan.json` | `node .claude/skills/gate/gate.mjs growth`, then `npm run growth:today` (**C**) |
 | architecture | architect | `docs/ARCHITECTURE.md`, `hosting.target` | `node .claude/skills/gate/gate.mjs architecture` |
 | design | designer | `docs/DESIGN.md` | `node .claude/skills/gate/gate.mjs design` (DESIGN.md spec lint), `npm run gate:design` (**C**) |
-| build | coder | app code | `npm run verify` (**C**) |
+| design-approval | owner | — | the owner types `APPROVE <hash>` for `docs/DESIGN.md` as it is now; recorded with `gate.mjs record design-approval` |
+| build | coder | app code | `node .claude/skills/gate/gate.mjs build` (both approvals still match their files), `npm run verify` (**C**) |
 | tests | harness | `tests/**` | `npm test`, `npm run test:e2e` (**C**) |
 | code-review | code-reviewer | `reports/code-review.md` | `node .claude/skills/gate/gate.mjs code-review` (Verdict PASS, 0 blockers, reviewed SHA = HEAD), `npm run lint`, `npm run typecheck` (**C**) |
 | reconcile | reconciler | `reports/reconcile.md` | `npm run check:release`, `npm run audit:unique` (**C**) |
@@ -109,7 +115,7 @@ outputs, runs the npm gates in order, and appends the result to the ledger. Scri
 | performance | performance-auditor | `reports/performance.md` | `npm run audit:lighthouse`, `npm run audit:perf`, `npm run audit:a11y` (**C**) |
 | preprod | orchestrator | PR to the production branch | `preprod.yml` green for the exact SHA (CI, Step D); recorded with `gate.mjs record preprod` |
 | cloudflare | cloudflare-reviewer (Cloudflare targets only) | `reports/cloudflare.md` | `node .claude/skills/gate/gate.mjs cloudflare` (report exists); MCP reads against the checklist |
-| go | owner | — | the owner types `GO <sha>`; recorded with `gate.mjs record go` |
+| go | owner | — | the owner types `GO <sha>`; recorded with `gate.mjs record go`, which refuses while an approval is out of date |
 | deploy | devsecops-deployer | `reports/deploys/<date>-<sha>.md` | deploy workflow green; `npm run check:live -- https://<domain>` (**C**); `npm run check:seo-live -- https://<domain>` |
 | docs | doc-generator | `docs/PRD.md`, `docs/DESIGN.md`, `docs/ARCHITECTURE.md`, `docs/SECURITY.md`, `AGENTS.md` §6 | `node .claude/skills/gate/gate.mjs docs`, `npm run check:repo` (**C**) |
 

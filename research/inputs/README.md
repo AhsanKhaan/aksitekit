@@ -7,6 +7,7 @@ site will have. Every stage writes a file and exits 1, with a message, when a ru
 |---|---|---|
 | `kp/<competitor-domain>.csv` | you: one Google Keyword Planner export per competitor | yes, at least the seed |
 | `competitors.csv` | you (or `/start`) | yes |
+| `idea.md` | `/start`, with your words unchanged | yes (§9) |
 | `kd.csv` | the free SERP check, or you | no, but nothing is selected without a KD |
 | `categories.csv` | you, to fix `uncategorized` | no |
 | `examples/` | the template: **fake** sample files | never read by the pipeline |
@@ -179,7 +180,7 @@ In the outputs, `label` / `seasonalityLabel` say how far to trust a number: **M*
 **R** a range (Keyword Planner bucket), **P** a proxy computed from buckets, **U** unknown.
 
 ## 8. The examples
-`examples/` holds **fake** files to try the pipeline: made-up competitors on the reserved `.example` domain and
+`examples/` holds **fake** files to try the pipeline (and a fake `idea.md` showing its format): made-up competitors on the reserved `.example` domain and
 keywords such as "example widget sizer", with invented numbers. They are not research and must never be copied into
 real inputs. `examples/kp/sizerpal.example.csv` is saved exactly like a real download (UTF-16 LE, tabs), so most editors
 show it as binary; `examples/kp/widgetwise.example.csv` is the UTF-8 re-save.
@@ -188,3 +189,21 @@ To try them without touching this folder:
 ```bash
 mkdir -p /tmp/factory-try/research/inputs && cp factory.config.json /tmp/factory-try/ && cp -r research/inputs/examples/. /tmp/factory-try/research/inputs/ && FACTORY_ROOT=/tmp/factory-try npm run research:all
 ```
+
+## 9. `idea.md` (your idea)
+`/start` asks what visitors should be able to do on your site and who they are, and saves your answer here word for
+word. The keyword scripts don't read it; the agents do.
+```markdown
+# The idea
+
+## In the owner's words
+A free site where people sizing example widgets type their measurements and get the right size.
+
+## Owner answers
+- 2026-11-02: Both inches and centimetres.
+```
+- **In the owner's words:** your answer, unchanged. `docs/IDEA.md` must quote it exactly, so the groomed idea can't
+  drift from what you said.
+- **Owner answers:** your answers to the groomer's open questions and the changes you ask for, dated, in your words.
+- Recon measures each competitor against it, the idea-groomer turns both into `docs/IDEA.md`, and you approve that
+  file with `APPROVE <hash>` before the keyword stage (README → Step 6).

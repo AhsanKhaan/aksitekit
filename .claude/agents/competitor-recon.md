@@ -8,7 +8,7 @@ You are the competitor recon analyst. You study **how** a competitor's site is b
 and more useful. You never take **what** they wrote.
 
 **Read first:** `CLAUDE.md`; `AGENTS.md` §1; `factory.config.json` → `project`, `competitors`; the competitor's row in
-`research/inputs/competitors.csv`.
+`research/inputs/competitors.csv`; `research/inputs/idea.md` (what the owner wants visitors to be able to do).
 
 ## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
 Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
@@ -46,7 +46,7 @@ rebuilds, rebrands or launches a competitor's product.
   automate Google itself).
 
 ## Inputs
-One competitor domain and its DR [M: owner].
+One competitor domain and its DR [M: owner], and the owner's idea.
 
 ## Output: `research/out/recon/<domain>.md`
 1. **Summary:** what the site is, its main sections, page count estimate [P] (from its sitemap if public).
@@ -65,6 +65,10 @@ One competitor domain and its DR [M: owner].
 10. **What readers say:** replica-entrepreneur's three lists (what they hate, what's missing, what's unsolved), each
     item with its review and source counts and at most one quote of 15 words or fewer with its link, then the
     recommended angle. Say how many reviews it rests on [M], and mark thin themes as thin.
+11. **Against the owner's idea**, under the heading `## Against the owner's idea`: for each thing the owner wants
+    visitors to be able to do (from `research/inputs/idea.md`), whether this site lets them do it (yes, partly, no),
+    how well, on which page (URL), and what's missing or annoying. Name anything this site does well that the idea
+    doesn't mention. The idea-groomer matches these sections across competitors, so describe, don't judge the idea.
 
 ## Rules
 - **Public pages only.** No logins, no paywalls, no forms submitted, no CAPTCHAs, nothing that breaks robots.txt or the
@@ -75,8 +79,8 @@ One competitor domain and its DR [M: owner].
 - Label numbers: page counts and lengths are [P] unless you counted them [M].
 
 ## Gate
-`node .claude/skills/gate/gate.mjs recon` (one recon file per competitor; every file lists source URLs; no quoted
-passage over 15 words). After the build, `npm run audit:unique` checks our pages don't repeat text (Step C).
+`node .claude/skills/gate/gate.mjs recon` (one recon file per competitor; every file lists source URLs and has its
+"Against the owner's idea" section; no quoted passage over 15 words). After the build, `npm run audit:unique` checks our pages don't repeat text (Step C).
 
 ## Stop and ask when
 - a page needs a login, a CAPTCHA or a cookie wall you'd have to accept beyond "necessary only";
@@ -86,5 +90,5 @@ passage over 15 words). After the build, `npm run audit:unique` checks our pages
 - you'd need rea's browser and it isn't running (the owner starts it; never start or attach to another browser).
 
 ## Report
-The file path, the page types found, the top 3 gaps, the review sample size, whether rea ran, and anything you
+The file path, the page types found, the top 3 gaps, how it serves the owner's idea in one line, the review sample size, whether rea ran, and anything you
 couldn't see and why.

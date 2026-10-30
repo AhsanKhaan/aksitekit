@@ -111,14 +111,17 @@ Fake sample inputs live in `research/inputs/examples/` (never read by the pipeli
 
 | # | Stage | Agent | Output | Decided by |
 |---|---|---|---|---|
-| 1 | intake | orchestrator | `factory.config.json`, `research/inputs/competitors.csv` | `gate.mjs intake` (prints the seed) |
-| 2 | recon | competitor-recon | `research/out/recon/<competitor>.md` | recon files exist; unique-text check finds no copied text |
+| 1 | intake | orchestrator | `factory.config.json`, `research/inputs/competitors.csv`, `research/inputs/idea.md` | `gate.mjs intake` (prints the seed) |
+| 2 | recon | competitor-recon | `research/out/recon/<competitor>.md` | recon files exist, each measured against your idea; no copied text |
+| 2a | idea | idea-groomer | `docs/IDEA.md` | your words unchanged; every job and competitor covered; every feature with evidence; your open questions answered |
+| 2b | idea-approval | **you** | — | your `APPROVE <hash>` for that exact version of `docs/IDEA.md` |
 | 3 | keywords | keyword-researcher | `keywords.json`, `selected.json`, `keyword-map.json` | `npm run research:all` (exits 1 on any rule break) |
 | 4 | strategy | content-strategist | `docs/CONTENT-STRATEGY.md`, content plan, briefs, JSON-LD plan | briefs for wave 1 exist; schema plan per page type |
 | 5 | growth | growth-strategist | `docs/GROWTH-90.md`, `growth/plan.json` | plan validates (one task a day, ≤ 45 min, a done check each) |
 | 6 | architecture | architect | `docs/ARCHITECTURE.md`, `hosting.target` | Pages vs Workers rule applied (§10) |
 | 7 | design | designer | `docs/DESIGN.md` | `npm run gate:design` (WCAG AA contrast); fonts self-hosted |
-| 8 | build | coder | the site | `npm run verify` |
+| 7a | design-approval | **you** | — | your `APPROVE <hash>` for that exact version of `docs/DESIGN.md` |
+| 8 | build | coder | the site | both approvals still match their files; `npm run verify` |
 | 9 | tests | harness | `tests/**` | `npm test`, `npm run test:e2e`, in CI too |
 | 10 | code-review | code-reviewer | `reports/code-review.md` | Verdict PASS with 0 blockers, for the current commit (`gate.mjs code-review`) |
 | 11 | reconcile | reconciler | `reports/reconcile.md` | keyword map ↔ pages ↔ design ↔ briefs agree |
@@ -130,7 +133,7 @@ Fake sample inputs live in `research/inputs/examples/` (never read by the pipeli
 | 17 | performance | performance-auditor | `reports/performance.md` | Lighthouse and Core Web Vitals budgets (§11) |
 | 18 | preprod | orchestrator | — | `preprod.yml` green on the PR to the production branch |
 | 19 | cloudflare | cloudflare-reviewer | `reports/cloudflare.md` | only when hosting is Cloudflare; free-plan checklist |
-| 20 | go | **you** | — | your GO for that exact commit, typed in chat |
+| 20 | go | **you** | — | your GO for that exact commit, typed in chat; refused while an approval is out of date |
 | 21 | deploy | devsecops-deployer | — | deploy workflow, then `check:live` |
 | 22 | docs | doc-generator | `docs/PRD.md`, `DESIGN.md`, `ARCHITECTURE.md`, `SECURITY.md` | regenerated from the agents' outputs |
 
@@ -139,11 +142,12 @@ Every gate run is recorded in `reports/ledger.md` (format in `AGENTS.md` §5), s
 ---
 
 ## 5. The agents
-All 20 live in `.claude/agents/`; `AGENTS.md` §2 has the full map.
+All 21 live in `.claude/agents/`; `AGENTS.md` §2 has the full map.
 
 | Agent | Job | Main skills and tools |
 |---|---|---|
-| orchestrator | Runs `/start`: intake, stage order, gates, ledger | `/goal`, gate runner |
+| orchestrator | Runs `/start`: intake (with your idea), stage order, gates, your approvals, ledger | `/goal`, gate runner |
+| idea-groomer | Grooms your idea against the competitors' recon: visitors' jobs, coverage, gaps, ranked features, the first slice, positioning, open questions | `jobs-to-be-done`, `replica-diff`, `replica-entrepreneur` |
 | competitor-recon | Maps competitors' public sites: page types, URLs, templates, stack, a feature matrix across competitors, what their readers complain about, UX gaps | `replica-recon`, `replica-architect`, `replica-diff`, `replica-entrepreneur`, marketingskills `competitors`, Playwright MCP, rea website tools (optional) |
 | keyword-researcher | Keyword Planner CSVs → selected keywords → keyword map | the Step B scripts, `keyword-research`, `serp-analysis`, claude-seo `seo-cluster`, `programmatic-seo` |
 | content-strategist | Content plan, page briefs with voice notes, JSON-LD and schema plan, `llms.txt` | marketingskills `content-strategy`/`copywriting`/`schema`/`ai-seo`, claude-seo `seo-content-brief`/`seo-geo`/`seo-schema`, `humanizer` |
@@ -354,7 +358,7 @@ aksitekit/
 ├── .mcp.json                official, free MCP servers
 ├── .npmrc                   supply-chain rules (no install scripts, exact versions, 7-day minimum age)
 ├── .claude/
-│   ├── agents/              20 agents
+│   ├── agents/              21 agents
 │   ├── skills/              start, today, gate (+ gate.mjs, stages.json), keyword-pipeline, deploy-production
 │   ├── hooks/               secret and .env guard, push guard, secret scan after edits
 │   └── settings.json        permissions and hooks

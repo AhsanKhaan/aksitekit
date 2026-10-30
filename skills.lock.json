@@ -1800,7 +1800,8 @@
       ],
       "usedBy": [
         "content-strategist",
-        "designer"
+        "designer",
+        "idea-groomer"
       ],
       "defaultBranch": "main",
       "commit": "c172996495bed0fcd26896a9416b2093fd7073f0",
@@ -1811,7 +1812,8 @@
         "jobs-to-be-done": {
           "usedBy": [
             "content-strategist",
-            "designer"
+            "designer",
+            "idea-groomer"
           ],
           "upstreamPath": "jobs-to-be-done",
           "licenceFrom": "LICENSE",
@@ -1910,6 +1912,7 @@
         "architect",
         "competitor-recon",
         "designer",
+        "idea-groomer",
         "reconciler"
       ],
       "defaultBranch": "main",
@@ -1975,6 +1978,7 @@
         "replica-diff": {
           "usedBy": [
             "competitor-recon",
+            "idea-groomer",
             "reconciler"
           ],
           "upstreamPath": "replica-diff",
@@ -2002,7 +2006,8 @@
         },
         "replica-entrepreneur": {
           "usedBy": [
-            "competitor-recon"
+            "competitor-recon",
+            "idea-groomer"
           ],
           "upstreamPath": "replica-entrepreneur",
           "licenceFrom": "LICENSE",

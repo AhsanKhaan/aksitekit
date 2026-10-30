@@ -47,6 +47,12 @@ folder.
 - `research/inputs/kp/<competitor>.csv`: Google Keyword Planner export (UTF-16 LE, tab-separated, two title rows, then a
   header row with `Keyword`, `Avg. monthly searches`, `Competition`, `Competition (indexed value)`, bid columns and 12
   `Searches: <Mon YYYY>` columns). UTF-8 CSV must also be accepted.
+- `research/inputs/idea.md`: `# The idea`, then `## In the owner's words` (the owner's answer at intake, unchanged)
+  and `## Owner answers` (their later answers, dated, in their words). Example: `research/inputs/examples/idea.md`.
+- `docs/IDEA.md`: from `docs/templates/IDEA.md`, nine `## ` sections; jobs are `J1`, `J2`, …; §5 is a table with
+  `Feature`, `Job`, `Priority` (must, should, could, won't), `Page type` and `Evidence` columns. The owner approves it
+  by its sha256 (first 12 hex, line endings normalised), recorded in the ledger as `APPROVE <hash>`; `docs/DESIGN.md`
+  is approved the same way.
 - `research/inputs/kd.csv` (optional): `keyword,kd,source,checked` from the free SERP check or the owner.
 - `research/out/keywords.json`: normalized rows `{ keyword, volume, monthly[12], seasonality, competitionAds, kd, kdSource, sources[] }`.
 - `research/out/selected.json`: rows kept, plus `rejected[]` each with a `reason` (`low-volume`, `kd`, `seasonal`, `brand`, `duplicate`).

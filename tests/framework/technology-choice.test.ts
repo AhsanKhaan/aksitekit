@@ -66,7 +66,8 @@ describe('scripts/framework.mjs runs the chosen technology', () => {
 });
 
 describe('intake gate checks the technology choice', () => {
-  function intake(build: Record<string, unknown>, csv = 'domain,dr,notes\nrival-one.test,12,\nrival-two.test,30,\n') {
+  const IDEA = "# The idea\n\n## In the owner's words\nA free site for sizing example widgets.\n\n## Owner answers\n";
+  function intake(build: Record<string, unknown>, csv = 'domain,dr,notes\nrival-one.test,12,\nrival-two.test,30,\n', idea: string | null = IDEA) {
     const root = temp();
     mkdirSync(path.join(root, '.claude', 'skills'), { recursive: true });
     cpSync(path.join(REPO, '.claude', 'skills', 'gate'), path.join(root, '.claude', 'skills', 'gate'), { recursive: true });
@@ -75,6 +76,7 @@ describe('intake gate checks the technology choice', () => {
     mkdirSync(path.join(root, 'research', 'inputs'), { recursive: true });
     writeFileSync(path.join(root, 'factory.config.json'), JSON.stringify(baseConfig(build)));
     writeFileSync(path.join(root, 'research', 'inputs', 'competitors.csv'), csv);
+    if (idea !== null) writeFileSync(path.join(root, 'research', 'inputs', 'idea.md'), idea);
     return spawnSync(process.execPath, [path.join(root, '.claude', 'skills', 'gate', 'gate.mjs'), 'intake'], { cwd: root, encoding: 'utf8' });
   }
   const nextjs = { framework: 'nextjs', outputDir: 'out', commands: { build: 'next build', dev: 'next dev' } };
@@ -102,5 +104,19 @@ describe('intake gate checks the technology choice', () => {
   test('accepts the optional brands column the keyword pipeline reads', () => {
     const r = intake(nextjs, 'domain,dr,notes,brands\nrival-one.test,12,,Rival One\nrival-two.test,30,,\n');
     expect(r.status, r.stdout + r.stderr).toBe(0);
+  });
+  test("counts the words of the owner's idea", () => {
+    const r = intake(nextjs);
+    expect(r.stdout + r.stderr).toMatch(/idea 7 words \[M\]/);
+  });
+  test("fails without the owner's idea (planted)", () => {
+    const r = intake(nextjs, undefined, null);
+    expect(r.status).not.toBe(0);
+    expect(r.stdout + r.stderr).toMatch(/missing or empty: research\/inputs\/idea\.md/);
+  });
+  test("fails when the idea's section holds only the template comment (planted)", () => {
+    const r = intake(nextjs, undefined, "# The idea\n\n## In the owner's words\n<!-- the owner's answer -->\n\n## Owner answers\n");
+    expect(r.status).not.toBe(0);
+    expect(r.stdout + r.stderr).toMatch(/"## In the owner's words" is empty/);
   });
 });

@@ -1,7 +1,7 @@
 # PRD: {{PROJECT_NAME}}
 
-<!-- Template. doc-generator fills it from factory.config.json, research/out/*, docs/CONTENT-STRATEGY.md and
-docs/GROWTH-90.md. Every placeholder (double-brace, upper-case names) must be replaced; label every number
+<!-- Template. doc-generator fills it from factory.config.json, docs/IDEA.md (the owner-approved idea), research/out/*,
+docs/CONTENT-STRATEGY.md and docs/GROWTH-90.md. Every placeholder (double-brace, upper-case names) must be replaced; label every number
 [M] measured, [R] range, [P] proxy/estimate, [U] unverified, with its source. -->
 
 | | |
@@ -9,13 +9,14 @@ docs/GROWTH-90.md. Every placeholder (double-brace, upper-case names) must be re
 | Domain | {{DOMAIN}} |
 | Brand | {{BRAND}} |
 | Markets and language | {{MARKETS}} · {{LOCALE}} |
+| Idea | `docs/IDEA.md`, approved by the owner at {{IDEA_APPROVED_HASH}} |
 | Hosting | {{HOSTING_TARGET}} (free plan) |
 | Status | {{PIPELINE_STATUS}} (from `node .claude/skills/gate/gate.mjs status`) |
 | Last updated | {{DATE}} |
 
 ## 1. Problem and readers
-{{READER_PROBLEM}}: who searches for this, what they need to get done, and what's wrong with today's results (from
-`research/out/recon/*.md`, described, never quoted at length).
+{{READER_PROBLEM}}: who searches for this, what they need to get done (the jobs in `docs/IDEA.md` §2), and what's
+wrong with today's results (from `docs/IDEA.md` §3–4 and `research/out/recon/*.md`, described, never quoted at length).
 
 ## 2. Goal
 A useful, original site that answers {{NICHE_SUMMARY}} better than what ranks today, and earns from display ads only
@@ -31,7 +32,7 @@ after it qualifies under AdSense policies. No check can guarantee rankings or ap
 | Combined monthly searches of kept primaries | {{VOLUME_SUM}} | Keyword Planner [M] or [R] |
 
 ## 4. Scope
-**Wave 1 (launch):** {{WAVE1_SUMMARY}} — the hub, its first spokes and the trust pages (About, Contact, Privacy,
+**Wave 1 (launch):** {{WAVE1_SUMMARY}} — the "must" features of `docs/IDEA.md` §6 as pages: the hub, its first spokes and the trust pages (About, Contact, Privacy,
 Terms, Editorial policy). Full list: `research/out/content-plan.json`.
 
 **Later waves:** {{LATER_WAVES_SUMMARY}}.
@@ -72,4 +73,4 @@ exists [U: Google publishes no fixed threshold]. Until then: {{PRE_ADSENSE_PLAN}
 | {{EXTRA_RISK}} | {{EXTRA_MITIGATION}} |
 
 ## 9. Owner decisions
-{{OWNER_DECISIONS}} (each with its date; for example the training-bot policy `bots.aiTraining`, hosting confirmation).
+{{OWNER_DECISIONS}} (each with its date; for example the approvals of `docs/IDEA.md` and `docs/DESIGN.md`, the training-bot policy `bots.aiTraining`, hosting confirmation).

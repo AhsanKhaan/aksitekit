@@ -69,7 +69,7 @@ describe('the repository', () => {
     const r = run();
     expect(r.stderr).toBe('');
     expect(r.status).toBe(0);
-    expect(r.stdout).toMatch(/^check-skills: OK \(\d+ skills, \d+ files, \d+ sources, 20 agents\)/);
+    expect(r.stdout).toMatch(/^check-skills: OK \(\d+ skills, \d+ files, \d+ sources, 21 agents\)/);
   });
 });
 

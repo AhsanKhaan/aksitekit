@@ -1,13 +1,14 @@
 {
-  "$comment": "Pipeline stages in order. gate.mjs reads this file. 'outputs' must exist ({competitor} expands to each competitor domain; a path ending in / needs at least one file). 'checks' are built-in checks in gate.mjs. 'npm' are npm scripts from docs/CONTRACT.md, run in order. 'manual' stages are recorded with the owner's confirmation. 'when' skips a stage that doesn't apply. 'npmProduces' runs the npm scripts before checking outputs (they create them).",
+  "$comment": "Pipeline stages in order. gate.mjs reads this file. 'outputs' must exist ({competitor} expands to each competitor domain; a path ending in / needs at least one file). 'checks' are built-in checks in gate.mjs. 'npm' are npm scripts from docs/CONTRACT.md, run in order. 'manual' stages are recorded with the owner's confirmation; 'approves' names the file an approval stage pins by its content hash (the owner types APPROVE <hash>). 'when' skips a stage that doesn't apply. 'npmProduces' runs the npm scripts before checking outputs (they create them).",
   "stages": [
     {
       "id": "intake",
       "agent": "orchestrator",
-      "summary": "Domain, competitors and their DR (owner supplies DR); the lowest-DR competitor becomes the keyword seed",
+      "summary": "Domain, competitors and their DR (owner supplies DR), the technology, and the owner's idea in their own words; the lowest-DR competitor becomes the keyword seed",
       "outputs": [
         "factory.config.json",
-        "research/inputs/competitors.csv"
+        "research/inputs/competitors.csv",
+        "research/inputs/idea.md"
       ],
       "checks": [
         "intake"
@@ -17,14 +18,38 @@
     {
       "id": "recon",
       "agent": "competitor-recon",
-      "summary": "Structure, page types and UX gaps of each competitor, from public pages only; no copied text",
+      "summary": "Structure, page types and UX gaps of each competitor, and how it serves the owner's idea, from public pages only; no copied text",
       "outputs": [
         "research/out/recon/{competitor}.md"
       ],
       "checks": [
-        "recon-no-copy"
+        "recon-no-copy",
+        "recon-idea"
       ],
       "npm": []
+    },
+    {
+      "id": "idea",
+      "agent": "idea-groomer",
+      "summary": "The owner's idea matched against every recon file: visitors' jobs, coverage by competitor, gaps, ranked features, the wave-1 slice, positioning and open questions",
+      "outputs": [
+        "docs/IDEA.md"
+      ],
+      "checks": [
+        "idea-brief",
+        "no-template-placeholders"
+      ],
+      "npm": []
+    },
+    {
+      "id": "idea-approval",
+      "agent": "owner",
+      "summary": "The owner approves docs/IDEA.md as it is now by typing APPROVE <hash>",
+      "outputs": [],
+      "checks": [],
+      "npm": [],
+      "manual": "Owner typed 'APPROVE <hash>' in chat for docs/IDEA.md at its current content",
+      "approves": "docs/IDEA.md"
     },
     {
       "id": "keywords",
@@ -109,11 +134,23 @@
       ]
     },
     {
-      "id": "build",
-      "agent": "coder",
-      "summary": "Pages, components and content from the keyword map, briefs and DESIGN.md",
+      "id": "design-approval",
+      "agent": "owner",
+      "summary": "The owner approves docs/DESIGN.md as it is now by typing APPROVE <hash>",
       "outputs": [],
       "checks": [],
+      "npm": [],
+      "manual": "Owner typed 'APPROVE <hash>' in chat for docs/DESIGN.md at its current content",
+      "approves": "docs/DESIGN.md"
+    },
+    {
+      "id": "build",
+      "agent": "coder",
+      "summary": "Pages, components and content from the keyword map, briefs and DESIGN.md; the owner's approvals still match IDEA.md and DESIGN.md",
+      "outputs": [],
+      "checks": [
+        "approvals-current"
+      ],
       "npm": [
         "verify"
       ]
