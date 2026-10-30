@@ -1,7 +1,7 @@
 # Pre-production checks (docs/BLUEPRINT.md flow: "pre-prod checks on the production branch" before the owner's GO).
 # Runs on pull requests whose base is the production branch (factory.config.json hosting.productionBranch, read at
 # run time), and by hand before a release. Every gate:
-#   gates:          gate:adsense, gate:design, check:release, the production build (check-out and the on-page SEO gate run inside it), a
+#   gates:          gate:adsense, lint:design, gate:design, check:release, the production build (check-out and the on-page SEO gate run inside it), a
 #                   secret scan of the build output folder (build.outputDir), the e2e suite (responsive
 #                   320-1280 px), Lighthouse budgets;
 #   preview:        finds the pull request's Cloudflare Pages preview (.github/scripts/preview-url.mjs);
@@ -91,6 +91,9 @@ jobs:
 
       - name: AdSense gate
         run: npm run gate:adsense
+
+      - name: Design lint (the official DESIGN.md linter)
+        run: npm run lint:design
 
       - name: Design gate (WCAG AA contrast)
         run: npm run gate:design
