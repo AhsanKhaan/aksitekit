@@ -151,7 +151,7 @@ Full 40-character SHAs, and the sha256 of every vendored file, are in `skills.lo
 | `@playwright/mcp` | npm | 0.0.83 | 2026-09-28 | `.mcp.json` → `playwright` |
 | `chrome-devtools-mcp` | npm | 1.11.0 | 2026-10-15 | `.mcp.json` → `chrome-devtools` (1.12.0 was under 7 days old) |
 | `analytics-mcp` | PyPI | 0.7.0 | 2026-07-29 | `.mcp.json` → `google-analytics` (0.8.0 was under 7 days old) |
-| `@google/design.md` | npm | 0.4.0 | 2026-07-27 | `npm run lint:design` (requested from Phase E) |
+| `@google/design.md` | npm | 0.4.0 | 2026-07-27 | `npm run lint:design` (devDependency; its nested zod 3 advisory is accepted in `audit-exceptions.json` until 2027-01-30) |
 | `@lhci/cli` | npm | 0.15.1 | 2025-06-25 | `npm run audit:lighthouse` |
 | `rea-agents` | npm | 6.5.0 | 2026-10-14 | `.mcp.json` → `rea` (6.7.0 and 6.8.0 were under 7 days old) |
 

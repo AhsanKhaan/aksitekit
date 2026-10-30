@@ -62,9 +62,10 @@ After the gates below pass, the owner approves `docs/DESIGN.md` by its content h
 change to it needs their approval again before build.
 
 `node .claude/skills/gate/gate.mjs design`: front matter and section order follow the spec, no duplicate keys or
-sections, no template placeholders; then `npm run lint:design` (the official DESIGN.md linter:
-`npx -p @google/design.md@0.4.0 designmd lint docs/DESIGN.md`; Phase E adds the script) and `npm run gate:design`
-(WCAG AA contrast from the tokens, Step C). Until those scripts exist the stage is BLOCKED; say so.
+sections, no template placeholders; then `npm run lint:design` (the official DESIGN.md linter, devDependency
+`@google/design.md` 0.4.0: an error such as a broken token reference or a value that isn't a colour fails it; its
+warnings don't) and `npm run gate:design` (WCAG AA contrast from the tokens). Without `node_modules` the stage is
+BLOCKED until the owner runs `npm ci`; say so.
 
 ## Stop and ask when
 - the owner has brand colours or fonts already (use them; check contrast; propose fixes);

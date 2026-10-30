@@ -36,6 +36,7 @@ folder.
 | `audit:seo`, `check:seo-live` | `scripts/audits/seo-checks.mjs` (built output; `--live <url> [paths]`), config `seo-checks.json`. `build` also runs it after `check-out.mjs` (`docs/SEO-GATE.md`) | E (done, ported from calculatorporch) |
 | `audit:lighthouse` | `npx @lhci/cli@0.15.1 autorun` with `lighthouserc.json` (no installed dependency) | C (config), D (CI action) |
 | `gate:adsense`, `gate:design` | `scripts/adsense-gate.mjs`, `scripts/design/contrast.mjs` | C |
+| `lint:design` | `designmd lint --format markdown docs/DESIGN.md`, the official DESIGN.md linter (devDependency `@google/design.md`) | E |
 | `research:ingest`, `research:select`, `research:cluster`, `research:all` | `scripts/research/*.mjs` | B |
 | `growth:today` | `scripts/growth/today.mjs` reading `growth/plan.json` | C |
 | `verify` | check:repo → audit → lint → typecheck → test → build → test:e2e | all |

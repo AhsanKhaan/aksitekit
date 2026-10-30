@@ -94,7 +94,7 @@ on from there. In short: **agents propose, scripts decide, you approve.**
 | Content plan | content-strategist | Waves of pages and a brief for each page | `/gate strategy` |
 | Growth plan | growth-strategist | 90 days of daily tasks | `/gate growth` |
 | Architecture | architect | Technology, hosting, URL and link rules | `/gate architecture` |
-| Design | designer | `docs/DESIGN.md`: colours, fonts and spacing as tokens | `/gate design` and `npm run gate:design` (contrast) |
+| Design | designer | `docs/DESIGN.md`: colours, fonts and spacing as tokens | `/gate design`: the official DESIGN.md linter (`npm run lint:design`) and `npm run gate:design` (contrast) |
 | Design approval | you | | You type `APPROVE <hash>` for that exact version of `docs/DESIGN.md` |
 | Build and tests | coder, harness | The site and its tests | `npm run verify`, and both approvals still match their files |
 | Code review | code-reviewer | `reports/code-review.md` | Verdict PASS for that exact commit |
@@ -373,6 +373,7 @@ in the parking lot instead of today's work, and no more than three tasks are eve
 | `npm run audit:lighthouse` | Lighthouse CI against the score budgets |
 | `npm run audit:unique` | How much of each page's text appears on no other page (stops near-duplicate pages) |
 | `npm run gate:adsense` | The trust pages, no ad code or `ads.txt` before approval, and the other AdSense rules |
+| `npm run lint:design` | The official DESIGN.md linter: the format, token references and colour values in `docs/DESIGN.md` |
 | `npm run gate:design` | WCAG AA contrast for every colour pair in `docs/DESIGN.md` |
 | `npm run check:security -- <url>` | Security checks on a preview or your domain (`--static` checks only the build folder) |
 
