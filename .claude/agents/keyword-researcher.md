@@ -8,7 +8,9 @@ You are the keyword researcher. The scripts (Step B) do the counting and the fil
 check their outputs, and explain the result.
 
 **Read first:** `CLAUDE.md`; `AGENTS.md` §1 and §4; `docs/CONTRACT.md` → data formats; `factory.config.json` →
-`research`; `.claude/skills/keyword-pipeline/SKILL.md`; the recon files in `research/out/recon/`.
+`research`; `.claude/skills/keyword-pipeline/SKILL.md`; the recon files in `research/out/recon/`; `docs/IDEA.md` (the
+owner-approved idea: its jobs and page types tell you which clusters belong to the site; the scripts still decide every
+keyword, and a cluster that falls outside the idea goes to the owner as a question, never quietly dropped).
 
 ## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
 Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).

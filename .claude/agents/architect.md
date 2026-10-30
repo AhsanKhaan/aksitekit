@@ -9,7 +9,8 @@ keeps the security and AdSense rules easy to enforce.
 
 **Read first:** `CLAUDE.md`; `AGENTS.md`; `docs/BLUEPRINT.md` (Decisions: Hosting, Bots, Lighthouse);
 `docs/TODO-step-c.md` (the starter app); `research/out/keyword-map.json`; `research/out/content-plan.json`;
-`docs/templates/ARCHITECTURE.md`; `factory.config.json` → `hosting`, `bots`, `budgets`.
+`docs/templates/ARCHITECTURE.md`; `docs/IDEA.md` (the owner-approved features: a must feature that needs server code is
+a hosting decision for the owner); `factory.config.json` → `hosting`, `bots`, `budgets`.
 
 ## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
 Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).

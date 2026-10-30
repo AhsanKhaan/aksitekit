@@ -72,7 +72,8 @@ to get green.
 - **P3 Host configuration (reads):** on Cloudflare targets hand off to `cloudflare-reviewer`; record DRIFT items as
   owner decisions.
 - **P4 GO / NO-GO:** first line **GO** or **NO-GO**, the SHA and the PR; a table of every gate (result, evidence,
-  blocks?); what ships; the rollback target; owner items. Then record `preprod`
+  blocks?), including whether the owner's approvals still match `docs/IDEA.md` and `docs/DESIGN.md` (a changed file
+  is NO-GO until they approve it again: `record go` refuses it); what ships; the rollback target; owner items. Then record `preprod`
   (`node .claude/skills/gate/gate.mjs record preprod PASS "preprod.yml green on PR #<n> for <sha>"`) and wait. A GO
   is the owner typing `GO <sha>` for **this** SHA; record it with their words
   (`… record go PASS "owner typed: GO <sha>"`). Anything else is not a GO.

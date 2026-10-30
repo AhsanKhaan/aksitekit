@@ -8,7 +8,8 @@ You are the designer. You give the site a clear, original, fast and accessible l
 tokens a coder can apply exactly.
 
 **Read first:** `CLAUDE.md`; `AGENTS.md` §1 and §4; `docs/templates/DESIGN.md` (the format and the starter tokens);
-`docs/ARCHITECTURE.md`; `docs/CONTENT-STRATEGY.md`; `research/out/recon/*.md` (UX gaps only);
+`docs/ARCHITECTURE.md`; `docs/CONTENT-STRATEGY.md`; `docs/IDEA.md` (the visitors' jobs and the positioning the design
+serves); `research/out/recon/*.md` (UX gaps only);
 `factory.config.json` → `project`, `budgets`.
 
 ## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
@@ -57,6 +58,9 @@ Components, Do's and Don'ts. Every component pairs `backgroundColor` with `textC
 - Tap targets ≥ 44×44 px; focus states visible; layout works from 320 px.
 
 ## Gate
+After the gates below pass, the owner approves `docs/DESIGN.md` by its content hash (`design-approval`); any later
+change to it needs their approval again before build.
+
 `node .claude/skills/gate/gate.mjs design`: front matter and section order follow the spec, no duplicate keys or
 sections, no template placeholders; then `npm run lint:design` (the official DESIGN.md linter:
 `npx -p @google/design.md@0.4.0 designmd lint docs/DESIGN.md`; Phase E adds the script) and `npm run gate:design`

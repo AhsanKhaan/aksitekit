@@ -71,9 +71,10 @@ ownership, npm script names and data formats. `docs/BLUEPRINT.md` is the approve
 | Stage definitions the gate runner reads | `.claude/skills/gate/stages.json` |
 | Permissions and hooks (secret and `.env` guard, push guard, secret scan after edits) | `.claude/settings.json`, `.claude/hooks/` |
 | Project inputs and thresholds | `factory.config.json` |
-| Owner inputs | `research/inputs/competitors.csv`, `research/inputs/kp/*.csv`, optional `research/inputs/kd.csv` |
+| Owner inputs | `research/inputs/idea.md` (the idea, word for word), `research/inputs/competitors.csv`, `research/inputs/kp/*.csv`, optional `research/inputs/kd.csv` |
+| The groomed idea the owner approves | `docs/IDEA.md`; the owner's `APPROVE <hash>` pins it, and `docs/DESIGN.md`, before build |
 | Trusted sources, pinned | `skills.lock.json`, explained in `docs/SKILLS.md` |
 | Vendored skills the agents read (reviewed, hashed) | `vendor/skills/<name>/`, checked by `npm run check:skills` |
 | MCP servers | `.mcp.json` (free, official), explained in `docs/MCP.md` |
-| Doc templates | `docs/templates/` (PRD, DESIGN, ARCHITECTURE, SECURITY, CONTENT-STRATEGY, GROWTH-90) |
+| Doc templates | `docs/templates/` (IDEA, PRD, DESIGN, ARCHITECTURE, SECURITY, CONTENT-STRATEGY, GROWTH-90) |
 | Starter app and most gates (deferred) | `docs/TODO-step-c.md` |

@@ -3,7 +3,7 @@
 # AK Site Kit
 
 Turn your keyword research into a website built for Google search and AdSense.<br>
-Claude Code agents do the work, automatic checks decide when each step is done, and you approve every launch.
+Claude Code agents do the work, automatic checks decide when each step is done, and you approve the plan, the design<br>and every launch.
 
 [![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 [![Security](../../actions/workflows/security.yml/badge.svg)](../../actions/workflows/security.yml)
@@ -47,8 +47,9 @@ is measured, with where it came from.
 
 ## What it is
 AK Site Kit is a GitHub template for people who want to build a content website that earns from search traffic. You
-bring keyword ideas from Google Keyword Planner and a few competitor sites. A team of Claude Code agents, one for each
-stage, turns them into a keyword map, a content plan, a design and then the site, and checks the result before it goes
+bring your idea, keyword ideas from Google Keyword Planner and a few competitor sites. A team of Claude Code agents,
+one for each stage, sharpens your idea against what the competitors offer, then turns it into a keyword map, a content
+plan, a design and the site, and checks the result before it goes
 live.
 
 Every new site starts as its own copy of this template. Nothing is shared between sites, and nothing goes live without
@@ -63,12 +64,15 @@ approval (nobody can give one), or a copy of a competitor's site.
 ## How it works
 ```mermaid
 flowchart LR
-  A[Keyword Planner files<br>and competitors] --> B["/start"]
+  A[Your idea, Keyword Planner<br>files and competitors] --> B["/start"]
   B --> C[Competitor recon]
-  C --> D[Keyword map]
+  C --> C2[Idea groomed<br>against recon]
+  C2 --> C3{You approve<br>the idea}
+  C3 --> D[Keyword map]
   D --> E[Content plan<br>and briefs]
   E --> F[Architecture<br>and design]
-  F --> G[Build and tests]
+  F --> F2{You approve<br>the design}
+  F2 --> G[Build and tests]
   G --> H[SEO, AdSense, security,<br>mobile and speed checks]
   H --> I{Your GO}
   I --> J[Live on Cloudflare]
@@ -82,14 +86,17 @@ on from there. In short: **agents propose, scripts decide, you approve.**
 ### The stages
 | Stage | Agent | What you get | What decides it passed |
 |---|---|---|---|
-| Intake | orchestrator | Your domain, competitors and technology in `factory.config.json` | `/gate intake` |
-| Competitor recon | competitor-recon | One map of each competitor's public pages | `/gate recon` |
+| Intake | orchestrator | Your domain, competitors and technology in `factory.config.json`, and your idea in `research/inputs/idea.md` | `/gate intake` |
+| Competitor recon | competitor-recon | One map of each competitor's public pages, including how well it lets visitors do what your idea describes | `/gate recon` |
+| Idea | idea-groomer | `docs/IDEA.md`: your idea matched against every competitor, with the visitors' jobs, the gaps, ranked features, the first slice to build and the positioning | `/gate idea` |
+| Idea approval | you | | You type `APPROVE <hash>` for that exact version of `docs/IDEA.md` |
 | Keywords | keyword-researcher | The keyword map: one page per main keyword | `npm run research:all` |
 | Content plan | content-strategist | Waves of pages and a brief for each page | `/gate strategy` |
 | Growth plan | growth-strategist | 90 days of daily tasks | `/gate growth` |
 | Architecture | architect | Technology, hosting, URL and link rules | `/gate architecture` |
 | Design | designer | `docs/DESIGN.md`: colours, fonts and spacing as tokens | `/gate design` and `npm run gate:design` (contrast) |
-| Build and tests | coder, harness | The site and its tests | `npm run verify` |
+| Design approval | you | | You type `APPROVE <hash>` for that exact version of `docs/DESIGN.md` |
+| Build and tests | coder, harness | The site and its tests | `npm run verify`, and both approvals still match their files |
 | Code review | code-reviewer | `reports/code-review.md` | Verdict PASS for that exact commit |
 | Reviews | reconciler, seo-auditor, ai-search-auditor, adsense-gatekeeper, secops-reviewer, responsive-checker, performance-auditor | One report each in `reports/` | Each review's own scripts: the SEO gate, `gate:adsense`, the security checks, the e2e tests, Lighthouse |
 | Pre-production | orchestrator | A pull request to `main` | `preprod.yml` green for that commit |
@@ -108,7 +115,9 @@ code enforces them.
 |---|---|
 | No secrets read, printed or committed (`.env*`, `.dev.vars*`, keys, tokens) | `.claude/hooks/guard.mjs` blocks it before Claude runs the tool; a secret scan runs after every edit (`.claude/hooks/post-edit.mjs`); `npm run check:repo` and gitleaks in CI |
 | No push to `main`, no force-push, no skipped hooks | `guard.mjs`, and branch protection on `main` once you turn it on ([Setup](.github/CI-CD.md#setup-the-owner-once-per-project)) |
-| Nothing deploys without your GO for that exact commit | `/deploy-production` waits for `GO <commit>` in chat; on a public repository, the `production` environment's required reviewer too |
+| Nothing is built from an idea or a design you haven't approved | `/gate build` stays blocked until your `APPROVE <hash>` matches `docs/IDEA.md` and `docs/DESIGN.md` as they are now; a later edit to either needs your approval again |
+| Nothing deploys without your GO for that exact commit | `/deploy-production` waits for `GO <commit>` in chat, and the GO is refused while an approval is out of date; on a public repository, the `production` environment's required reviewer too |
+| Only the built site goes live | The deploy uploads the build output folder (`build.outputDir`, `out/` for Next.js) and nothing else: the agents, scripts, tests, research and docs stay in your repository |
 | No ad code or `ads.txt` before AdSense approves your account | `npm run gate:adsense` |
 | No stuffed, thin or duplicate pages | The SEO gate in every build ([docs/SEO-GATE.md](docs/SEO-GATE.md)) and `npm run audit:unique` |
 | Only reviewed, pinned outside skills | `npm run check:skills`, which checks a hash for every file |
@@ -234,6 +243,8 @@ project's settings and safety hooks run (for example, the guard that stops anyon
   looks it up or buys it.
 - **Markets and language,** if they differ from the defaults.
 - **Technology:** Next.js (built in) or another one, such as Astro, Eleventy or Hugo.
+- **Your idea:** in a few sentences, what visitors should be able to do on your site, and who they are. Rough is fine:
+  it's saved word for word in `research/inputs/idea.md`, and the next stages build on it.
 
 It saves your answers and picks the competitor with the **lowest DR** as the starting point. A weak site that still
 ranks shows you keywords a new site can win.
@@ -248,12 +259,29 @@ ranks shows you keywords a new site can win.
 4. Save it as `research/inputs/kp/<competitor-domain>.csv`. Files for other competitors are optional.
 5. Tell Claude "CSVs are in".
 
-While you do this, the competitor-recon agent maps each competitor's public pages: page types, structure and gaps.
+While you do this, the competitor-recon agent maps each competitor's public pages: page types, structure, gaps, and
+how well each one lets visitors do what your idea describes.
 It never copies their text or design. More detail: [research/inputs/README.md](research/inputs/README.md).
 
 **Done when:** the file is in `research/inputs/kp/` and the keyword stage reads it without a format error.
 
-### Step 6: Review the keyword map
+### Step 6: Approve your idea
+Still while you export, the idea-groomer matches your idea against every competitor's recon and writes
+`docs/IDEA.md`:
+- the jobs visitors come to do, and how well each competitor does them today;
+- where nobody serves them well, including what the competitors' readers complain about;
+- the features, each marked must, should, could or won't, with the evidence behind it;
+- the smallest first version worth building, and one sentence on how the site stands out;
+- what's out of scope, and the questions only you can answer.
+
+Claude asks you those questions first. Your answers are added to `research/inputs/idea.md`, in your words, and the
+idea is groomed again. Then you get a short summary and a 12-character hash. Read `docs/IDEA.md`, and either type
+`APPROVE <hash>` or say what to change. The keyword stage waits for your approval. If the file changes later, build
+stops until you approve the new version.
+
+**Done when:** `/gate status` shows idea-approval as passed.
+
+### Step 7: Review the keyword map
 The keyword stage reads your files and keeps keywords that pass every rule in `factory.config.json` → `research`:
 - enough monthly searches (at least 1,000 [P]);
 - not seasonal (the busiest month at most 2.5 times the median month [P]);
@@ -264,18 +292,19 @@ plan and the counts. If too few keywords survive, the agent shows why and asks y
 
 **Done when:** `npm run research:all` passes and you've agreed to the page plan.
 
-### Step 7: Plans and design
+### Step 8: Plans and design
 The next stages run one after another, each with its own check:
 - **Content plan:** waves of pages (a hub and its first pages come first), a brief for each page, and the JSON-LD
   plan.
 - **90-day growth plan:** one task a day.
 - **Architecture:** the technology, hosting (Cloudflare Pages for a static site, Workers only if server code is
   needed; it asks you), URL rules and internal links.
-- **Design:** colours, fonts and layout as design tokens in `docs/DESIGN.md`, checked for contrast.
+- **Design:** colours, fonts and layout as design tokens in `docs/DESIGN.md`, checked for contrast. Then you approve it
+  the same way as the idea: type `APPROVE <hash>`, or say what to change. Build waits for your approval.
 
-**Done when:** `/gate status` shows strategy, growth, architecture and design as passed.
+**Done when:** `/gate status` shows strategy, growth, architecture, design and design-approval as passed.
 
-### Step 8: Build and check
+### Step 9: Build and check
 The coder builds the pages from the briefs and the design, the harness writes their tests, and the code reviewer
 checks the change. Then the reviews run: SEO, AI search, AdSense, security, responsive layouts from 320 to 1280 px, and
 speed (Lighthouse: Accessibility, Best Practices and SEO 100 [P]; Performance at least 90 on mobile [P]). The Next.js
@@ -284,18 +313,19 @@ starter ships one example page of each type, which the coder replaces with your 
 **Done when:** `npm run verify` passes, the code review says PASS for the current commit, and every review has its
 report in `reports/`.
 
-### Step 9: Go live
+### Step 10: Go live
 1. Set up Cloudflare and GitHub once: [.github/CI-CD.md → Setup](.github/CI-CD.md#setup-the-owner-once-per-project).
    It lists the two secrets and the variables by name, the `production` environment, the Cloudflare Pages settings and
    branch protection.
 2. Open a pull request to `main`. The pre-production checks run on it.
-3. When they pass, type `GO <commit>` in chat for that exact commit. Nothing deploys without it.
+3. When they pass, type `GO <commit>` in chat for that exact commit. Nothing deploys without it, and the GO is
+   refused while `docs/IDEA.md` or `docs/DESIGN.md` differs from the version you approved.
 4. The kit deploys, checks the live site, and tells you how to roll back if anything is wrong.
 
 **Done when:** `npm run check:live -- https://<your-domain>` and
 `npm run check:seo-live -- https://<your-domain> / /contact/` both pass.
 
-### Step 10: Grow, one task a day
+### Step 11: Grow, one task a day
 Type `/today` to see today's task and your streak. `/today done` marks it done. `/today park <idea>` puts a new idea
 in the parking lot instead of today's work, and no more than three tasks are ever in progress at once.
 
@@ -367,6 +397,7 @@ in the parking lot instead of today's work, and no more than three tasks are eve
 | `research/out/keyword-map.json` | Every page to build, its main and secondary keywords, and the evidence |
 | `research/out/selected.json` | The keywords kept, and every rejected one with its reason |
 | `research/out/recon/*.md` | Each competitor's structure and gaps |
+| `docs/IDEA.md` | Your idea, groomed against the competitors: jobs, gaps, ranked features, the first slice, positioning |
 | `docs/CONTENT-STRATEGY.md`, `research/out/briefs/*.md` | The content plan and one brief per page |
 | `docs/ARCHITECTURE.md` | Technology, hosting, URL and link rules |
 | `docs/DESIGN.md` | The design as tokens a developer can apply exactly |
@@ -400,7 +431,7 @@ vendor/skills/        reviewed outside skills the agents read, hash-checked
 app/, components/,    the Next.js starter site
 lib/, content/
 public/               static files served as they are
-research/inputs/      your Keyword Planner files and competitors.csv
+research/inputs/      your idea, Keyword Planner files and competitors.csv
 research/out/         keyword map, briefs and recon (generated)
 scripts/              the checks that decide (keyword pipeline, gates, audits)
 tests/                unit tests (Vitest) and browser tests (tests/e2e, Playwright)
@@ -418,8 +449,8 @@ themselves. To take one:
    remote and `git cherry-pick` its commit.
 3. Run `npm run verify` and open a pull request as usual.
 
-Leave the files generated for your site alone (`factory.config.json`, `research/`, `content/pages/`, `docs/DESIGN.md`
-and the other project docs): they're yours, not the kit's.
+Leave the files generated for your site alone (`factory.config.json`, `research/`, `content/pages/`, `docs/IDEA.md`,
+`docs/DESIGN.md` and the other project docs): they're yours, not the kit's.
 
 ## Status
 | Part | State |
