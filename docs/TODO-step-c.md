@@ -41,7 +41,7 @@ same rules (crawlable HTML for every page, same URLs, headers, JSON-LD, bot poli
 | Script | What it must check |
 |---|---|
 | `build` → `production-gate.mjs` | Production env values are set; no example pages; preview builds stay `noindex` |
-| `build` → `check-out.mjs` | Every built page: one title and meta description (unique), one canonical, an OG image that exists, a favicon, ≥ 3 inbound links, ≤ 3 clicks deep, no broken links |
+| `build` → `check-out.mjs` | Every built page: one title and meta description (unique), one canonical, an OG image that exists, a favicon, ≥ 3 inbound links, ≤ 3 clicks deep, no broken links; the output folder holds no hidden file but `.well-known/` (a `.gitkeep`, `.DS_Store` or `.env` would go live) |
 | `build` → `scripts/audits/seo-checks.mjs` | **Already built** (`docs/SEO-GATE.md`). The starter's pages must pass it with 0 fail (navbar links included: their text is the label alone, with any count or note drawn by CSS, never a run-together "Pets1"): target terms ≤ 6% of meaningful words, titles 30–60 characters with the URL's words, one canonical and H1, `lang`, a visible disclaimer, links to about, contact, privacy, terms, editorial policy and an author page, table headers, JSON-LD `@type`, budgets for HTML and inline JS. Add an exception to `seo-checks.json` only with the owner's yes and a reason |
 | `check:repo` | No secrets, no `.env` files, no placeholder text ("TODO", "lorem", "coming soon") in content |
 | `audit` | `npm audit` gate (high and critical fail, with a reviewed-exceptions file) |

@@ -2,7 +2,7 @@
 // one title and one meta description (each unique), one H1, one self-canonical, an og:image that exists, a favicon
 // link that exists; the link graph: no broken internal links, at least 3 inbound links, at most 3 clicks from home;
 // the sitemap and llms.txt list exactly the published pages; the required files exist; no ad code or ads.txt while
-// AdSense is off; no example page in a production build. Fails the build on any problem.
+// AdSense is off; no example page in a production build; no hidden file but .well-known/. Fails the build on any problem.
 //
 //   node scripts/check-out.mjs
 import { existsSync, readFileSync } from 'node:fs';
@@ -106,6 +106,11 @@ export function checkSite({ pages, files, origin, adsEnabled = false, production
       if (!/\.(?:html|js|txt|json)$/.test(name)) continue;
       for (const re of AD_PATTERNS) if (re.test(text)) problems.push(`${name}: ad code (${re.source}) while AdSense is off`);
     }
+  }
+
+  // 5. Only site files: no hidden file or folder but .well-known/ (a .gitkeep, .DS_Store or .env would go live).
+  for (const name of files.keys()) {
+    if (name.split('/').some((part) => part.startsWith('.') && part !== '.well-known')) problems.push(`${name}: a hidden file in the output folder (only .well-known/ is published)`);
   }
   return { problems, stats: { pages: html.size, held: held.size, maxDepth: Math.max(0, ...depth.values()) } };
 }
