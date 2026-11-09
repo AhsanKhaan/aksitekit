@@ -10,6 +10,7 @@
 | On demand | `npm run audit:seo` (`-- --strict` makes warnings fail; `-- --json` for a report) | the same | yes |
 | After every production deploy, and daily in `live-check.yml` | `npm run check:seo-live -- https://<domain> / /contact/` | compression, Brotli, HTTP/3, `Cache-Control`, warm response time ≤ 600 ms, HSTS, the security headers, the http→https redirect | yes |
 | The `gate` skill | stage `seo` runs `build` and `audit:seo`; stage `deploy` runs `check:live` and `check:seo-live` with `--url` | | yes |
+| The `gate` skill, stages `strategy` and `seo` | check `google-sources` | `docs/CONTENT-STRATEGY.md` and `reports/seo.md` list every Google page in `seo-checks.json` → `googleSources`, each read within 90 days (§5) | yes |
 
 **Results:**
 - **fail** blocks the build;
@@ -35,9 +36,10 @@ The checks that matter most for AdSense and spam policy:
 | | Any single word over 8% | **fail** |
 | | A month or weekday name that isn't a target term (date tables are data, and move with the build date) | warn only |
 | `content.word-count` | Under 300 meaningful words on the whole page | warn |
-| `core.title-length` | Under 30 characters | warn |
-| | Over 60 characters or 580 px | **fail** |
-| `url.slug-keywords` | Fewer than half the URL slug's words appear in the title | warn |
+| `core.title-length` | Under 30 characters (a tool heuristic, §5) | warn |
+| | Over 60 characters | **fail** |
+| `content.title-pixels` | Over 580 px | warn |
+| `url.slug-keywords` | Fewer than half the URL slug's words appear in the title (a tool heuristic, §5) | warn |
 | `eeat.disclaimers`, `eeat.*-link`, `eeat.author-byline` | A visible disclaimer, and links to about, contact, privacy, terms, editorial policy and an author page | **fail** |
 | `eeat.external-citations` | The home page and keyword-map pages link to at least one outside source | warn |
 | `links.joined-anchor-text` | A link's text runs together when read the way SEO tools read it (tags removed with nothing in their place): `<span>Pets</span><span>1</span>` is the anchor "Pets1" | **fail** |
@@ -51,7 +53,7 @@ The checks that matter most for AdSense and spam policy:
 
 Calibrated on calculatorporch.com's home page: 309 meaningful words against SEOmator's 304 [M]. Pixel widths use Arial at 14.1 px, which reproduces SEOmator's 331.5 px title and 920.5 px description [M].
 
-There is no target density: never add repeats to reach a number. The limits are only a ceiling.
+There is no target density: never add repeats to reach a number. The limits are only a ceiling, and an alarm rather than Google's test. Google's spam policies define keyword stuffing by its purpose, filling a page with keywords to manipulate rankings, and name no percentage (Google, "Spam policies for Google web search", checked 2026-11-09). On calculatorporch.com, tool pages measured 0.6–1.6% exact-match density once the tool name sat in one H2 instead of every heading [M: that project's docs/05 §1a].
 
 ## 4. Configuration (`seo-checks.json`)
 
@@ -64,6 +66,7 @@ There is no target density: never add repeats to reach a number. The limits are 
   - `siteUrlEnv` and `indexableEnv` take lists, so the technology-neutral `SITE_URL` / `SITE_INDEXABLE` and the Next.js `NEXT_PUBLIC_*` names both work;
   - `keywordMap` points at `research/out/keyword-map.json`.
 - **Thresholds** are starting defaults [P]. Tune them per project, and only with a reason.
+- **`googleSources`** lists the Google pages the content rules rest on (§5) and `maxAgeDays` (90). The `strategy` and `seo` gates read it. Add a page when a rule starts to rest on it; change `maxAgeDays` only with the owner.
 
 **Exceptions:**
 - Each one needs four fields:
@@ -85,16 +88,41 @@ There is no target density: never add repeats to reach a number. The limits are 
 
 ## 5. Content rules the gate enforces (and how to meet them honestly)
 
+**Google's current documentation is the source of truth:** Search Central and the spam policies, read fresh when a decision depends on them, with the date you checked. Google changes its guidance, so never rely on memory or on a tool's summary of it. SEO tools (SEOmator, Ubersuggest and this gate's tool heuristics) are alarms that point at something to check. When a tool disagrees with Google, follow Google and record the reason in the exception or the commit. These rules were learned on calculatorporch.com (its docs/05 §1a, §3 and §3a).
+
+**The Google pages these rules rest on** (the list the gate reads is `seo-checks.json` → `googleSources`):
+
+| Rule | Google page | URL | Last checked |
+| --- | --- | --- | --- |
+| Keyword stuffing, scaled content | Spam policies for Google web search | https://developers.google.com/search/docs/essentials/spam-policies | 2026-11-09 |
+| Titles | Influencing your title links in search results | https://developers.google.com/search/docs/appearance/title-link | 2026-11-09 |
+| Word counts, honest dates | Creating helpful, reliable, people-first content | https://developers.google.com/search/docs/fundamentals/creating-helpful-content | 2026-11-09 |
+| URLs | URL structure best practices for Google Search | https://developers.google.com/search/docs/crawling-indexing/url-structure | 2026-11-09 |
+| Sitemap `lastmod` | Build and submit a sitemap | https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap | 2026-11-09 |
+
+**How agents keep them fresh:**
+- The content-strategist reads every page before writing the briefs, and the seo-auditor reads them again before its audit. Both have WebFetch. `.claude/settings.json` → `permissions.allow` should hold `WebFetch(domain:developers.google.com)` so the reads don't stop for a permission prompt.
+- Each lists the pages under a `## Google sources checked` table (in `docs/CONTENT-STRATEGY.md` and `reports/seo.md`), with the date it read each one. Google's own "Last updated" line often doesn't come through WebFetch, so the date is the day the agent read the page.
+- The `strategy` and `seo` gates (check `google-sources`) fail when a page is missing, a URL isn't an https Google page, or a date is older than 90 days or in the future.
+- If a page says something different from these rules, the agent follows Google, says so in its report, and proposes the change to this file. The coder has no web access and works from the brief and this file.
+
+- **Keyword placement.** Put the primary keyword in the H1, the first 100 words and **one** H2 ("How to use the gravel calculator"), not in every heading. There is no target density; never add repeats.
 - **Name the task, not the category.**
-  - To cut a repeated word, write the task in its own words ("fractions, discounts, gravel orders, sun hours, due dates").
+  - When natural, clear text trips the density alarm, change the structure first: put a repeated unit in a table header, or drop a caption that repeats the column names.
+  - Then cut a repeated word by writing the task in its own words ("fractions, discounts, gravel orders, sun hours, due dates").
   - **Never swap in a vague word** ("tools", "these", "it", "the resource"). It loses the meaning and only moves the repetition: on calculatorporch.com, "tools" reached 5.3% the same day [M].
-- **Titles** are 30–60 characters, primary keyword first, and carry the URL's words. A `/pets/` hub titled "Pet Calculators" was flagged as a "poorly formatted URL"; "Calculators for Pets" fixed it. Never change a live URL to fix a title.
-- **Word counts:**
+  - Never make clear text less clear to pass a number.
+- **Titles** follow Google's title-link guidance (Google, "Influencing your title links in search results", checked 2026-11-09):
+  - **distinct on every page and describing what it holds today.** No boilerplate that differs by one word, and no repeated keywords. A hub's title names only the pages it links to now, not pages still planned;
+  - **primary keyword first, at most 60 characters and 580 px.** Google sets no length limit; results truncate by device width, so this is for display. The build fails a title over 60 characters and warns over 580 px;
+  - **under 30 characters, or without the URL's words, the gate warns.** Both are Ubersuggest heuristics; Google asks only for descriptive titles and readable URLs. Fix them where the title stays accurate: a `/pets/` hub titled "Pet Calculators" was flagged as a "poorly formatted URL", and "Calculators for Pets" fixed it. **Never change a live URL to fix a title.**
+  - **the Next.js starter is stricter.** Its content schema (`lib/content/schema.ts`) refuses a title under 30 or over 60 characters before the build. A title that short is usually a vague label ("Contact"), which Google's title guidance also discourages, so write a longer one that stays accurate ("Contact Example Site: email and reply times"). Relaxing the schema is a gate change and needs the owner.
+- **Word counts:** Google has no preferred word count (Google, "Creating helpful, reliable, people-first content", checked 2026-11-09). A low count means "check the page is useful", not "add words". Our floors catch thin pages:
   - category hubs and the A–Z index need at least 300 words in `<main>`;
   - trust pages need at least 200;
   - tool pages need 600–1,500 words and guides 800–1,500 (HANDBOOK §8).
 
-  These are floors. Never pad.
+  These are floors, never targets. Length follows from what the visitor needs. Never pad.
 - **Hub guide sections** take their facts only from the tool pages they link to. They answer the visitor's next question ("which standard deviation does my teacher want?"), with worked examples computed by the same code as the tool.
 - **Date-dependent pages** (ages, countdowns, "N days from today") change with every rebuild. Put a repeated unit in the column header once ("Days from today": "204 to go", "4,796 ago"), not in every cell, so the build date can never push a page over a fail line. On calculatorporch.com the build date took "days" on the age page from 5.98% to 6.08% in two days [M].
 - **Link text is the label alone.** A count or note inside a link ("Pets" plus "1" in a phone menu) joins the label in the HTML that SEO tools read ("Pets1"), even when it's hidden on screen. Draw such notes with CSS from a `data-` attribute (`content: attr(data-note) / ""`), or keep them outside the link. calculatorporch.com shipped "Pets1" and "All calculatorsA–Z…" in its navbar until 2026-10-27 [M].
@@ -103,7 +131,7 @@ There is no target density: never add repeats to reach a number. The limits are 
   - no em dashes;
   - no stock phrases ("in today's world", "look no further", "unlock", "delve", "seamless", "comprehensive guide");
   - `check:release` runs the AI-writing scan.
-- **Dates are honest.** A page's `updated` date changes only when its text changes, and the sitemap uses the same date.
+- **Dates are honest.** A page's `updated` date moves only for a substantial change (new or corrected facts, formulas, sources, sections or links), never for a rewording. Google asks whether dates change to make a page seem fresh (same "Creating helpful content" page). The sitemap's `lastmod` uses the same date.
 
 ## 6. Measuring with outside tools
 

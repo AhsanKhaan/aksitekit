@@ -417,6 +417,50 @@ const CHECKS = {
     return `llms.txt starts with "${first.trim().slice(0, 60)}"; robots.txt follows bots (aiSearch ${bots.aiSearch}, aiTraining ${bots.aiTraining})`;
   },
 
+  'google-sources'(stage) {
+    // Google's current docs are the source of truth (docs/SEO-GATE.md §5). The stage's report lists the Google pages its
+    // agent read, each with the date it read them; a required page that's missing, or read too long ago, fails.
+    let cfg;
+    try {
+      cfg = readJson('seo-checks.json').googleSources;
+    } catch (e) {
+      fail(`seo-checks.json is missing or doesn't parse: ${e.message}`);
+    }
+    const required = Array.isArray(cfg?.required) ? cfg.required : [];
+    const maxAge = cfg?.maxAgeDays;
+    if (!required.length || !required.every((r) => normUrl(r?.url)) || !Number.isInteger(maxAge) || maxAge < 1) {
+      fail('seo-checks.json → googleSources needs a "required" list of { page, url } and a whole-number "maxAgeDays"');
+    }
+    const today = Date.parse(`${new Date().toISOString().slice(0, 10)}T00:00:00Z`);
+    let oldest = '';
+    const files = expandOutputs(stage).filter((f) => f.endsWith('.md'));
+    for (const p of files) {
+      const listed = new Set();
+      for (const row of googleSourceRows(p)) {
+        const where = `${p}:${row.line}`;
+        let host = '';
+        try {
+          const u = new URL(row.url);
+          host = u.protocol === 'https:' ? u.hostname.toLowerCase() : '';
+        } catch { /* reported below */ }
+        if (!/(?:^|\.)google\.com$/.test(host)) fail(`${where} lists ${row.url}, which isn't an https Google page`);
+        if (!row.date) fail(`${where} has no YYYY-MM-DD date for ${row.url}`, 'read the page again and write the date you read it');
+        const t = Date.parse(`${row.date}T00:00:00Z`);
+        if (Number.isNaN(t) || new Date(t).toISOString().slice(0, 10) !== row.date) fail(`${where}: ${row.date} is not a real date`);
+        const age = Math.round((today - t) / 86400000);
+        if (age < -1) fail(`${where}: ${row.date} is in the future`);
+        if (age > maxAge) fail(`${where}: ${row.url} was checked ${row.date}, ${age} days ago (limit ${maxAge})`, 'read the page again, update the rules if Google changed it, and write today\'s date');
+        if (!oldest || row.date < oldest) oldest = row.date;
+        listed.add(normUrl(row.url));
+      }
+      const missing = required.filter((r) => !listed.has(normUrl(r.url)));
+      if (missing.length) {
+        fail(`${p} doesn't list ${missing.map((r) => `"${r.page}" (${r.url})`).join(', ')} under "Google sources checked"`, 'read each page and add it with the date checked');
+      }
+    }
+    return `Google sources: ${required.length} required page(s) listed in ${files.join(', ')}, all checked within ${maxAge} days (oldest ${oldest})`;
+  },
+
   'no-template-placeholders'(stage) {
     for (const o of expandOutputs(stage).filter((f) => !f.endsWith('/') && /\.(?:md|json)$/.test(f))) {
       const lines = readFileSync(abs(o), 'utf8').split(/\r?\n/);
@@ -456,6 +500,35 @@ function blocksSite(groups, ua) {
   const group = groups.find((g) => g.agents.includes(name)) || groups.find((g) => g.agents.includes('*'));
   if (!group) return false;
   return group.rules.some((r) => !r.allow && r.path === '/') && !group.rules.some((r) => r.allow && r.path.startsWith('/'));
+}
+
+// The table under a "## Google sources checked" heading (any level 2–4, optionally numbered), up to the next heading:
+// one row per Google page, with its URL and the YYYY-MM-DD date it was read.
+const GOOGLE_SECTION = /^#{2,4}\s+(?:\d+(?:\.\d+)*\.?\s+)?Google sources checked\s*$/i;
+
+function googleSourceRows(p) {
+  const lines = readFileSync(abs(p), 'utf8').split(/\r?\n/);
+  const start = lines.findIndex((l) => GOOGLE_SECTION.test(l.trim()));
+  if (start === -1) {
+    fail(`${p} has no "## Google sources checked" section (docs/SEO-GATE.md §5)`, 'read the Google pages in seo-checks.json → googleSources and list each with the date checked');
+  }
+  const rows = [];
+  for (let i = start + 1; i < lines.length && !/^#{1,6}\s/.test(lines[i]); i++) {
+    const url = lines[i].match(/https?:\/\/[^\s|)>\]`]+/);
+    if (!/^\s*\|/.test(lines[i]) || !url) continue;
+    rows.push({ line: i + 1, url: url[0], date: lines[i].match(/\b\d{4}-\d{2}-\d{2}\b/)?.[0] });
+  }
+  return rows;
+}
+
+// Compares Google URLs by host and path: no query, fragment or trailing slash.
+function normUrl(u) {
+  try {
+    const x = new URL(String(u));
+    return `${x.hostname.toLowerCase()}${x.pathname.replace(/\/+$/, '')}`;
+  } catch {
+    return '';
+  }
 }
 
 function briefSlug(url) {

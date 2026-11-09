@@ -34,7 +34,10 @@ Read each skill's `SKILL.md` at the path below and use its method inside this fi
 The keyword map (URLs, types, primaries, secondaries, intents, clusters), recon gaps, the project's markets and locale.
 
 ## Outputs
-- `docs/CONTENT-STRATEGY.md` from `docs/templates/CONTENT-STRATEGY.md` (every placeholder filled).
+- `docs/CONTENT-STRATEGY.md` from `docs/templates/CONTENT-STRATEGY.md` (every placeholder filled). Before writing the
+  briefs, read every Google page in its `### Google sources checked` table with WebFetch and write the date you read
+  it. Where Google now says something different from `docs/SEO-GATE.md` §5, follow Google in the briefs, say so in the
+  strategy and propose the doc change.
 - `research/out/content-plan.json`:
   ```json
   {
@@ -52,8 +55,11 @@ The keyword map (URLs, types, primaries, secondaries, intents, clusters), recon 
   verify with their primary sources, internal links in and out, the JSON-LD types, voice notes (who the reader is, words to use and to avoid), the
   first-hand detail that makes the page more than a summary of what ranks (a worked example, a measured number, a real
   photo), word range (tool pages 600–1,500,
-  guides 800–1,500, hubs ≥ 300 words in `<main>`, trust pages ≥ 200 [P]; never pad to reach it), the title
-  (30–60 characters, primary keyword first, the URL's words in it), and the task words that replace repetition.
+  guides 800–1,500, hubs ≥ 300 words in `<main>`, trust pages ≥ 200 [P]; floors, never targets, so never pad to reach
+  it), the title (distinct, describing what the page holds today, primary keyword first, ≤ 60 characters and 580 px,
+  and ≥ 30 for the Next.js starter, whose content schema refuses shorter; the URL's words in it where that stays
+  accurate), the one H2 that carries the primary keyword, and the task words
+  that replace repetition.
 
 ## Rules
 - Wave 1 is small and complete: a hub and its first spokes, plus the trust pages, before breadth.
@@ -62,8 +68,10 @@ The keyword map (URLs, types, primaries, secondaries, intents, clusters), recon 
 - No copied text from competitors; recon tells you structure and gaps only.
 - **Written for a person.** A brief that only a model could have written (generic outline, no first-hand detail, no
   clear reader) isn't done. The voice notes are what the coder and humanizer work from.
-- **Every brief must pass the build's SEO gate honestly** (`docs/SEO-GATE.md` §5):
-  - target terms stay at or under 5% of a page's meaningful words (6% fails);
+- **Every brief must pass the build's SEO gate honestly** (`docs/SEO-GATE.md` §5). Google's current docs decide; the
+  gate's numbers are alarms:
+  - the primary keyword goes in the H1, the first 100 words and one H2, not in every heading; there is no target
+    density (a target term over 5% of meaningful words warns, over 6% fails);
   - list the task words the writer uses instead of repeating the category name ("fractions, discounts, gravel orders",
     not "tools");
   - hub guide sections answer the visitor's next question with facts from the pages the hub links to;
@@ -73,7 +81,8 @@ The keyword map (URLs, types, primaries, secondaries, intents, clusters), recon 
 
 ## Gate
 `node .claude/skills/gate/gate.mjs strategy`: the three outputs exist; wave 1 is non-empty; every wave-1 URL is in the
-keyword map and has a brief; every page type has a JSON-LD plan; no template placeholders remain.
+keyword map and has a brief; every page type has a JSON-LD plan; no template placeholders remain; the `Google sources
+checked` table lists every required Google page with a date no older than 90 days (check `google-sources`).
 
 ## Stop and ask when
 - a wave-1 page is YMYL, needs credentials the owner doesn't have, or carries legal risk;

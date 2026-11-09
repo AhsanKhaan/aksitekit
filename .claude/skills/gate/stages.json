@@ -84,7 +84,8 @@
       ],
       "checks": [
         "content-plan",
-        "no-template-placeholders"
+        "no-template-placeholders",
+        "google-sources"
       ],
       "npm": []
     },
@@ -201,7 +202,9 @@
       "outputs": [
         "reports/seo.md"
       ],
-      "checks": [],
+      "checks": [
+        "google-sources"
+      ],
       "npm": [
         "build",
         "audit:seo"

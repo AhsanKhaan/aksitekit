@@ -20,6 +20,17 @@
     "Claude-User",
     "PerplexityBot"
   ],
+  "googleSources": {
+    "$comment": "Google's current docs are the source of truth (docs/SEO-GATE.md §5). The strategy and seo gates (gate.mjs check google-sources) fail unless docs/CONTENT-STRATEGY.md and reports/seo.md each have a '## Google sources checked' table listing every page below with the YYYY-MM-DD date it was read, no older than maxAgeDays. Add a page when a rule starts to rest on it; change maxAgeDays only with the owner.",
+    "maxAgeDays": 90,
+    "required": [
+      { "page": "Spam policies for Google web search", "url": "https://developers.google.com/search/docs/essentials/spam-policies" },
+      { "page": "Influencing your title links in search results", "url": "https://developers.google.com/search/docs/appearance/title-link" },
+      { "page": "Creating helpful, reliable, people-first content", "url": "https://developers.google.com/search/docs/fundamentals/creating-helpful-content" },
+      { "page": "URL structure best practices for Google Search", "url": "https://developers.google.com/search/docs/crawling-indexing/url-structure" },
+      { "page": "Build and submit a sitemap", "url": "https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap" }
+    ]
+  },
   "thresholds": {
     "titleMinChars": 30,
     "titleMaxChars": 60,

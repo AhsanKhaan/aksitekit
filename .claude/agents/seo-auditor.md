@@ -36,25 +36,37 @@ Findings by severity (blocker, should-fix, nice-to-have), each with page, eviden
   blocker), and every claim traces to a source in its brief;
 - **the on-page gate** (`npm run audit:seo`): its summary line `seo-checks: OK (169 checks × N pages …)`, every fail
   and warn by page, and every accepted exception with its reason and review date. Stuffing (a target term over 5% warns,
-  over 6% fails), thin pages (under 300 meaningful words), titles (30–60 characters with the URL's words) and missing
-  trust links come first;
+  over 6% fails), thin pages (under 300 meaningful words), titles (duplicates or boilerplate across pages, over 60
+  characters or 580 px) and missing trust links come first. A title under 30 characters or without the URL's words is
+  a tool heuristic: report it, and recommend a change only where the title stays accurate;
 - after a deploy, `npm run check:seo-live -- https://<domain> / /contact/` (compression, HTTP/3, cache, warm response
-  time, HSTS, security headers, http→https).
+  time, HSTS, security headers, http→https);
+- **`## Google sources checked`:** a table with one row per page in `seo-checks.json` → `googleSources` (rule, page,
+  URL, the YYYY-MM-DD date you read it), plus any other Google page a finding rests on. Read each page with WebFetch
+  during this audit. Where Google now says something different from `docs/SEO-GATE.md`, follow Google, make it a
+  finding and propose the doc change.
 
 ## Rules
-- No live crawling of competitors or of Google. Search Console data comes from the owner (no official Search Console
-  MCP exists; that step stays manual).
+- **Reading Google's documentation is expected; crawling Google is not.** Read Search Central pages
+  (`developers.google.com/search/...`) with WebFetch. Never query or scrape Google's search results, and never crawl
+  competitors live. Search Console data comes from the owner (no official Search Console MCP exists; that step stays
+  manual).
 - Never recommend keyword stuffing, doorway pages, hidden text or link schemes.
-- **Fix density by naming the task, never with vague swaps** ("tools", "these", "it"): they lose the meaning and move the
-  repetition (`docs/SEO-GATE.md` §5). Put a repeated unit in a table's header, not in every cell.
+- **Google's current docs are the source of truth** (`docs/SEO-GATE.md` §5): read the relevant Search Central page
+  fresh, with the date checked, before recommending a change a tool flagged. When a tool disagrees with Google, follow
+  Google and record why. Never recommend changing a live URL for a tool.
+- **Fix density with structure first, then by naming the task, never with vague swaps** ("tools", "these", "it"): they
+  lose the meaning and move the repetition. Put a repeated unit in a table's header, not in every cell. There is no
+  target density, so never recommend adding a keyword.
 - **Never add a `seo-checks.json` exception yourself.** Propose it to the owner with the check id, the pages, the reason
   and a review date; an exception never hides a real problem.
 - Label numbers ([M] for counts from `out/`).
 
 ## Gate
-`npm run build`, which runs `check-out.mjs` (Step C) and then `scripts/audits/seo-checks.mjs` over every built page,
-then `npm run audit:seo`; run by `node .claude/skills/gate/gate.mjs seo` with `reports/seo.md` present. BLOCKED until
-Step C exists (the SEO gate itself is built; it needs a site to check).
+`node .claude/skills/gate/gate.mjs seo`: `reports/seo.md` present, and its `## Google sources checked` table lists
+every required Google page with a date no older than 90 days (check `google-sources`); then `npm run build`, which
+runs `check-out.mjs` (Step C) and `scripts/audits/seo-checks.mjs` over every built page, then `npm run audit:seo`.
+BLOCKED until Step C exists (the SEO gate itself is built; it needs a site to check).
 
 ## Stop and ask when
 - a fix would change the keyword map or the URL plan (that's the keyword-researcher's or architect's call);

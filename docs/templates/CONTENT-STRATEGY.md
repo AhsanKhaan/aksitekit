@@ -41,12 +41,26 @@ Wave 1 URLs and their briefs: `research/out/content-plan.json` → `waves[0].url
 
 Never pad to reach a word count; a shorter complete page beats a longer padded one.
 
-**Gate rules every page meets** (`docs/SEO-GATE.md` §5, checked in every build):
-- **Target terms** (title, H1 and primary keyword words) stay at or under 5% of the page's meaningful words; 6% fails the build.
-- **Cut repetition by naming the task** in its own words ({{TASK_WORDS}}), never by vague swaps ("tools", "these").
-- **Titles** are 30–60 characters, primary keyword first, and carry the URL's words.
+**Gate rules every page meets** (`docs/SEO-GATE.md` §5, checked in every build; Google's current docs decide, the gate's numbers are alarms):
+- **Keyword placement:** the primary keyword goes in the H1, the first 100 words and one H2. There is no target density; a target term (title, H1 and primary keyword words) over 5% of the page's meaningful words warns, and over 6% fails the build.
+- **Cut repetition with structure first**, then by naming the task in its own words ({{TASK_WORDS}}), never by vague swaps ("tools", "these").
+- **Titles** are distinct, describe what the page holds today, put the primary keyword first and stay within 60 characters and 580 px (and at least 30 characters on the Next.js starter, whose content schema refuses shorter). Keep the URL's words in them where that stays accurate.
 - **Hubs** have ≥ 300 words in `<main>`, and their guide sections take facts only from the pages they link to. Trust pages have ≥ 200 words in `<main>`.
 - **Date tables** put a repeated unit in the column header ("Days from today"), not in every cell.
+
+### Google sources checked
+Read each page fresh before writing the briefs, and write the date you read it (YYYY-MM-DD). If Google's guidance has
+changed, follow Google and update these standards. The strategy gate fails a missing page or a date older than 90 days
+(`seo-checks.json` → `googleSources`). A brief that rests on another Google page (a structured-data type, a policy)
+lists it in the brief.
+
+| Rule it backs | Google page | URL | Checked |
+|---|---|---|---|
+| Keyword stuffing, scaled content | Spam policies for Google web search | https://developers.google.com/search/docs/essentials/spam-policies | {{CHECKED}} |
+| Titles | Influencing your title links in search results | https://developers.google.com/search/docs/appearance/title-link | {{CHECKED}} |
+| Word counts, honest dates | Creating helpful, reliable, people-first content | https://developers.google.com/search/docs/fundamentals/creating-helpful-content | {{CHECKED}} |
+| URLs | URL structure best practices for Google Search | https://developers.google.com/search/docs/crawling-indexing/url-structure | {{CHECKED}} |
+| Sitemap `lastmod` | Build and submit a sitemap | https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap | {{CHECKED}} |
 
 ## 6. Briefs
 Each wave-1 URL has `research/out/briefs/<slug>.md` (slug = the URL path without outer slashes, `/` → `--`, `/` alone

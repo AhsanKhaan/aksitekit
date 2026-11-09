@@ -29,12 +29,24 @@ ownership, npm script names and data formats. `docs/BLUEPRINT.md` is the approve
   every page covering a 171-check SEOmator audit, and a fail blocks the deploy. After a production deploy also run
   `npm run check:seo-live -- https://<domain> / /contact/`. An exception goes in `seo-checks.json` only with the
   owner's yes, a reason and a review date.
-- **Write content that passes it honestly** (`docs/SEO-GATE.md` §5):
-  - a page's target terms stay at or under 5% of its meaningful words (6% fails);
-  - titles are 30–60 characters and carry the URL's words;
-  - hubs have ≥ 300 words in `<main>` and trust pages ≥ 200;
-  - repetition is cut by naming the task in its own words, never by vague swaps such as "tools";
-  - date tables put a repeated unit in the header.
+- **Write content that passes it honestly** (`docs/SEO-GATE.md` §5). **Google's current Search Central pages are the
+  source of truth;** the gate's numbers and SEO tools are alarms that point at a page to check. When a tool disagrees
+  with Google, follow Google and record why. The `strategy` and `seo` gates fail unless their reports list the Google
+  pages in `seo-checks.json` → `googleSources`, each read within 90 days.
+  - **Titles** are distinct on every page and describe what the page holds today: primary keyword first, at most 60
+    characters and 580 px (results truncate by width), no boilerplate that differs by one word. Under 30 characters or
+    without the URL's words the SEO gate warns: those are tool heuristics, so fix them only where the title stays
+    accurate, and never change a live URL for one. The Next.js starter is stricter: its content schema
+    (`lib/content/schema.ts`) refuses a title under 30 characters before the build.
+  - **Keywords** go in the H1, the first 100 words and **one** H2, not in every heading. There is no target density;
+    never add repeats. A target term over 5% of meaningful words warns and over 6% fails: that is the stuffing alarm,
+    not a goal to write up to.
+  - **Cut repetition** by changing the structure first (a repeated unit in a table header, a caption that repeats the
+    column names dropped), then by naming the task in its own words. Never a vague swap such as "tools", and never make
+    clear text less clear to pass a number.
+  - **Length:** Google has no preferred word count. Hubs ≥ 300 words in `<main>` and trust pages ≥ 200 are floors that
+    catch thin pages, never targets; never pad.
+  - **Dates:** a page's `updated` date moves only when its facts, sources or sections change, never for a rewording.
 - **Blockers mean stop and ask:** a login or auth prompt, a CAPTCHA, a permission denial, a tool that isn't installed or
   connected, a paid or keyed API, a rate limit. Give a one-line diagnosis and 2–3 options.
 

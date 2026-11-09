@@ -17,7 +17,7 @@ names and data formats are fixed in `docs/CONTRACT.md`.
 | **"Competition" is not KD** | Keyword Planner's Competition column measures advertiser bidding. It's stored as `competitionAds`, a commercial-value signal, never as difficulty |
 | **Label every number** | **[M]** measured (say the source), **[R]** range, **[P]** proxy or estimate, **[U]** unverified |
 | **DR comes from the owner** | Agents never fetch DR or other paid metrics. The owner writes it in `research/inputs/competitors.csv` |
-| **No stuffing, no thin pages** | Every build runs the on-page SEO gate (`docs/SEO-GATE.md`). A target term over 6% of a page's meaningful words fails it. Cut repetition by naming the task, never with vague swaps ("tools"); hubs need ≥ 300 words in `<main>`, titles 30–60 characters with the URL's words; never pad |
+| **No stuffing, no thin pages** | Every build runs the on-page SEO gate (`docs/SEO-GATE.md`). Google's current docs decide; the gate's numbers are alarms. A target term over 6% of a page's meaningful words fails it; there is no target density, and the primary keyword goes in the H1, the first 100 words and one H2. Cut repetition with structure first, then by naming the task, never with vague swaps ("tools"). Titles are distinct, describe the page today, ≤ 60 characters and 580 px; hubs need ≥ 300 words in `<main>`; never pad |
 | **No ad code before approval** | No AdSense code, ad script or `ads.txt` until `npm run gate:adsense` passes and the owner confirms approval |
 
 ## 2. Agent map
@@ -98,7 +98,7 @@ outputs, runs the npm gates in order, and appends the result to the ledger. Scri
 | idea | idea-groomer | `docs/IDEA.md` | `node .claude/skills/gate/gate.mjs idea` (nine sections; the owner's words unchanged; every job and competitor covered; every feature with a priority, a job and evidence; BLOCKED while §9 has an unanswered question) |
 | idea-approval | owner | — | the owner types `APPROVE <hash>` for `docs/IDEA.md` as it is now; recorded with `gate.mjs record idea-approval` |
 | keywords | keyword-researcher | `research/out/keywords.json`, `selected.json`, `keyword-map.json` | `npm run research:ingest`, `npm run research:select`, `npm run research:cluster` (**B**) |
-| strategy | content-strategist | `docs/CONTENT-STRATEGY.md`, `research/out/content-plan.json`, `research/out/briefs/*.md` | `node .claude/skills/gate/gate.mjs strategy` |
+| strategy | content-strategist | `docs/CONTENT-STRATEGY.md`, `research/out/content-plan.json`, `research/out/briefs/*.md` | `node .claude/skills/gate/gate.mjs strategy` (includes `google-sources`: every Google page in `seo-checks.json` → `googleSources` read within 90 days) |
 | growth | growth-strategist | `docs/GROWTH-90.md`, `growth/plan.json` | `node .claude/skills/gate/gate.mjs growth`, then `npm run growth:today` (**C**) |
 | architecture | architect | `docs/ARCHITECTURE.md`, `hosting.target` | `node .claude/skills/gate/gate.mjs architecture` |
 | design | designer | `docs/DESIGN.md` | `node .claude/skills/gate/gate.mjs design` (DESIGN.md spec structure), `npm run lint:design` (the official linter, **E**), `npm run gate:design` (**C**) |
@@ -107,7 +107,7 @@ outputs, runs the npm gates in order, and appends the result to the ledger. Scri
 | tests | harness | `tests/**` | `npm test`, `npm run test:e2e` (**C**) |
 | code-review | code-reviewer | `reports/code-review.md` | `node .claude/skills/gate/gate.mjs code-review` (Verdict PASS, 0 blockers, reviewed SHA = HEAD), `npm run lint`, `npm run typecheck` (**C**) |
 | reconcile | reconciler | `reports/reconcile.md` | `npm run check:release`, `npm run audit:unique` (**C**) |
-| seo | seo-auditor | `reports/seo.md` | `npm run build` → `check-out.mjs` (**C**) and `scripts/audits/seo-checks.mjs` (169 checks per page, `docs/SEO-GATE.md`); `npm run audit:seo` |
+| seo | seo-auditor | `reports/seo.md` | `gate.mjs` check `google-sources` (Google pages re-read within 90 days); `npm run build` → `check-out.mjs` (**C**) and `scripts/audits/seo-checks.mjs` (169 checks per page, `docs/SEO-GATE.md`); `npm run audit:seo` |
 | ai-search | ai-search-auditor | `reports/ai-search.md` | `node .claude/skills/gate/gate.mjs ai-search` (`llms.txt` starts with `# <name>`; `robots.txt` follows `bots`), `npm run audit:seo` |
 | adsense | adsense-gatekeeper | `reports/adsense.md` | `npm run gate:adsense` (**C**) |
 | security | secops-reviewer | `reports/security.md`, `docs/SECURITY.md` | `npm run check:repo`, `npm run audit`, `npm run check:security -- <preview-url>` (**C**); CI `security.yml` |

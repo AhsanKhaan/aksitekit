@@ -53,10 +53,13 @@ that reads `research/out/keyword-map.json`. Tests come from `harness`; you keep 
   placeholders ("TODO", "lorem", "coming soon"); never pad to a word count.
 - **The build ends with the on-page SEO gate** (`scripts/audits/seo-checks.mjs`, `docs/SEO-GATE.md`).
   - Fix its fails in the content or the markup, never in `seo-checks.json`.
-  - Cut a repeated keyword by naming the task in its own words, not with a vague swap.
-  - Put a repeated unit in a table's header once.
+  - Put the primary keyword in the H1, the first 100 words and one H2, not in every heading. Never add repeats.
+  - Cut a repeated keyword with structure first (a repeated unit in a table's header once, no caption that repeats the
+    column names), then by naming the task in its own words, not with a vague swap. Never make clear text less clear.
   - Give tables headers (`<th scope>`) and links visible text.
-  - Keep titles to 30–60 characters with the URL's words in them.
+  - Make every title distinct and true to what the page holds today: primary keyword first, 30–60 characters (the
+    starter's content schema refuses anything outside that) and ≤ 580 px, the URL's words in it where that stays
+    accurate. Never change a live URL to fix a title.
 - Example pages from the starter are removed before a production build (`production-gate.mjs` fails otherwise).
 - No new npm dependency without the supply-chain checklist and a version ≥ 7 days old; ask Phase E / the owner, since
   only Phase 0 and Phase E edit `package.json`.

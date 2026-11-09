@@ -116,7 +116,7 @@ Fake sample inputs live in `research/inputs/examples/` (never read by the pipeli
 | 2a | idea | idea-groomer | `docs/IDEA.md` | your words unchanged; every job and competitor covered; every feature with evidence; your open questions answered |
 | 2b | idea-approval | **you** | — | your `APPROVE <hash>` for that exact version of `docs/IDEA.md` |
 | 3 | keywords | keyword-researcher | `keywords.json`, `selected.json`, `keyword-map.json` | `npm run research:all` (exits 1 on any rule break) |
-| 4 | strategy | content-strategist | `docs/CONTENT-STRATEGY.md`, content plan, briefs, JSON-LD plan | briefs for wave 1 exist; schema plan per page type |
+| 4 | strategy | content-strategist | `docs/CONTENT-STRATEGY.md`, content plan, briefs, JSON-LD plan | briefs for wave 1 exist; schema plan per page type; Google's pages re-read within 90 days (`google-sources`) |
 | 5 | growth | growth-strategist | `docs/GROWTH-90.md`, `growth/plan.json` | plan validates (one task a day, ≤ 45 min, a done check each) |
 | 6 | architecture | architect | `docs/ARCHITECTURE.md`, `hosting.target` | Pages vs Workers rule applied (§10) |
 | 7 | design | designer | `docs/DESIGN.md` | `npm run lint:design` (the official DESIGN.md linter), `npm run gate:design` (WCAG AA contrast); fonts self-hosted |
@@ -125,7 +125,7 @@ Fake sample inputs live in `research/inputs/examples/` (never read by the pipeli
 | 9 | tests | harness | `tests/**` | `npm test`, `npm run test:e2e`, in CI too |
 | 10 | code-review | code-reviewer | `reports/code-review.md` | Verdict PASS with 0 blockers, for the current commit (`gate.mjs code-review`) |
 | 11 | reconcile | reconciler | `reports/reconcile.md` | keyword map ↔ pages ↔ design ↔ briefs agree |
-| 12 | seo | seo-auditor | `reports/seo.md` | `check-out` in the build |
+| 12 | seo | seo-auditor | `reports/seo.md` | Google's pages re-read within 90 days (`google-sources`); `check-out` and the SEO gate in the build |
 | 13 | ai-search | ai-search-auditor | `reports/ai-search.md` | `llms.txt` and `robots.txt` follow the bot policy (`gate.mjs ai-search`) |
 | 14 | adsense | adsense-gatekeeper | `reports/adsense.md` | `npm run gate:adsense` |
 | 15 | security | secops-reviewer | `reports/security.md`, `docs/SECURITY.md` | §9 checks |
@@ -242,8 +242,12 @@ The thresholds in `factory.config.json` are starting defaults [P], not research 
   ≥ 200. These are floors, never targets; never pad.
 - **Keyword stuffing and thin pages are build failures:**
   - every build runs the on-page SEO gate (`scripts/audits/seo-checks.mjs`, 169 checks per page, `docs/SEO-GATE.md`);
-  - a target term over 6% of a page's meaningful words fails; titles must be 30–60 characters with the URL's words;
-  - cut repetition by naming the task ("fractions, gravel orders"), never with vague swaps such as "tools".
+  - Google's current docs are the source of truth; the gate's numbers are alarms, not targets;
+  - a target term over 6% of a page's meaningful words fails; the primary keyword goes in the H1, the first 100 words
+    and one H2;
+  - titles are distinct, describe the page today and stay within 60 characters (fails over) and 580 px;
+  - cut repetition with structure first, then by naming the task ("fractions, gravel orders"), never with vague swaps
+    such as "tools".
 - **Programmatic SEO** only for keyword families with demand evidence (Google's scaled-content-abuse policy).
 - **Structured data:** JSON-LD per page type (WebPage, WebApplication, BreadcrumbList, FAQPage, Article,
   CollectionPage, Organization, WebSite); no self-made ratings. `llms.txt` is generated too (cheap and optional; there's
