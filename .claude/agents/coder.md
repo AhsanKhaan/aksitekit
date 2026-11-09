@@ -53,7 +53,8 @@ that reads `research/out/keyword-map.json`. Tests come from `harness`; you keep 
   placeholders ("TODO", "lorem", "coming soon"); never pad to a word count.
 - **The build ends with the on-page SEO gate** (`scripts/audits/seo-checks.mjs`, `docs/SEO-GATE.md`).
   - Fix its fails in the content or the markup, never in `seo-checks.json`.
-  - Put the primary keyword in the H1, the first 100 words and one H2, not in every heading. Never add repeats.
+  - Keep target terms at or under 5% of a page's meaningful words. Put the primary keyword in the H1, the first 100
+    words and one H2, not in every heading. Never add repeats.
   - Cut a repeated keyword with structure first (a repeated unit in a table's header once, no caption that repeats the
     column names), then by naming the task in its own words, not with a vague swap. Never make clear text less clear.
   - Give tables headers (`<th scope>`) and links visible text.

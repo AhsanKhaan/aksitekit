@@ -120,7 +120,30 @@ describe('google-sources: seo stage', () => {
     expect(r.out).toMatch(new RegExp(`checked ${daysAgo(MAX_AGE + 30)}, \\d+ days ago \\(limit ${MAX_AGE}\\)`));
   });
 
-  test('a date in the future fails (planted)', () => {
+  test(`a page read exactly ${MAX_AGE} days ago passes (edge)`, () => {
+    const r = seo(table(redate(1, daysAgo(MAX_AGE))));
+    expect(r.status, r.out).toBe(BLOCKED);
+  });
+
+  test(`a page read ${MAX_AGE + 1} days ago fails (edge, planted)`, () => {
+    const r = seo(table(redate(1, daysAgo(MAX_AGE + 1))));
+    expect(r.status).toBe(FAIL);
+    expect(r.out).toMatch(new RegExp(`${MAX_AGE + 1} days ago \\(limit ${MAX_AGE}\\)`));
+  });
+
+  // A date one day ahead of UTC is allowed: between local and UTC midnight, east of Greenwich, the local date is ahead.
+  test('a date one day ahead of UTC passes (edge)', () => {
+    const r = seo(table(redate(0, daysAgo(-1))));
+    expect(r.status, r.out).toBe(BLOCKED);
+  });
+
+  test('a date two days ahead fails (edge, planted)', () => {
+    const r = seo(table(redate(0, daysAgo(-2))));
+    expect(r.status).toBe(FAIL);
+    expect(r.out).toMatch(/is in the future/);
+  });
+
+  test('a date well in the future fails (planted)', () => {
     const r = seo(table(redate(0, daysAgo(-10))));
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/is in the future/);
@@ -142,6 +165,13 @@ describe('google-sources: seo stage', () => {
     const r = seo(table([...allFresh(), { url: 'https://developers.google.com.example.test/search/docs/x', date: daysAgo(0) }]));
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/isn't an https Google page/);
+  });
+
+  test('a second, non-Google link in a row fails (planted)', () => {
+    const rows = allFresh().map((r, j) => (j === 0 ? { ...r, page: 'Spam policies, see also https://example.test/notes' } : r));
+    const r = seo(table(rows));
+    expect(r.status).toBe(FAIL);
+    expect(r.out).toMatch(/lists https:\/\/example\.test\/notes, which isn't an https Google page/);
   });
 
   test('a plain http link fails (planted)', () => {

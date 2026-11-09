@@ -245,7 +245,8 @@ The thresholds in `factory.config.json` are starting defaults [P], not research 
   - Google's current docs are the source of truth; the gate's numbers are alarms, not targets;
   - a target term over 6% of a page's meaningful words fails; the primary keyword goes in the H1, the first 100 words
     and one H2;
-  - titles are distinct, describe the page today and stay within 60 characters (fails over) and 580 px;
+  - target terms stay at or under 5%; titles are 30–60 characters (fails over 60) and ≤ 580 px, distinct, describe the
+    page today and carry the URL's words where that stays accurate;
   - cut repetition with structure first, then by naming the task ("fractions, gravel orders"), never with vague swaps
     such as "tools".
 - **Programmatic SEO** only for keyword families with demand evidence (Google's scaled-content-abuse policy).

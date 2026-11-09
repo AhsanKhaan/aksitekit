@@ -42,9 +42,9 @@ Wave 1 URLs and their briefs: `research/out/content-plan.json` → `waves[0].url
 Never pad to reach a word count; a shorter complete page beats a longer padded one.
 
 **Gate rules every page meets** (`docs/SEO-GATE.md` §5, checked in every build; Google's current docs decide, the gate's numbers are alarms):
-- **Keyword placement:** the primary keyword goes in the H1, the first 100 words and one H2. There is no target density; a target term (title, H1 and primary keyword words) over 5% of the page's meaningful words warns, and over 6% fails the build.
+- **Keyword ceiling and placement:** target terms (title, H1 and primary keyword words) stay at or under 5% of the page's meaningful words; over 5% warns and over 6% fails the build. The primary keyword goes in the H1, the first 100 words and one H2. There is no target density to write up to.
 - **Cut repetition with structure first**, then by naming the task in its own words ({{TASK_WORDS}}), never by vague swaps ("tools", "these").
-- **Titles** are distinct, describe what the page holds today, put the primary keyword first and stay within 60 characters and 580 px (and at least 30 characters on the Next.js starter, whose content schema refuses shorter). Keep the URL's words in them where that stays accurate.
+- **Titles** are distinct, describe what the page holds today, put the primary keyword first, are 30–60 characters and at most 580 px, and carry the URL's words where that stays accurate.
 - **Hubs** have ≥ 300 words in `<main>`, and their guide sections take facts only from the pages they link to. Trust pages have ≥ 200 words in `<main>`.
 - **Date tables** put a repeated unit in the column header ("Days from today"), not in every cell.
 

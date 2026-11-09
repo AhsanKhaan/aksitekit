@@ -31,16 +31,17 @@ ownership, npm script names and data formats. `docs/BLUEPRINT.md` is the approve
   owner's yes, a reason and a review date.
 - **Write content that passes it honestly** (`docs/SEO-GATE.md` §5). **Google's current Search Central pages are the
   source of truth;** the gate's numbers and SEO tools are alarms that point at a page to check. When a tool disagrees
-  with Google, follow Google and record why. The `strategy` and `seo` gates fail unless their reports list the Google
-  pages in `seo-checks.json` → `googleSources`, each read within 90 days.
-  - **Titles** are distinct on every page and describe what the page holds today: primary keyword first, at most 60
-    characters and 580 px (results truncate by width), no boilerplate that differs by one word. Under 30 characters or
-    without the URL's words the SEO gate warns: those are tool heuristics, so fix them only where the title stays
-    accurate, and never change a live URL for one. The Next.js starter is stricter: its content schema
-    (`lib/content/schema.ts`) refuses a title under 30 characters before the build.
-  - **Keywords** go in the H1, the first 100 words and **one** H2, not in every heading. There is no target density;
-    never add repeats. A target term over 5% of meaningful words warns and over 6% fails: that is the stuffing alarm,
-    not a goal to write up to.
+  with Google, follow Google and record why; a gate fail still blocks, so fix the page or ask the owner for an
+  exception. The `strategy` and `seo` gates fail unless their reports list the Google pages in `seo-checks.json` →
+  `googleSources`, each read within 90 days.
+  - **Titles** are 30–60 characters and at most 580 px, distinct on every page, and describe what the page holds
+    today: primary keyword first, no boilerplate that differs by one word, and the URL's words in them where that stays
+    accurate. Never change a live URL to fix a title. The SEO gate fails over 60 characters and warns under 30, over
+    580 px or without the URL's words; the Next.js starter's content schema (`lib/content/schema.ts`) refuses a title
+    under 30 or over 60 characters before the build.
+  - **Keywords:** a page's target terms stay at or under 5% of its meaningful words (the gate warns over 5% and fails
+    over 6%). They go in the H1, the first 100 words and **one** H2, not in every heading. There is no target density
+    to write up to; never add repeats.
   - **Cut repetition** by changing the structure first (a repeated unit in a table header, a caption that repeats the
     column names dropped), then by naming the task in its own words. Never a vague swap such as "tools", and never make
     clear text less clear to pass a number.

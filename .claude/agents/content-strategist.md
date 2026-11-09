@@ -56,10 +56,9 @@ The keyword map (URLs, types, primaries, secondaries, intents, clusters), recon 
   first-hand detail that makes the page more than a summary of what ranks (a worked example, a measured number, a real
   photo), word range (tool pages 600–1,500,
   guides 800–1,500, hubs ≥ 300 words in `<main>`, trust pages ≥ 200 [P]; floors, never targets, so never pad to reach
-  it), the title (distinct, describing what the page holds today, primary keyword first, ≤ 60 characters and 580 px,
-  and ≥ 30 for the Next.js starter, whose content schema refuses shorter; the URL's words in it where that stays
-  accurate), the one H2 that carries the primary keyword, and the task words
-  that replace repetition.
+  it), the title (distinct, describing what the page holds today, primary keyword first, 30–60 characters and
+  ≤ 580 px, the URL's words in it where that stays accurate), the one H2 that carries the primary keyword, and the
+  task words that replace repetition.
 
 ## Rules
 - Wave 1 is small and complete: a hub and its first spokes, plus the trust pages, before breadth.
@@ -70,8 +69,9 @@ The keyword map (URLs, types, primaries, secondaries, intents, clusters), recon 
   clear reader) isn't done. The voice notes are what the coder and humanizer work from.
 - **Every brief must pass the build's SEO gate honestly** (`docs/SEO-GATE.md` §5). Google's current docs decide; the
   gate's numbers are alarms:
-  - the primary keyword goes in the H1, the first 100 words and one H2, not in every heading; there is no target
-    density (a target term over 5% of meaningful words warns, over 6% fails);
+  - target terms stay at or under 5% of a page's meaningful words (over 5% warns, over 6% fails); the primary
+    keyword goes in the H1, the first 100 words and one H2, not in every heading; there is no target density to write
+    up to;
   - list the task words the writer uses instead of repeating the category name ("fractions, discounts, gravel orders",
     not "tools");
   - hub guide sections answer the visitor's next question with facts from the pages the hub links to;

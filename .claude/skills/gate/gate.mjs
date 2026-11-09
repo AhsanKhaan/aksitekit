@@ -434,16 +434,19 @@ const CHECKS = {
     const today = Date.parse(`${new Date().toISOString().slice(0, 10)}T00:00:00Z`);
     let oldest = '';
     const files = expandOutputs(stage).filter((f) => f.endsWith('.md'));
+    if (!files.length) fail(`stage "${stage.id}" has no .md output for the google-sources check to read`, 'list the report in stages.json → outputs');
     for (const p of files) {
       const listed = new Set();
       for (const row of googleSourceRows(p)) {
         const where = `${p}:${row.line}`;
-        let host = '';
-        try {
-          const u = new URL(row.url);
-          host = u.protocol === 'https:' ? u.hostname.toLowerCase() : '';
-        } catch { /* reported below */ }
-        if (!/(?:^|\.)google\.com$/.test(host)) fail(`${where} lists ${row.url}, which isn't an https Google page`);
+        for (const url of row.urls) {
+          let host = '';
+          try {
+            const u = new URL(url);
+            host = u.protocol === 'https:' ? u.hostname.toLowerCase() : '';
+          } catch { /* reported below */ }
+          if (!/(?:^|\.)google\.com$/.test(host)) fail(`${where} lists ${url}, which isn't an https Google page`);
+        }
         if (!row.date) fail(`${where} has no YYYY-MM-DD date for ${row.url}`, 'read the page again and write the date you read it');
         const t = Date.parse(`${row.date}T00:00:00Z`);
         if (Number.isNaN(t) || new Date(t).toISOString().slice(0, 10) !== row.date) fail(`${where}: ${row.date} is not a real date`);
@@ -451,7 +454,7 @@ const CHECKS = {
         if (age < -1) fail(`${where}: ${row.date} is in the future`);
         if (age > maxAge) fail(`${where}: ${row.url} was checked ${row.date}, ${age} days ago (limit ${maxAge})`, 'read the page again, update the rules if Google changed it, and write today\'s date');
         if (!oldest || row.date < oldest) oldest = row.date;
-        listed.add(normUrl(row.url));
+        for (const url of row.urls) listed.add(normUrl(url));
       }
       const missing = required.filter((r) => !listed.has(normUrl(r.url)));
       if (missing.length) {
@@ -503,7 +506,8 @@ function blocksSite(groups, ua) {
 }
 
 // The table under a "## Google sources checked" heading (any level 2–4, optionally numbered), up to the next heading:
-// one row per Google page, with its URL and the YYYY-MM-DD date it was read.
+// one row per Google page, with its URL and the YYYY-MM-DD date it was read. Every URL in a row is returned, so a second
+// link that isn't Google's can't slip through.
 const GOOGLE_SECTION = /^#{2,4}\s+(?:\d+(?:\.\d+)*\.?\s+)?Google sources checked\s*$/i;
 
 function googleSourceRows(p) {
@@ -514,9 +518,9 @@ function googleSourceRows(p) {
   }
   const rows = [];
   for (let i = start + 1; i < lines.length && !/^#{1,6}\s/.test(lines[i]); i++) {
-    const url = lines[i].match(/https?:\/\/[^\s|)>\]`]+/);
-    if (!/^\s*\|/.test(lines[i]) || !url) continue;
-    rows.push({ line: i + 1, url: url[0], date: lines[i].match(/\b\d{4}-\d{2}-\d{2}\b/)?.[0] });
+    const urls = [...lines[i].matchAll(/https?:\/\/[^\s|)>\]`]+/g)].map((m) => m[0]);
+    if (!/^\s*\|/.test(lines[i]) || !urls.length) continue;
+    rows.push({ line: i + 1, url: urls[0], urls, date: lines[i].match(/\b\d{4}-\d{2}-\d{2}\b/)?.[0] });
   }
   return rows;
 }

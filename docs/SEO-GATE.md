@@ -36,10 +36,10 @@ The checks that matter most for AdSense and spam policy:
 | | Any single word over 8% | **fail** |
 | | A month or weekday name that isn't a target term (date tables are data, and move with the build date) | warn only |
 | `content.word-count` | Under 300 meaningful words on the whole page | warn |
-| `core.title-length` | Under 30 characters (a tool heuristic, §5) | warn |
+| `core.title-length` | Under 30 characters (still a writing rule, §5) | warn |
 | | Over 60 characters | **fail** |
 | `content.title-pixels` | Over 580 px | warn |
-| `url.slug-keywords` | Fewer than half the URL slug's words appear in the title (a tool heuristic, §5) | warn |
+| `url.slug-keywords` | Fewer than half the URL slug's words appear in the title (still a writing rule where accurate, §5) | warn |
 | `eeat.disclaimers`, `eeat.*-link`, `eeat.author-byline` | A visible disclaimer, and links to about, contact, privacy, terms, editorial policy and an author page | **fail** |
 | `eeat.external-citations` | The home page and keyword-map pages link to at least one outside source | warn |
 | `links.joined-anchor-text` | A link's text runs together when read the way SEO tools read it (tags removed with nothing in their place): `<span>Pets</span><span>1</span>` is the anchor "Pets1" | **fail** |
@@ -88,7 +88,7 @@ There is no target density: never add repeats to reach a number. The limits are 
 
 ## 5. Content rules the gate enforces (and how to meet them honestly)
 
-**Google's current documentation is the source of truth:** Search Central and the spam policies, read fresh when a decision depends on them, with the date you checked. Google changes its guidance, so never rely on memory or on a tool's summary of it. SEO tools (SEOmator, Ubersuggest and this gate's tool heuristics) are alarms that point at something to check. When a tool disagrees with Google, follow Google and record the reason in the exception or the commit. These rules were learned on calculatorporch.com (its docs/05 §1a, §3 and §3a).
+**Google's current documentation is the source of truth:** Search Central and the spam policies, read fresh when a decision depends on them, with the date you checked. Google changes its guidance, so never rely on memory or on a tool's summary of it. SEO tools (SEOmator, Ubersuggest and this gate's tool heuristics) are alarms that point at something to check. When a tool disagrees with Google, follow Google and record the reason in the exception or the commit. A gate fail still blocks the build: fix the page, or ask the owner for a reviewed exception (§4). These rules were learned on calculatorporch.com (its docs/05 §1a, §3 and §3a).
 
 **The Google pages these rules rest on** (the list the gate reads is `seo-checks.json` → `googleSources`):
 
@@ -106,7 +106,7 @@ There is no target density: never add repeats to reach a number. The limits are 
 - The `strategy` and `seo` gates (check `google-sources`) fail when a page is missing, a URL isn't an https Google page, or a date is older than 90 days or in the future.
 - If a page says something different from these rules, the agent follows Google, says so in its report, and proposes the change to this file. The coder has no web access and works from the brief and this file.
 
-- **Keyword placement.** Put the primary keyword in the H1, the first 100 words and **one** H2 ("How to use the gravel calculator"), not in every heading. There is no target density; never add repeats.
+- **Keyword ceiling and placement.** A page's target terms stay at or under 5% of its meaningful words; the gate warns over 5% and fails over 6%. Put the primary keyword in the H1, the first 100 words and **one** H2 ("How to use the gravel calculator"), not in every heading. There is no target density to write up to; never add repeats.
 - **Name the task, not the category.**
   - When natural, clear text trips the density alarm, change the structure first: put a repeated unit in a table header, or drop a caption that repeats the column names.
   - Then cut a repeated word by writing the task in its own words ("fractions, discounts, gravel orders, sun hours, due dates").
@@ -114,9 +114,9 @@ There is no target density: never add repeats to reach a number. The limits are 
   - Never make clear text less clear to pass a number.
 - **Titles** follow Google's title-link guidance (Google, "Influencing your title links in search results", checked 2026-11-09):
   - **distinct on every page and describing what it holds today.** No boilerplate that differs by one word, and no repeated keywords. A hub's title names only the pages it links to now, not pages still planned;
-  - **primary keyword first, at most 60 characters and 580 px.** Google sets no length limit; results truncate by device width, so this is for display. The build fails a title over 60 characters and warns over 580 px;
-  - **under 30 characters, or without the URL's words, the gate warns.** Both are Ubersuggest heuristics; Google asks only for descriptive titles and readable URLs. Fix them where the title stays accurate: a `/pets/` hub titled "Pet Calculators" was flagged as a "poorly formatted URL", and "Calculators for Pets" fixed it. **Never change a live URL to fix a title.**
-  - **the Next.js starter is stricter.** Its content schema (`lib/content/schema.ts`) refuses a title under 30 or over 60 characters before the build. A title that short is usually a vague label ("Contact"), which Google's title guidance also discourages, so write a longer one that stays accurate ("Contact Example Site: email and reply times"). Relaxing the schema is a gate change and needs the owner.
+  - **primary keyword first, 30–60 characters and at most 580 px.** Google sets no length limit; results truncate by device width, so the maximum is for display. The build fails a title over 60 characters and warns over 580 px;
+  - **at least 30 characters, with the URL's words where that stays accurate.** These floors started as Ubersuggest heuristics, and Google asks only for descriptive titles and readable URLs, so the SEO gate only warns on them. We keep them as writing rules anyway: a title under 30 characters is usually a vague label ("Contact"), which Google's title guidance also discourages, so write a longer one that stays accurate ("Contact Example Site: email and reply times"). A `/pets/` hub titled "Pet Calculators" was flagged as a "poorly formatted URL", and "Calculators for Pets" fixed it. **Never change a live URL to fix a title.**
+  - **the Next.js starter enforces the range.** Its content schema (`lib/content/schema.ts`) refuses a title under 30 or over 60 characters before the build. Relaxing the schema is a gate change and needs the owner.
 - **Word counts:** Google has no preferred word count (Google, "Creating helpful, reliable, people-first content", checked 2026-11-09). A low count means "check the page is useful", not "add words". Our floors catch thin pages:
   - category hubs and the A–Z index need at least 300 words in `<main>`;
   - trust pages need at least 200;

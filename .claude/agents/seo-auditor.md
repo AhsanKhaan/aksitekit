@@ -37,8 +37,9 @@ Findings by severity (blocker, should-fix, nice-to-have), each with page, eviden
 - **the on-page gate** (`npm run audit:seo`): its summary line `seo-checks: OK (169 checks × N pages …)`, every fail
   and warn by page, and every accepted exception with its reason and review date. Stuffing (a target term over 5% warns,
   over 6% fails), thin pages (under 300 meaningful words), titles (duplicates or boilerplate across pages, over 60
-  characters or 580 px) and missing trust links come first. A title under 30 characters or without the URL's words is
-  a tool heuristic: report it, and recommend a change only where the title stays accurate;
+  characters or 580 px) and missing trust links come first. A title under 30 characters, or without the URL's words,
+  breaks the writing rules (30–60 characters, the URL's words where accurate): make it a should-fix with an accurate
+  rewrite, never a URL change;
 - after a deploy, `npm run check:seo-live -- https://<domain> / /contact/` (compression, HTTP/3, cache, warm response
   time, HSTS, security headers, http→https);
 - **`## Google sources checked`:** a table with one row per page in `seo-checks.json` → `googleSources` (rule, page,
@@ -54,7 +55,8 @@ Findings by severity (blocker, should-fix, nice-to-have), each with page, eviden
 - Never recommend keyword stuffing, doorway pages, hidden text or link schemes.
 - **Google's current docs are the source of truth** (`docs/SEO-GATE.md` §5): read the relevant Search Central page
   fresh, with the date checked, before recommending a change a tool flagged. When a tool disagrees with Google, follow
-  Google and record why. Never recommend changing a live URL for a tool.
+  Google and record why. A gate fail still blocks: recommend a fix to the page, or an exception for the owner to
+  decide. Never recommend changing a live URL for a tool.
 - **Fix density with structure first, then by naming the task, never with vague swaps** ("tools", "these", "it"): they
   lose the meaning and move the repetition. Put a repeated unit in a table's header, not in every cell. There is no
   target density, so never recommend adding a keyword.
@@ -65,8 +67,8 @@ Findings by severity (blocker, should-fix, nice-to-have), each with page, eviden
 ## Gate
 `node .claude/skills/gate/gate.mjs seo`: `reports/seo.md` present, and its `## Google sources checked` table lists
 every required Google page with a date no older than 90 days (check `google-sources`); then `npm run build`, which
-runs `check-out.mjs` (Step C) and `scripts/audits/seo-checks.mjs` over every built page, then `npm run audit:seo`.
-BLOCKED until Step C exists (the SEO gate itself is built; it needs a site to check).
+runs `check-out.mjs` and `scripts/audits/seo-checks.mjs` over every built page, then `npm run audit:seo`. Step C's
+starter is built (`docs/CONTRACT.md`), so the stage runs against the starter's pages.
 
 ## Stop and ask when
 - a fix would change the keyword map or the URL plan (that's the keyword-researcher's or architect's call);
