@@ -42,7 +42,7 @@ ${canonical}<link rel="icon" href="/icon.svg"/><meta name="robots" content="noin
 }
 
 const TRUST = ['/about/', '/contact/', '/privacy/', '/terms/', '/editorial-policy/', '/authors/sam/'];
-interface Options { config?: Record<string, unknown>; factory?: unknown; keywordMap?: unknown }
+interface Options { config?: Record<string, unknown>; factory?: unknown; keywordMap?: unknown; env?: Record<string, string> }
 function site(pages: Record<string, string>, exceptions: unknown[] = [], o: Options = {}) {
   const root = mkdtempSync(join(tmpdir(), 'seo-checks-'));
   roots.push(root);
@@ -76,7 +76,7 @@ function site(pages: Record<string, string>, exceptions: unknown[] = [], o: Opti
   if (o.factory) writeFileSync(join(root, 'factory.config.json'), JSON.stringify(o.factory));
   writeFileSync(join(root, 'seo-checks.json'), JSON.stringify(config));
   // Relative paths (a blank outDir filled from factory.config.json) resolve from the fixture root, like a project's.
-  const env = { ...process.env, SEO_CHECKS_CONFIG: join(root, 'seo-checks.json'), SEO_CHECKS_FACTORY: join(root, 'factory.config.json') };
+  const env = { ...process.env, SEO_CHECKS_CONFIG: join(root, 'seo-checks.json'), SEO_CHECKS_FACTORY: join(root, 'factory.config.json'), ...o.env };
   const r = spawnSync(process.execPath, [SCRIPT, '--json'], { cwd: root, encoding: 'utf8', env });
   const json = r.stdout.slice(0, r.stdout.lastIndexOf('}') + 1);
   const report = (json ? JSON.parse(json).report : []) as { route: string; id: string; status: string; msg: string }[];
@@ -133,10 +133,25 @@ describe('seo-checks', () => {
     expect(s.result('/', 'content.keyword-stuffing')!.msg).toContain('target "grout"');
   });
 
-  test('no site URL anywhere stops with a clear message instead of guessing', () => {
-    const s = site({ '/': page('/') }, [], { config: { siteUrl: '' }, factory: { project: { domain: '' } } });
+  test('no site URL in a non-indexable build checks against the template URL, https://example.com', () => {
+    const noUrl = { config: { siteUrl: '', indexableEnv: 'SEO_TEST_INDEXABLE' }, factory: { project: { domain: '' } }, env: { SEO_TEST_INDEXABLE: '' } };
+    const template = site({ '/': page('/', { canonical: 'https://example.com/' }) }, [], noUrl);
+    expect(template.stderr).not.toContain('no site URL');
+    expect(template.result('/', 'core.canonical-self')).toMatchObject({ status: 'pass' });
+    // The checks still run against that URL: a canonical on another origin fails.
+    const other = site({ '/': page('/') }, [], noUrl);
+    expect(other.result('/', 'core.canonical-self')).toMatchObject({ status: 'fail' });
+    expect(other.status).toBe(1);
+  });
+
+  test('no site URL in an indexable (production) build stops with a clear message instead of guessing', () => {
+    const s = site({ '/': page('/', { canonical: 'https://example.com/' }) }, [], {
+      config: { siteUrl: '', indexableEnv: 'SEO_TEST_INDEXABLE' }, factory: { project: { domain: '' } }, env: { SEO_TEST_INDEXABLE: 'true' },
+    });
     expect(s.status).toBe(1);
+    expect(s.stderr).toContain('no site URL');
     expect(s.stderr).toContain('project.domain');
+    expect(s.report).toEqual([]);
   });
 
   test('core tags: a missing canonical and two H1s fail', () => {
