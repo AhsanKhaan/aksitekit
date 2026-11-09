@@ -15,9 +15,13 @@
 // Blank settings in seo-checks.json come from factory.config.json: outDir ← build.outputDir, siteUrl ← https://
 // project.domain, siteName ← project.brand (or project.name). The env names are lists, so the technology-neutral
 // SITE_URL / SITE_INDEXABLE and the Next.js NEXT_PUBLIC_* names both work (.github/CI-CD.md).
+// Without any URL (the template, or a copy before /start sets project.domain) a non-indexable build checks against
+// https://example.com, like lib/site.ts and scripts/lib/site.mjs; an indexable (production) build with no URL stops.
+// The URL only feeds the canonical and absolute-URL checks, so the fallback silences none of them.
 // SEO_CHECKS_CONFIG=<path>, SEO_CHECKS_FACTORY=<path> and SEO_CHECKS_OUT=<dir> point elsewhere (tests).
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
+import { TEMPLATE_URL } from '../lib/site.mjs';
 
 const args = process.argv.slice(2);
 const flag = (f) => args.includes(f);
@@ -30,10 +34,12 @@ config.siteName ||= factory.project?.brand || factory.project?.name || '';
 const T = config.thresholds;
 const OUT = process.env.SEO_CHECKS_OUT || config.outDir;
 const envOf = (names) => [names].flat().map((n) => process.env[n]).find(Boolean);
-const siteUrl = (envOf(config.siteUrlEnv) || config.siteUrl).replace(/\/+$/, '');
 const production = envOf(config.indexableEnv) === 'true';
+const givenUrl = (envOf(config.siteUrlEnv) || config.siteUrl).replace(/\/+$/, '');
+const templateMode = !givenUrl && !production && !flag('--live');
+const siteUrl = templateMode ? TEMPLATE_URL : givenUrl;
 if (!siteUrl && !flag('--live')) {
-  console.error('seo-checks: no site URL. Set project.domain in factory.config.json (or siteUrl in seo-checks.json).');
+  console.error('seo-checks: no site URL for an indexable (production) build. Set project.domain in factory.config.json (or siteUrl in seo-checks.json, or SITE_URL).');
   process.exit(1);
 }
 
@@ -484,7 +490,7 @@ else {
   }
 }
 const failed = count('fail') + (flag('--strict') ? count('warn') : 0);
-const label = flag('--live') ? 'live checks' : `${CHECKS.length} checks × ${pages.filter((p) => !p.is404).length} pages (${production ? 'production' : 'preview'} build)`;
+const label = flag('--live') ? 'live checks' : `${CHECKS.length} checks × ${pages.filter((p) => !p.is404).length} pages (${production ? 'production' : 'preview'} build${templateMode ? `, template mode: ${TEMPLATE_URL}` : ''})`;
 console.log(`seo-checks: ${failed ? 'FAIL' : 'OK'} (${label}: ${count('pass')} pass, ${count('warn')} warn, ${count('accepted')} accepted, ${count('fail')} fail)`);
 // exitCode, not process.exit(): on Linux, stdout to a pipe is asynchronous, and exiting at once cuts off a long
 // report (CI saw the --json output end at ~146 KB). Node exits by itself once the output has flushed.
