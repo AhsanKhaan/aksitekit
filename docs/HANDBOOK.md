@@ -359,7 +359,7 @@ aksitekit/
 ├── .mcp.json                official, free MCP servers
 ├── .npmrc                   supply-chain rules (no install scripts, exact versions, 7-day minimum age)
 ├── .claude/
-│   ├── agents/              21 agents
+│   ├── agents/              22 agents
 │   ├── skills/              start, today, gate (+ gate.mjs, stages.json), keyword-pipeline, deploy-production
 │   ├── hooks/               secret and .env guard, push guard, secret scan after edits
 │   └── settings.json        permissions and hooks
