@@ -103,7 +103,7 @@ function loadPage(file) {
     h1: elements(body, 'h1').map((e) => textOf(e.inner)),
     headings: [...body.matchAll(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi)].map((m) => ({ level: Number(m[1]), text: textOf(m[2]) })),
     images: tags(body, 'img'),
-    scripts: [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].map((m) => ({ a: attrs(`<script ${m[1]}>`), content: m[2], inHead: m.index < headEnd })),
+    scripts: [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)].map((m) => ({ a: attrs(`<script ${m[1]}>`), content: m[2], inHead: m.index < headEnd })),
     styles: [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]),
     text: textOf(body),
     mainText: textOf(main),
