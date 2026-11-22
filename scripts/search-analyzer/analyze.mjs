@@ -58,7 +58,11 @@ const round = (n, d = 2) => (n == null || Number.isNaN(n) ? null : Math.round(n 
 const pct = (n, d = 2) => (n == null ? '' : `${round(n * 100, d)}%`);
 const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const unesc = (s) => String(s ?? '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'");
+// One pass over the input, so "&amp;lt;" becomes "&lt;" and is never unescaped a second time.
+const ENTITIES = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#x27;': "'", '&#39;': "'" };
+const unesc = (s) => String(s ?? '').replace(/&(?:amp|lt|gt|quot|#x27|#39);/g, (m) => ENTITIES[m]);
+// Remove tags until none are left, so nested input such as "<<script>script>" cannot leave a tag behind.
+const stripTags = (s) => { let prev; let out = String(s ?? ''); do { prev = out; out = out.replace(/<[^>]*>/g, ''); } while (out !== prev); return out.replace(/</g, ''); };
 
 function parseCsv(text) {
   const rows = []; let r = [], c = '', q = false;
@@ -193,7 +197,7 @@ const site = new Map(); // url → { title, description, h1, h2[], types[], link
       for (const m of h.matchAll(/<script type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)) {
         try { const walk = (x) => { if (Array.isArray(x)) x.forEach(walk); else if (x && typeof x === 'object') { if (x['@type']) types.push(...[].concat(x['@type'])); if (x['@graph']) walk(x['@graph']); } }; walk(JSON.parse(m[1])); } catch { warn(`Unparseable JSON-LD on ${url}`); }
       }
-      const strip = (s) => unesc(s.replace(/<[^>]+>/g, '')).trim();
+      const strip = (s) => unesc(stripTags(s)).trim();
       site.set(url, {
         url,
         title: unesc((h.match(/<title>(.*?)<\/title>/s) || [])[1] || ''),
