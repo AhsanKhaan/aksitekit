@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants';
 
-// Static export (docs/TODO-step-c.md §1): build.outputDir "out", trailing slashes, no server code. Headers live in
+// Static export (internal/docs/TODO-step-c.md §1): build.outputDir "out", trailing slashes, no server code. Headers live in
 // _headers (scripts/gen-public-files.mjs): a static export ignores next.config headers().
 export default function config(phase: string): NextConfig {
   return {

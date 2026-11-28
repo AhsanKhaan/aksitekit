@@ -1,5 +1,5 @@
 // The first step of `npm run build` (fails fast, before the framework runs). It decides what kind of build this is
-// and refuses the ones that must never ship (docs/TODO-step-c.md §3):
+// and refuses the ones that must never ship (internal/docs/TODO-step-c.md §3):
 // - production (SITE_ENV=production in CI, or a Cloudflare Pages build of hosting.productionBranch): the project's
 //   values are set, the site URL is the project's own domain, the build is indexable, the bot policy is decided, and
 //   no example page or example site fact remains;
@@ -14,7 +14,7 @@ import { DOMAIN, buildContext, domainOf, indexable, isMain, readConfig, siteUrl 
 import { botPolicyProblems } from './lib/public-files.mjs';
 
 const CONTENT = process.env.SITE_CONTENT_DIR || 'content';
-const KEYWORD_MAP = process.env.KEYWORD_MAP || 'research/out/keyword-map.json';
+const KEYWORD_MAP = process.env.KEYWORD_MAP || 'internal/research/out/keyword-map.json';
 
 /** Content files still marked as the template's examples ("example": true), and the example site facts. */
 export function exampleContent(dir = CONTENT) {

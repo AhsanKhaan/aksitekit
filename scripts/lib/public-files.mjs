@@ -1,4 +1,4 @@
-// The generated public files (docs/TODO-step-c.md §2), as pure functions so the tests can plant failing cases:
+// The generated public files (internal/docs/TODO-step-c.md §2), as pure functions so the tests can plant failing cases:
 // robots.txt from factory.config.json → bots, the _headers rules (CSP and the security headers), security.txt, and the
 // sitemap and llms.txt built from the pages the build actually wrote.
 import { isHeld, meta, mainOf, textOf, titleOf } from './site.mjs';
@@ -120,7 +120,7 @@ export function hstsValue(value) {
 export function headersFile({ siteUrl, target = 'cloudflare-pages', framework = 'nextjs', indexable = false, analytics = false, ads = false, hsts }) {
   const host = new URL(siteUrl).host;
   const lines = [
-    '# Written by scripts/gen-public-files.mjs (docs/TODO-step-c.md §2). Edit the generator, not this file.',
+    '# Written by scripts/gen-public-files.mjs (internal/docs/TODO-step-c.md §2). Edit the generator, not this file.',
     '/*',
     `  Content-Security-Policy: ${csp({ analytics, ads })}`,
     '  X-Content-Type-Options: nosniff',

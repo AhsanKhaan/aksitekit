@@ -1,7 +1,7 @@
 # Security policy
 
 This policy covers the AK Site Kit template itself: its agents, gates, scripts, workflows and vendored skills. A site
-built from the template has its own policy in its `docs/SECURITY.md`, written by the `secops-reviewer` agent.
+built from the template has its own policy in its `internal/docs/SECURITY.md`, written by the `secops-reviewer` agent.
 
 ## Reporting a vulnerability
 Please report it privately. Don't open a public issue.
@@ -26,7 +26,7 @@ These are targets, not guarantees: the kit is maintained by one person [P].
 ## In scope
 - The gate scripts, hooks and workflows: anything that lets a check pass when it should fail, a secret leak, an
   injection into a workflow, or an action or skill that isn't pinned.
-- A vendored skill under `vendor/skills/` that does more than its review in `docs/SKILLS.md` says (a hidden
+- A vendored skill under `internal/skills/` that does more than its review in `internal/docs/SKILLS.md` says (a hidden
   instruction, a network call, a script). Report it here and to its upstream project.
 - The agents' rules in `CLAUDE.md` and `AGENTS.md`, when following them would cause harm.
 
@@ -38,6 +38,6 @@ These are targets, not guarantees: the kit is maintained by one person [P].
 
 ## How the kit defends itself
 Skills are vendored, pinned to commits at least 7 days old, hash-checked in CI and held to the skills.sh audit rule
-(`docs/SKILLS.md`). GitHub Actions are pinned by commit SHA with least-privilege tokens. Secrets are scanned with
+(`internal/docs/SKILLS.md`). GitHub Actions are pinned by commit SHA with least-privilege tokens. Secrets are scanned with
 gitleaks on every push, code with Semgrep (and CodeQL once the repository is public), dependencies with `npm audit`, and
 every pull request gets a code review.

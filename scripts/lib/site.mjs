@@ -1,4 +1,4 @@
-// Shared by the Step C gate scripts (docs/TODO-step-c.md): the project config, the build output folder, the site's
+// Shared by the Step C gate scripts (internal/docs/TODO-step-c.md): the project config, the build output folder, the site's
 // address and a few HTML readers for the built pages. No dependencies, so any technology's output can be checked.
 //
 // Every gate reads the site from factory.config.json → build.outputDir, never a hard-coded folder.
@@ -55,7 +55,7 @@ export function buildContext(cfg, env = process.env) {
 export const indexable = (env = process.env) => (env.SITE_INDEXABLE || env.NEXT_PUBLIC_INDEXABLE) === 'true';
 
 /**
- * The site's origin, in the same order as scripts/audits/seo-checks.mjs: SITE_URL, NEXT_PUBLIC_SITE_URL, then
+ * The site's origin, in the same order as internal/scripts/audits/seo-checks.mjs: SITE_URL, NEXT_PUBLIC_SITE_URL, then
  * https://project.domain. Without a domain (the template, or a copy before /start) builds use example.com; a
  * production build never does (production-gate.mjs).
  */

@@ -114,8 +114,8 @@ describe('planted registry failures', () => {
 
   it('prefers the research keyword map over the example once it exists', () => {
     const root = plantedRoot();
-    mkdirSync(path.join(root, 'research', 'out'), { recursive: true });
-    writeFileSync(path.join(root, 'research', 'out', 'keyword-map.json'), JSON.stringify({ pages: [] }));
-    expect(() => loadRegistry(root)).toThrow(/no keyword-map row \(research\/out\/keyword-map\.json\)/);
+    mkdirSync(path.join(root, 'internal', 'research', 'out'), { recursive: true });
+    writeFileSync(path.join(root, 'internal', 'research', 'out', 'keyword-map.json'), JSON.stringify({ pages: [] }));
+    expect(() => loadRegistry(root)).toThrow(/no keyword-map row \(internal\/research\/out\/keyword-map\.json\)/);
   });
 });

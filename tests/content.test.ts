@@ -52,7 +52,7 @@ describe('the release rules (planted pages)', () => {
   const page = { url: '/a/b/', sources: [{ title: 'Standard', url: 'https://standards.example/spec' }], intro: ['See [the paper](https://papers.example/x).'] };
 
   it('fails a page without a brief', () => {
-    expect(briefProblems(page, null, 'research/out/briefs/a--b.md')).toEqual(['/a/b/: no brief at research/out/briefs/a--b.md; every page is written from one']);
+    expect(briefProblems(page, null, 'internal/research/out/briefs/a--b.md')).toEqual(['/a/b/: no brief at internal/research/out/briefs/a--b.md; every page is written from one']);
   });
 
   it('fails a source or outside link the brief does not list', () => {
@@ -68,7 +68,7 @@ describe.runIf(RELEASE)('release: the real content', () => {
   });
 
   it.each(pages.map((p) => [p.url]))('%s is written from a brief that lists what it cites', (url) => {
-    const briefPath = `research/out/briefs/${slugOf(url)}.md`;
+    const briefPath = `internal/research/out/briefs/${slugOf(url)}.md`;
     const full = path.join(REPO, briefPath);
     expect(briefProblems(raw(url), existsSync(full) ? readFileSync(full, 'utf8') : null, briefPath)).toEqual([]);
   });

@@ -5,7 +5,7 @@ const PORT = Number(process.env.PORT ?? 4321);
 // End-to-end tests against the built site (factory.config.json → build.outputDir), served by scripts/serve-out.mjs
 // with the _headers rules applied, so CSP problems show up here before they reach a host.
 export default defineConfig({
-  // testDir keeps the scan inside tests/e2e, so other sessions' worktrees (.claude/worktrees/) and vendor/skills/ are
+  // testDir keeps the scan inside tests/e2e, so other sessions' worktrees (.claude/worktrees/) and internal/skills/ are
   // never read. A testIgnore glob for them would match this checkout's own path when it is itself a worktree.
   testDir: 'tests/e2e',
   fullyParallel: true,

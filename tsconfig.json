@@ -21,5 +21,5 @@
     "paths": { "@/*": ["./*"] }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
-  "exclude": ["node_modules", "out", ".next/cache", ".claude/worktrees", "vendor/skills", ".lighthouseci", "playwright-report", "test-results"]
+  "exclude": ["node_modules", "out", ".next/cache", ".claude/worktrees", "internal/skills", ".lighthouseci", "playwright-report", "test-results"]
 }

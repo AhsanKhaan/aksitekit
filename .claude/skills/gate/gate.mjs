@@ -18,13 +18,13 @@ import { redact } from '../../hooks/secret-patterns.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..', '..', '..');
-const LEDGER = path.join(ROOT, 'reports', 'ledger.md');
+const LEDGER = path.join(ROOT, 'internal', 'reports', 'ledger.md');
 const STAGES = JSON.parse(readFileSync(path.join(HERE, 'stages.json'), 'utf8')).stages;
 const RESULTS = ['PASS', 'FAIL', 'BLOCKED', 'SKIPPED'];
 const PLACEHOLDER = /\{\{[A-Z0-9_]+\}\}/;
-const TODO_C = 'docs/TODO-step-c.md';
+const TODO_C = 'internal/docs/TODO-step-c.md';
 
-const IDEA_INPUT = 'research/inputs/idea.md';
+const IDEA_INPUT = 'internal/research/inputs/idea.md';
 
 const abs = (p) => path.join(ROOT, ...p.split('/'));
 const readJson = (p) => JSON.parse(readFileSync(abs(p), 'utf8'));
@@ -71,11 +71,11 @@ function normalizeDomain(d) {
 const DOMAIN = /^(?!-)[a-z0-9-]{1,63}(?:\.[a-z0-9-]{1,63})+$/;
 
 function competitors() {
-  const p = 'research/inputs/competitors.csv';
+  const p = 'internal/research/inputs/competitors.csv';
   if (!existsSync(abs(p))) fail(`${p} is missing`, 'run intake (/start)');
   const rows = parseCsv(readFileSync(abs(p), 'utf8'));
   const header = (rows.shift() || []).map((h) => h.toLowerCase());
-  // `brands` is optional (research/inputs/README.md): the keyword pipeline's brand filter reads it.
+  // `brands` is optional (internal/research/inputs/README.md): the keyword pipeline's brand filter reads it.
   if (!['domain,dr,notes', 'domain,dr,notes,brands'].includes(header.join(','))) {
     fail(`${p} header must be "domain,dr,notes" or "domain,dr,notes,brands", found "${header.join(',')}"`);
   }
@@ -172,7 +172,7 @@ const CHECKS = {
     const domain = normalizeDomain(cfg?.project?.domain);
     if (!DOMAIN.test(domain)) fail('factory.config.json → project.domain is empty or not a domain', 'owner: give the domain');
     const list = competitors();
-    if (list.length === 0) fail('research/inputs/competitors.csv has no competitors', 'owner: list competitors and their DR');
+    if (list.length === 0) fail('internal/research/inputs/competitors.csv has no competitors', 'owner: list competitors and their DR');
     const seen = new Set();
     for (const c of list) {
       if (!DOMAIN.test(c.domain)) fail(`competitor "${c.domain}" is not a domain`);
@@ -183,7 +183,7 @@ const CHECKS = {
     }
     const cfgList = (cfg.competitors || []).map((c) => normalizeDomain(typeof c === 'string' ? c : c.domain)).sort();
     if (cfgList.length && cfgList.join() !== [...seen].sort().join()) {
-      fail('factory.config.json → competitors differs from research/inputs/competitors.csv');
+      fail('factory.config.json → competitors differs from internal/research/inputs/competitors.csv');
     }
     const b = cfg.build || {};
     const framework = String(b.framework || '').trim();
@@ -201,7 +201,7 @@ const CHECKS = {
   'recon-no-copy'() {
     const notes = [];
     for (const c of competitors()) {
-      const p = `research/out/recon/${c.domain}.md`;
+      const p = `internal/research/out/recon/${c.domain}.md`;
       const text = readFileSync(abs(p), 'utf8');
       if (!/https?:\/\//.test(text)) fail(`${p} lists no source URLs (record every public page visited)`);
       const lines = text.split(/\r?\n/);
@@ -216,7 +216,7 @@ const CHECKS = {
 
   'recon-idea'() {
     for (const c of competitors()) {
-      const p = `research/out/recon/${c.domain}.md`;
+      const p = `internal/research/out/recon/${c.domain}.md`;
       const part = sections(readText(p)).find((s) => /against the owner'?s idea/i.test(s.heading));
       if (!part || !part.body.trim()) {
         fail(`${p} has no "## Against the owner's idea" section (how this competitor serves each thing the owner wants visitors to do)`, 'competitor-recon adds it');
@@ -226,10 +226,10 @@ const CHECKS = {
   },
 
   'idea-brief'() {
-    const p = 'docs/IDEA.md';
+    const p = 'internal/docs/IDEA.md';
     const text = readText(p);
     const parts = sections(text);
-    const part = (re, name) => parts.find((s) => re.test(s.heading)) ?? fail(`${p} has no "## ${name}" section`, 'idea-groomer writes it from docs/templates/IDEA.md');
+    const part = (re, name) => parts.find((s) => re.test(s.heading)) ?? fail(`${p} has no "## ${name}" section`, 'idea-groomer writes it from internal/docs/templates/IDEA.md');
     const own = part(/owner'?s idea/i, "1. The owner's idea");
     const jobs = part(/\bjobs\b/i, '2. Visitors and their jobs');
     const cover = part(/coverage/i, '3. Coverage by competitor');
@@ -300,21 +300,21 @@ const CHECKS = {
         fail(`${o} doesn't parse: ${e.message}`);
       }
     }
-    const map = readJson('research/out/keyword-map.json');
+    const map = readJson('internal/research/out/keyword-map.json');
     const rows = Array.isArray(map) ? map : map.pages || [];
     return `keyword map: ${rows.length} URL(s)`;
   },
 
   'content-plan'() {
-    const plan = readJson('research/out/content-plan.json');
-    const map = readJson('research/out/keyword-map.json');
+    const plan = readJson('internal/research/out/content-plan.json');
+    const map = readJson('internal/research/out/keyword-map.json');
     const rows = Array.isArray(map) ? map : map.pages || [];
     const urls = new Set(rows.map((r) => r.url));
     const wave1 = (plan.waves || []).find((w) => w.wave === 1);
     if (!wave1 || !Array.isArray(wave1.urls) || wave1.urls.length === 0) fail('content-plan.json has no wave 1 URLs');
     for (const u of wave1.urls) {
       if (!urls.has(u)) fail(`wave-1 URL ${u} is not in keyword-map.json`);
-      const brief = `research/out/briefs/${briefSlug(u)}.md`;
+      const brief = `internal/research/out/briefs/${briefSlug(u)}.md`;
       if (!existsSync(abs(brief))) fail(`no brief for ${u} (expected ${brief})`);
     }
     const types = [...new Set(rows.map((r) => r.type).filter(Boolean))];
@@ -324,10 +324,10 @@ const CHECKS = {
   },
 
   'growth-plan'() {
-    const plan = readJson('growth/plan.json');
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(plan.start || '')) fail('growth/plan.json → start must be a YYYY-MM-DD date');
+    const plan = readJson('internal/growth/plan.json');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(plan.start || '')) fail('internal/growth/plan.json → start must be a YYYY-MM-DD date');
     const days = plan.days || [];
-    if (days.length !== 90) fail(`growth/plan.json has ${days.length} days; it needs exactly 90`);
+    if (days.length !== 90) fail(`internal/growth/plan.json has ${days.length} days; it needs exactly 90`);
     const statuses = new Set(['todo', 'doing', 'done', 'skipped']);
     days.forEach((d, i) => {
       const where = `day ${i + 1}`;
@@ -351,31 +351,31 @@ const CHECKS = {
 
   'design-md'() {
     // Structure only (google-labs-code/design.md spec, alpha). The official linter and the contrast gate are npm scripts.
-    const text = readFileSync(abs('docs/DESIGN.md'), 'utf8').replace(/\r\n/g, '\n');
+    const text = readFileSync(abs('internal/docs/DESIGN.md'), 'utf8').replace(/\r\n/g, '\n');
     const fm = text.match(/^---\n([\s\S]*?)\n---\n/);
-    if (!fm) fail('docs/DESIGN.md must start with YAML front matter between --- lines');
+    if (!fm) fail('internal/docs/DESIGN.md must start with YAML front matter between --- lines');
     for (const key of ['name', 'colors', 'typography']) {
-      if (!new RegExp(`^${key}:`, 'm').test(fm[1])) fail(`docs/DESIGN.md front matter has no "${key}:"`);
+      if (!new RegExp(`^${key}:`, 'm').test(fm[1])) fail(`internal/docs/DESIGN.md front matter has no "${key}:"`);
     }
     const topKeys = fm[1].split('\n').filter((l) => /^[A-Z]/i.test(l)).map((l) => l.split(':')[0]);
     const dupKey = topKeys.find((k, i) => topKeys.indexOf(k) !== i);
-    if (dupKey) fail(`docs/DESIGN.md front matter repeats the key "${dupKey}"`);
+    if (dupKey) fail(`internal/docs/DESIGN.md front matter repeats the key "${dupKey}"`);
     const order = ['overview|brand & style', 'colors', 'typography', 'layout|layout & spacing', 'elevation & depth|elevation', 'shapes', 'components', "do's and don'ts"];
     const headings = [...text.slice(fm[0].length).matchAll(/^## (.+)$/gm)].map((m) => m[1].trim().toLowerCase());
     const dupHead = headings.find((h, i) => headings.indexOf(h) !== i);
-    if (dupHead) fail(`docs/DESIGN.md repeats the section "## ${dupHead}"`);
+    if (dupHead) fail(`internal/docs/DESIGN.md repeats the section "## ${dupHead}"`);
     let last = -1;
     for (const h of headings) {
       const idx = order.findIndex((o) => o.split('|').includes(h));
       if (idx === -1) continue;
-      if (idx < last) fail(`docs/DESIGN.md section "## ${h}" is out of the spec order`);
+      if (idx < last) fail(`internal/docs/DESIGN.md section "## ${h}" is out of the spec order`);
       last = idx;
     }
     return 'DESIGN.md structure follows the spec';
   },
 
   'code-review-verdict'() {
-    const p = 'reports/code-review.md';
+    const p = 'internal/reports/code-review.md';
     const text = readFileSync(abs(p), 'utf8');
     const verdict = text.match(/^Verdict: (PASS|CHANGES REQUESTED)\s*$/m);
     if (!verdict) fail(`${p} has no "Verdict: PASS" or "Verdict: CHANGES REQUESTED" line`, 'code-reviewer writes it');
@@ -480,7 +480,7 @@ function missingFor(script, scripts, seen = new Set()) {
   const cmd = scripts[script];
   if (cmd === undefined) return [`npm script "${script}" (not in package.json; Phase E adds it)`];
   const missing = [];
-  for (const m of cmd.matchAll(/(?:^|\s)((?:scripts|tests|lib|app)\/[\w./-]+\.(?:mjs|cjs|js|ts))(?=\s|$)/g)) {
+  for (const m of cmd.matchAll(/(?:^|\s)((?:internal\/scripts|scripts|tests|lib|app)\/[\w./-]+\.(?:mjs|cjs|js|ts))(?=\s|$)/g)) {
     if (!existsSync(abs(m[1]))) missing.push(m[1]);
   }
   for (const m of cmd.matchAll(/\bnpm run ([\w:-]+)/g)) missing.push(...missingFor(m[1], scripts, seen));
@@ -493,7 +493,7 @@ function missingFor(script, scripts, seen = new Set()) {
 }
 
 function ownerOf(missing) {
-  if (missing.every((m) => m.startsWith('scripts/research/') || m.startsWith('tests/research/'))) return 'Step B (keyword pipeline)';
+  if (missing.every((m) => m.startsWith('internal/scripts/research/') || m.startsWith('tests/research/'))) return 'Step B (keyword pipeline)';
   if (missing.some((m) => m.startsWith('npm script'))) return 'Phase E (package.json)';
   if (missing.every((m) => m.startsWith('node_modules'))) return 'the owner (npm ci)';
   return `Step C (${TODO_C})`;
@@ -587,7 +587,7 @@ function runStage(stage, opts) {
     if (before.length) process.stdout.write(`warning: earlier stage(s) not passed yet: ${before.map((s) => s.id).join(', ')}\n`);
     for (const need of stage.needs || []) {
       const ok = need.endsWith('/') ? filesIn(need).some((f) => /\.(?:csv|tsv)$/i.test(f)) : existsSync(abs(need));
-      if (!ok) blocked(`${need} is empty`, need.includes('/kp/') ? 'owner: drop Keyword Planner CSVs (one per competitor) in research/inputs/kp/' : `owner: provide ${need}`);
+      if (!ok) blocked(`${need} is empty`, need.includes('/kp/') ? 'owner: drop Keyword Planner CSVs (one per competitor) in internal/research/inputs/kp/' : `owner: provide ${need}`);
     }
     const checkAll = () => {
       checkOutputs(stage);

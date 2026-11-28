@@ -1,7 +1,7 @@
-// gate:adsense (scripts/adsense-gate.mjs) on a planted site: trust pages, no ads before approval, the full ad setup
+// gate:adsense (internal/scripts/adsense-gate.mjs) on a planted site: trust pages, no ads before approval, the full ad setup
 // after it, placeholders, example pages, content floors and policy terms.
 import { describe, expect, it } from 'vitest';
-import { evaluate } from '../../scripts/adsense-gate.mjs';
+import { evaluate } from '../../internal/scripts/adsense-gate.mjs';
 import { ORIGIN, pageHtml, site, withPage } from './site-fixture';
 
 const words = (n: number) => `<p>${Array.from({ length: n }, (_, i) => `word${i % 50}`).join(' ')}</p>`;

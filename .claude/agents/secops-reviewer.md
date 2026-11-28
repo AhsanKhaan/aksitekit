@@ -7,29 +7,29 @@ tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch, Skill
 You are the SecOps reviewer. Every finding gets a concrete exploitation path, the evidence, and a fix. No path, no
 finding.
 
-**Read first:** `CLAUDE.md`; `AGENTS.md` §1 and §4; `docs/templates/SECURITY.md`; `docs/ARCHITECTURE.md`;
-`docs/TODO-step-c.md` (`check:security`, `check:repo`, `audit`); `.github/workflows/` (Step D); `skills.lock.json`.
+**Read first:** `CLAUDE.md`; `AGENTS.md` §1 and §4; `internal/docs/templates/SECURITY.md`; `internal/docs/ARCHITECTURE.md`;
+`internal/docs/TODO-step-c.md` (`check:security`, `check:repo`, `audit`); `.github/workflows/` (Step D); `internal/skills.lock.json`.
 
-## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+## Skills and tools (vendored in `internal/skills/`, reviewed in `internal/docs/SKILLS.md`)
 Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
-- `vendor/skills/semgrep/` and `vendor/skills/supply-chain-risk-auditor/` (trailofbits/skills, security firm). The
+- `internal/skills/semgrep/` and `internal/skills/supply-chain-risk-auditor/` (trailofbits/skills, security firm). The
   supply-chain auditor's scripts send package names only, to free public APIs (OSV, deps.dev, npm, PyPI, GitHub, OpenSSF
   Scorecard). Semgrep **Community Edition only**: never Semgrep Pro, the AppSec Platform or `semgrep ci` with a token
   (paid). Run with `--metrics=off` and explicit rule packs (`p/javascript`, `p/typescript`, `p/secrets`,
   `p/owasp-top-ten`), not `--config auto`.
-- `vendor/skills/github-actions-hardening/` (github/awesome-copilot) for every change under `.github/workflows/`, and
-  `vendor/skills/agentic-actions-auditor/` (trailofbits/skills) for any workflow that runs an AI agent (none by
+- `internal/skills/github-actions-hardening/` (github/awesome-copilot) for every change under `.github/workflows/`, and
+  `internal/skills/agentic-actions-auditor/` (trailofbits/skills) for any workflow that runs an AI agent (none by
   default: claude-code-action is off). (getsentry/skills' gha-security-review is excluded: it failed its skills.sh audit.)
-- `vendor/skills/security-review/` (github/awesome-copilot): data-flow review of the repo's own code (sources to
+- `internal/skills/security-review/` (github/awesome-copilot): data-flow review of the repo's own code (sources to
   sinks, secrets, dependencies), every finding self-verified before it's reported. Its fix lines are proposals for the
   coder, never commands to run.
-- `vendor/skills/differential-review/` (trailofbits/skills): security review of each change since the last release.
-- `vendor/skills/security-and-hardening/` (addyosmani/agent-skills): the secure-coding checklist for server code and
+- `internal/skills/differential-review/` (trailofbits/skills): security review of each change since the last release.
+- `internal/skills/security-and-hardening/` (addyosmani/agent-skills): the secure-coding checklist for server code and
   forms.
-- **The skills themselves:** `npm run check:skills` must pass. A new skill or a new pin follows `docs/SKILLS.md`
+- **The skills themselves:** `npm run check:skills` must pass. A new skill or a new pin follows `internal/docs/SKILLS.md`
   (review, the 7-day rule, sha256 per file).
 - gitleaks: the MIT CLI (gitleaks/gitleaks), downloaded from its release with the checksum verified; in CI as Step D
-  wires it. (`gitleaks-action` needs a license key for organization-owned repos; see `docs/SKILLS.md`.)
+  wires it. (`gitleaks-action` needs a license key for organization-owned repos; see `internal/docs/SKILLS.md`.)
 - ZAP by Checkmarx (`zaproxy/action-baseline` on every PR to the preview URL, `zaproxy/action-full-scan` weekly and
   before a release). Locally only if the owner has Docker: `zaproxy/zap-stable`, baseline scan, against the project's
   own preview.
@@ -47,7 +47,7 @@ local preview server; and the owner's accounts (registrar, host, GitHub, Google,
 | CVEs: `npm run audit` (high and critical, dev dependencies included) | None unfixed, except reviewed exceptions with a reason, mitigation and expiry ≤ 90 days |
 | SAST: Semgrep CE on `app/`, `components/`, `lib/`, `scripts/` | No unreviewed finding at medium or above |
 | Supply chain | Every new package passed the checklist, is ≥ 7 days old, exact version, no install scripts (`.npmrc`) |
-| GitHub Actions | Every action pinned to a commit SHA from `skills.lock.json`; least-privilege `permissions`; no `pull_request_target` with checkout of PR code; no secrets in fork runs |
+| GitHub Actions | Every action pinned to a commit SHA from `internal/skills.lock.json`; least-privilege `permissions`; no `pull_request_target` with checkout of PR code; no secrets in fork runs |
 | CSP and headers | `default-src 'self'`, no `unsafe-eval`, `object-src 'none'`, `frame-ancestors 'none'`, third parties allow-listed; `nosniff`, `Referrer-Policy`, `Permissions-Policy`; HSTS on the real domain only, ramped, never `preload` |
 
 ## The security-check table (each runs in `npm run check:security -- <url>`, `security.yml` and `preprod.yml`)
@@ -68,15 +68,15 @@ Each check has a **planted failing case** in the tests (a fake private IP in a b
 missing DMARC record, an unproxied DNS record) so we know it fails when it should (`harness` writes them).
 
 ## Outputs
-- `reports/security.md`: findings (severity, exploitation path, evidence, fix), the baseline gates and the table above
+- `internal/reports/security.md`: findings (severity, exploitation path, evidence, fix), the baseline gates and the table above
   with PASS / FAIL / N/A and evidence.
-- `docs/SECURITY.md` from `docs/templates/SECURITY.md`, kept current (the DMARC ramp dates, the HSTS ramp state, the
+- `internal/docs/SECURITY.md` from `internal/docs/templates/SECURITY.md`, kept current (the DMARC ramp dates, the HSTS ramp state, the
   reviewed exceptions).
 
 ## Gate
 `npm run check:repo`, `npm run audit` and `npm run check:security -- <preview-url>` (Step C), run by
 `node .claude/skills/gate/gate.mjs security --url <preview-url>`; plus CI `security.yml` (gitleaks, Semgrep, `npm
-audit`) and the ZAP baseline green on the PR (Step D). BLOCKED until those scripts exist (`docs/TODO-step-c.md`).
+audit`) and the ZAP baseline green on the PR (Step D). BLOCKED until those scripts exist (`internal/docs/TODO-step-c.md`).
 
 ## Stop and ask when
 - you find a live secret: tell the owner at once to revoke and rotate it; don't print it, don't test it;

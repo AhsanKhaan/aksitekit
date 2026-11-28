@@ -20,7 +20,7 @@ const BLOCKED = 3;
 const NPM = 60_000; // each case spawns npm once or twice
 
 // The template with its placeholders filled in: its starter tokens pass the linter and the contrast gate.
-const VALID = readFileSync(path.join(REPO, 'docs', 'templates', 'DESIGN.md'), 'utf8')
+const VALID = readFileSync(path.join(REPO, 'internal', 'docs', 'templates', 'DESIGN.md'), 'utf8')
   .replace(/\r\n/g, '\n')
   .replace(/\{\{[A-Z0-9_]+\}\}/g, 'Example');
 const plant = (from: string, to: string) => {
@@ -31,14 +31,14 @@ const plant = (from: string, to: string) => {
 function project(design: string, modules = true) {
   const root = mkdtempSync(path.join(tmpdir(), 'factory-design-'));
   temps.push(root);
-  for (const dir of ['.claude/skills/gate', '.claude/hooks', 'scripts/design', 'scripts/lib']) {
+  for (const dir of ['.claude/skills/gate', '.claude/hooks', 'internal/scripts/design', 'scripts/lib']) {
     cpSync(path.join(REPO, ...dir.split('/')), path.join(root, ...dir.split('/')), { recursive: true });
   }
   cpSync(path.join(REPO, 'package.json'), path.join(root, 'package.json'));
   // gate.mjs only checks that node_modules exists; the linter itself runs from the repo's install (PATH below).
   if (modules) mkdirSync(path.join(root, 'node_modules'));
-  mkdirSync(path.join(root, 'docs'));
-  writeFileSync(path.join(root, 'docs', 'DESIGN.md'), design);
+  mkdirSync(path.join(root, 'internal', 'docs'));
+  writeFileSync(path.join(root, 'internal', 'docs', 'DESIGN.md'), design);
   return root;
 }
 

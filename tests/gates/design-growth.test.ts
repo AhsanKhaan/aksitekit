@@ -1,12 +1,12 @@
-// gate:design (scripts/design/contrast.mjs) and growth:today (scripts/growth/today.mjs), with planted failures.
+// gate:design (internal/scripts/design/contrast.mjs) and growth:today (internal/scripts/growth/today.mjs), with planted failures.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { checkDesign, contrast, frontMatter, parseColor, resolveRef } from '../../scripts/design/contrast.mjs';
-import { streak, today } from '../../scripts/growth/today.mjs';
+import { checkDesign, contrast, frontMatter, parseColor, resolveRef } from '../../internal/scripts/design/contrast.mjs';
+import { streak, today } from '../../internal/scripts/growth/today.mjs';
 
 const REPO = path.resolve(__dirname, '..', '..');
-const template = frontMatter(readFileSync(path.join(REPO, 'docs', 'templates', 'DESIGN.md'), 'utf8'));
+const template = frontMatter(readFileSync(path.join(REPO, 'internal', 'docs', 'templates', 'DESIGN.md'), 'utf8'));
 
 describe('gate:design', () => {
   it('passes the DESIGN.md template: every pair meets WCAG AA', () => {
@@ -81,6 +81,6 @@ describe('growth:today', () => {
 
   it('fails a plan without a start date or days (planted)', () => {
     expect(today({ days: [] }, '2026-10-29').code).toBe(1);
-    expect(today({ start: '2026-10-26', days: [{ ...day(0), task: '' }] }, '2026-10-26')).toEqual({ lines: ['growth:today: day 1 has no task in growth/plan.json'], code: 1 });
+    expect(today({ start: '2026-10-26', days: [{ ...day(0), task: '' }] }, '2026-10-26')).toEqual({ lines: ['growth:today: day 1 has no task in internal/growth/plan.json'], code: 1 });
   });
 });

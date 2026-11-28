@@ -1,4 +1,4 @@
-// Self-test for the workflow helpers, run by ci.yml: each gate fails on a planted case (docs/TODO-step-c.md rule:
+// Self-test for the workflow helpers, run by ci.yml: each gate fails on a planted case (internal/docs/TODO-step-c.md rule:
 // every gate proves it fails when it should). No dependencies.
 //
 //   node .github/scripts/selftest.mjs
@@ -78,7 +78,7 @@ test('preview-url: branch alias and Cloudflare check parsing', () => {
 });
 
 test('site-ready: template mode until a project exists (planted)', () => {
-  const pkg = { scripts: { 'check:repo': 'node scripts/check-repo.mjs', audit: 'node scripts/audit.mjs', lint: 'eslint .', typecheck: 'tsc --noEmit', build: 'node scripts/production-gate.mjs && node scripts/framework.mjs build', 'test:e2e': 'playwright test' } };
+  const pkg = { scripts: { 'check:repo': 'node internal/scripts/check-repo.mjs', audit: 'node internal/scripts/audit.mjs', lint: 'eslint .', typecheck: 'tsc --noEmit', build: 'node scripts/production-gate.mjs && node scripts/framework.mjs build', 'test:e2e': 'playwright test' } };
   const all = () => true;
   const none = () => false;
   assert.deepEqual(scriptFiles('node a.mjs && node scripts/b.js build | node c.mjs'), ['a.mjs', 'scripts/b.js', 'c.mjs']);

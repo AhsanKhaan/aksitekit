@@ -1,4 +1,4 @@
-// The public files that depend on the project and the build (docs/TODO-step-c.md §2), for any technology.
+// The public files that depend on the project and the build (internal/docs/TODO-step-c.md §2), for any technology.
 //
 //   node scripts/gen-public-files.mjs                before the framework (`npm run dev`, `npm run build`): writes
 //                                                    robots.txt, _headers and .well-known/security.txt into

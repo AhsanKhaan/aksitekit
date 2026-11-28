@@ -1,4 +1,4 @@
-// Post-build checks over the built site in build.outputDir, for any technology (docs/TODO-step-c.md §3). Every page:
+// Post-build checks over the built site in build.outputDir, for any technology (internal/docs/TODO-step-c.md §3). Every page:
 // one title and one meta description (each unique), one H1, one self-canonical, an og:image that exists, a favicon
 // link that exists; the link graph: no broken internal links, at least 3 inbound links, at most 3 clicks from home;
 // the sitemap and llms.txt list exactly the published pages; the required files exist; no ad code or ads.txt while

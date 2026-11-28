@@ -1,7 +1,7 @@
-// Content rules shared by the AdSense gate (scripts/adsense-gate.mjs) and the release check (tests/content.test.ts):
+// Content rules shared by the AdSense gate (internal/scripts/adsense-gate.mjs) and the release check (tests/content.test.ts):
 // word floors per page type, AdSense policy-risk terms, and the AI-writing scan. No dependencies.
 
-/** Words in <main> (HANDBOOK §8, docs/SEO-GATE.md §5). Floors, never targets: never pad a page to reach one. */
+/** Words in <main> (HANDBOOK §8, internal/docs/SEO-GATE.md §5). Floors, never targets: never pad a page to reach one. */
 export const FLOORS = { tool: 600, guide: 800, hub: 300, category: 300, instance: 300, home: 300, trust: 200, author: 200 };
 
 /** The trust pages every site needs (AdSense: who runs the site, how to reach them, what data is used). */
@@ -37,9 +37,9 @@ export const INVALID_TRAFFIC = [/\bclick (?:on )?(?:the |our |these |an? )?ads?\
 export const YMYL = /\b(?:mortgages?|loans?|credit scores?|invest(?:ing|ments?)|retirement savings|tax returns?|medications?|dosages?|diagnos[ei]s|symptoms|pregnan\w*|lawsuits?|legal advice)\b/i;
 
 /**
- * The AI-writing scan (check:release). The strongest patterns of vendor/skills/humanizer/SKILL.md, written as fixed
+ * The AI-writing scan (check:release). The strongest patterns of internal/skills/humanizer/SKILL.md, written as fixed
  * phrases and structures: chatbot residue (§22) and knowledge-limit hedges (§23) always count; stock phrases and the
- * overused words (§12, §13, §16, §18, docs/SEO-GATE.md §5), the "not X but Y" frame (§1) and em dashes count when
+ * overused words (§12, §13, §16, §18, internal/docs/SEO-GATE.md §5), the "not X but Y" frame (§1) and em dashes count when
  * they pile up. A pattern list can't prove a person wrote a page; it catches the drafts nobody edited.
  */
 export const AI_PATTERNS = [
@@ -79,7 +79,7 @@ const HTTPS = /https:\/\/[^\s)\]>"'<]+/g;
 const trimUrl = (u) => u.replace(/[.,;:!?]+$/, '');
 
 /**
- * check:release (docs/TODO-step-c.md §3): a page is written from its brief, so the brief exists, and every source the
+ * check:release (internal/docs/TODO-step-c.md §3): a page is written from its brief, so the brief exists, and every source the
  * page cites and every outside link in its text is one the brief lists among the facts to verify. A script can't read
  * claims; it holds the page to the sources its brief was checked against.
  */

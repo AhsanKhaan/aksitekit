@@ -73,10 +73,10 @@ describe('intake gate checks the technology choice', () => {
     cpSync(path.join(REPO, '.claude', 'skills', 'gate'), path.join(root, '.claude', 'skills', 'gate'), { recursive: true });
     cpSync(path.join(REPO, '.claude', 'hooks'), path.join(root, '.claude', 'hooks'), { recursive: true }); // gate.mjs imports secret-patterns.mjs
     cpSync(path.join(REPO, 'package.json'), path.join(root, 'package.json')); // gate.mjs reads the npm script names
-    mkdirSync(path.join(root, 'research', 'inputs'), { recursive: true });
+    mkdirSync(path.join(root, 'internal', 'research', 'inputs'), { recursive: true });
     writeFileSync(path.join(root, 'factory.config.json'), JSON.stringify(baseConfig(build)));
-    writeFileSync(path.join(root, 'research', 'inputs', 'competitors.csv'), csv);
-    if (idea !== null) writeFileSync(path.join(root, 'research', 'inputs', 'idea.md'), idea);
+    writeFileSync(path.join(root, 'internal', 'research', 'inputs', 'competitors.csv'), csv);
+    if (idea !== null) writeFileSync(path.join(root, 'internal', 'research', 'inputs', 'idea.md'), idea);
     return spawnSync(process.execPath, [path.join(root, '.claude', 'skills', 'gate', 'gate.mjs'), 'intake'], { cwd: root, encoding: 'utf8' });
   }
   const nextjs = { framework: 'nextjs', outputDir: 'out', commands: { build: 'next build', dev: 'next dev' } };
@@ -112,7 +112,7 @@ describe('intake gate checks the technology choice', () => {
   test("fails without the owner's idea (planted)", () => {
     const r = intake(nextjs, undefined, null);
     expect(r.status).not.toBe(0);
-    expect(r.stdout + r.stderr).toMatch(/missing or empty: research\/inputs\/idea\.md/);
+    expect(r.stdout + r.stderr).toMatch(/missing or empty: internal\/research\/inputs\/idea\.md/);
   });
   test("fails when the idea's section holds only the template comment (planted)", () => {
     const r = intake(nextjs, undefined, "# The idea\n\n## In the owner's words\n<!-- the owner's answer -->\n\n## Owner answers\n");

@@ -1,6 +1,6 @@
 ---
 name: idea-groomer
-description: Grooms the owner's idea into docs/IDEA.md by matching it against every competitor's recon file - the visitors' jobs, how each competitor covers them, where nobody serves them well, ranked features with evidence, the wave-1 slice, the positioning and the questions only the owner can answer. Use for the idea stage of /start (after recon), or "groom my idea", "what should the site let people do", "refine the idea with the recon".
+description: Grooms the owner's idea into internal/docs/IDEA.md by matching it against every competitor's recon file - the visitors' jobs, how each competitor covers them, where nobody serves them well, ranked features with evidence, the wave-1 slice, the positioning and the questions only the owner can answer. Use for the idea stage of /start (after recon), or "groom my idea", "what should the site let people do", "refine the idea with the recon".
 tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 
@@ -9,28 +9,28 @@ what the competitors already offer. You turn the two into one clear, specific pl
 the keyword, content, architecture and design stages build on. You add detail and evidence; you never replace what
 the owner wants with what you'd prefer.
 
-**Read first:** `CLAUDE.md`; `AGENTS.md` §1 and §4; `research/inputs/idea.md` (the owner's words, and their answers to
-earlier questions); every `research/out/recon/*.md`; `docs/templates/IDEA.md`; `factory.config.json` → `project`,
-`competitors`; `docs/CONTRACT.md` → data formats (the keyword map's page types).
+**Read first:** `CLAUDE.md`; `AGENTS.md` §1 and §4; `internal/research/inputs/idea.md` (the owner's words, and their answers to
+earlier questions); every `internal/research/out/recon/*.md`; `internal/docs/templates/IDEA.md`; `factory.config.json` → `project`,
+`competitors`; `internal/docs/CONTRACT.md` → data formats (the keyword map's page types).
 
-## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+## Skills and tools (vendored in `internal/skills/`, reviewed in `internal/docs/SKILLS.md`)
 Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
-- `vendor/skills/jobs-to-be-done/` (wondelai): turn the idea into job statements ("When [circumstances], I want to
+- `internal/skills/jobs-to-be-done/` (wondelai): turn the idea into job statements ("When [circumstances], I want to
   [progress], so I can [outcome]") with their functional, emotional and social sides, and count doing nothing, a
   spreadsheet or asking a friend as competition too. Jobs come from the owner's words and the recon files, never from
   invented interviews or quotes.
-- `vendor/skills/replica-diff/` (replica-skill, **caution** tier): read the parity scores recon wrote in each file's
+- `internal/skills/replica-diff/` (replica-skill, **caution** tier): read the parity scores recon wrote in each file's
   feature matrix, and use its must, should, could weighting to rank the gaps. Never to plan a copy.
-- `vendor/skills/replica-entrepreneur/` (replica-skill, **caution** tier): its step 4 (fix plan) and step 5 (the angle)
+- `internal/skills/replica-entrepreneur/` (replica-skill, **caution** tier): its step 4 (fix plan) and step 5 (the angle)
   only, run across all competitors' "What readers say" lists to pick the positioning. Never collect reviews yourself:
   recon did that, and its files hold every quote you may use.
 
 ## Inputs
-`research/inputs/idea.md` and the recon files. Nothing from the web: if recon didn't see something, it's an open
+`internal/research/inputs/idea.md` and the recon files. Nothing from the web: if recon didn't see something, it's an open
 question or [U], not a guess.
 
-## Output: `docs/IDEA.md`
-From `docs/templates/IDEA.md`, keeping its nine `## ` headings:
+## Output: `internal/docs/IDEA.md`
+From `internal/docs/templates/IDEA.md`, keeping its nine `## ` headings:
 1. **The owner's idea:** their words from `idea.md` → "In the owner's words", unchanged, as a blockquote; then one
    sentence saying what you understood.
 2. **Visitors and their jobs:** who comes and in what situation; a table of jobs `J1`, `J2`, … Split a broad idea

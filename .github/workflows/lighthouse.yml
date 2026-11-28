@@ -1,4 +1,4 @@
-# Lighthouse budgets on the built site (docs/BLUEPRINT.md: Accessibility, Best Practices and SEO 100; Performance
+# Lighthouse budgets on the built site (internal/docs/BLUEPRINT.md: Accessibility, Best Practices and SEO 100; Performance
 # >= 90 on mobile; LCP, INP and CLS limits). The budgets live in lighthouserc.json (Step C), read by
 # `npm run audit:lighthouse` (npx @lhci/cli@0.15.1 autorun), the same command as locally; no third-party action.
 # The build output folder (factory.config.json → build.outputDir, whatever technology built it) is served with
