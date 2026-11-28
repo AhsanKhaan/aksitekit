@@ -7,6 +7,8 @@
 name: scorecard
 
 on:
+  # Re-score when branch protection changes (the owner's settings steps in SECURITY.md → "Repository settings").
+  branch_protection_rule:
   push:
     branches: [main]
   schedule:

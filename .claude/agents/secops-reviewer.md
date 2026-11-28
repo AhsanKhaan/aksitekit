@@ -67,6 +67,26 @@ Probes only ever target the project's **own** preview or production hosts.
 Each check has a **planted failing case** in the tests (a fake private IP in a bundle, an XSS payload echoed raw, a
 missing DMARC record, an unproxied DNS record) so we know it fails when it should (`harness` writes them).
 
+## Security before code: the plan and the diff
+Security review runs **before** code ships, not only after the site is built: a finding in the plan costs a paragraph,
+the same finding in merged code costs a rewrite and a second review. Two stages come first (`AGENTS.md` §3):
+
+| Stage | When | What you review | Report |
+|---|---|---|---|
+| `security-plan` | after `architecture`, before `design` and any code | `internal/docs/ARCHITECTURE.md`: hosting target, server code or none, data flow, forms and endpoints, headers and CSP, every third party and new dependency (supply-chain checklist), what reaches production (only `build.outputDir`, never `internal/`). Use the threat model above and `security-and-hardening` | `internal/reports/security-plan.md` |
+| `security-diff` | after `code-review`, before the pull request | the branch diff against `origin/main`: Semgrep CE on the changed files (`semgrep scan --metrics=off --baseline-commit origin/main` with the packs above), new secrets, new or bumped dependencies, workflow changes (`github-actions-hardening`), with `differential-review` | `internal/reports/security-diff.md` |
+
+Both reports start with these lines, which `gate.mjs` reads (`security-plan-verdict`, `security-diff-verdict`):
+```text
+Reviewed: <commit SHA of HEAD>        (security-diff only; a review of an older commit is stale)
+Verdict: PASS | CHANGES REQUESTED
+Blockers: <n>
+```
+A blocker is any finding at medium or above without a fix. The coder (or architect, for the plan) fixes it and you
+re-review; never mark a blocker accepted yourself. CI then repeats the scans on the pull request before merge
+(`codeql.yml`, `security.yml`: gitleaks, Semgrep, npm audit; `dependency-review.yml`), so the same issue never reaches
+`main` and gets reviewed twice.
+
 ## Outputs
 - `internal/reports/security.md`: findings (severity, exploitation path, evidence, fix), the baseline gates and the table above
   with PASS / FAIL / N/A and evidence.

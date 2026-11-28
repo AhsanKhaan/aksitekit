@@ -569,6 +569,27 @@
       "notes": "Added: CLAUDE.md requires every GitHub Action to be in this lock."
     },
     {
+      "repo": "actions/dependency-review-action",
+      "url": "https://github.com/actions/dependency-review-action",
+      "kind": "github-action",
+      "tier": "official",
+      "status": "approved-with-limits",
+      "license": "MIT",
+      "purpose": "GitHub first-party: fails a pull request that adds a dependency with a known high or critical vulnerability (dependency-review.yml), on public repositories only",
+      "usedBy": [
+        "secops-reviewer"
+      ],
+      "defaultBranch": "main",
+      "commit": "bbc44d14a204704ccc493733616cd1e93a0321ec",
+      "commitDate": "2026-11-17T22:02:12Z",
+      "reviewed": "2026-11-28",
+      "release": {
+        "tag": "v5.0.1",
+        "commit": "bbc44d14a204704ccc493733616cd1e93a0321ec"
+      },
+      "notes": "A node24 JavaScript action (dist/index.js). Reads the dependency graph through the API; needs no checkout and writes nothing (comment-summary-in-pr: never). Skipped while the repository is private, because dependency review needs GitHub Code Security there (paid)."
+    },
+    {
       "repo": "ossf/scorecard-action",
       "url": "https://github.com/ossf/scorecard-action",
       "kind": "github-action",

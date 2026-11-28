@@ -424,23 +424,55 @@ Your project's settings live in `factory.config.json`. `/start` fills in the pro
 Only you change the thresholds. An agent that thinks one should change asks you first.
 
 ## Project structure
+The repository root holds the website and what building and deploying it needs. Everything that plans, researches,
+checks or documents the site lives under `internal/`, which never reaches production.
+
 ```text
-.claude/agents/       the agents, one file each
-.claude/skills/       /start, /today, /gate, /keyword-pipeline, /deploy-production
-.claude/hooks/        the guard (secrets, pushes to main) and the scan after every edit
-internal/skills/        reviewed outside skills the agents read, hash-checked
-app/, components/,    the Next.js starter site
+app/, components/,     the Next.js starter site (pages, components, helpers, page content)
 lib/, content/
-public/               static files served as they are
-internal/research/inputs/      your idea, Keyword Planner files and competitors.csv
-internal/research/out/         keyword map, briefs and recon (generated)
-scripts/              the checks that decide (keyword pipeline, gates, audits)
-tests/                unit tests (Vitest) and browser tests (tests/e2e, Playwright)
-internal/docs/                 handbook, contract, SEO gate, skills review, document templates
-.github/workflows/    CI, security scans, Lighthouse, pre-production, deploy
-factory.config.json   your project's settings
-internal/skills.lock.json      every outside skill, MCP server and GitHub Action, pinned
+public/                static files the build copies as they are
+scripts/               the build chain: production gate, generated public files, framework runner, check-out, local server
+tests/                 unit tests (Vitest) and browser tests (tests/e2e, Playwright)
+factory.config.json    your project's settings (the build reads them)
+package.json, *.config.*, lighthouserc.json, tsconfig.json
+.github/workflows/     CI, security scans (CodeQL, Semgrep, gitleaks, dependency review, Scorecard), Lighthouse, deploy
+.claude/agents/        the agents, one short file each (Claude Code discovers them only here)
+.claude/skills/        /start, /today, /gate, /keyword-pipeline, /deploy-production, and the gate runner
+.claude/hooks/         the guard (secrets, pushes to main) and the scan after every edit
+CLAUDE.md, AGENTS.md   the rules and the agent map (read by coding agents from the root)
+
+internal/              pipeline, research and gates: never deployed
+  docs/                handbook, contract, blueprint, SEO gate, skills review, templates, and your IDEA/DESIGN/PRD docs
+  research/inputs/     your idea, Keyword Planner files and competitors.csv
+  research/out/        keyword map, briefs and recon (generated)
+  reports/             the ledger and every agent's report (git-ignored)
+  growth/              the 90-day plan (plan.json)
+  scripts/             the checks that decide: keyword pipeline, audits, design contrast, AdSense gate, repo,
+                       security, skills and live checks, the Search Console analyzer
+  skills/              reviewed outside skills the agents read, hash-checked by npm run check:skills
+  skills.lock.json     every outside skill, MCP server and GitHub Action, pinned
+  seo-checks.json, audit-exceptions.json   the gates' settings and reviewed exceptions
 ```
+
+**Why `.claude/` stays where it is.** Claude Code finds agents only in `.claude/agents/` and skills only in
+`.claude/skills/`, so those discovery files stay there, short, and point at `internal/` for everything heavy: the
+vendored skills, the docs, the gate and audit scripts. `.claude/` is a hidden folder and, like `internal/`, is never
+part of the build output.
+
+### What reaches production
+Only the build output folder (`factory.config.json` → `build.outputDir`, `out/` for the Next.js starter) is uploaded:
+Cloudflare Pages deploys that folder (`deploy-pages.yml`), and Workers serves it as static assets
+(`assets.directory` in `wrangler.jsonc`, `deploy-workers.yml`). The static export holds only what `app/` renders
+and what `public/` contains. Four checks keep `internal/` and the repo's own files out of it:
+
+1. `build.outputDir` can't be a source folder (`.`, `internal`, `app`, `public`, `scripts`, ...): every gate refuses
+   it (`scripts/lib/site.mjs`).
+2. `check-out` fails the build if the output holds anything under `internal/`, a project file (`factory.config.json`,
+   `package.json`, `AGENTS.md`, the lock, the ledger, a wrangler config) or a hidden file.
+3. A Workers build also gets an `.assetsignore` (internal, `*.md`, `*.mjs`, `.env*`), so Wrangler skips such files
+   even if one slipped in.
+4. Both deploy workflows run `.github/scripts/assets-boundary.mjs` before uploading: the folder must be the build
+   folder, and on Workers `assets.directory` must equal `build.outputDir`.
 
 ## Keeping your site up to date
 A repository made from a template starts with its own history, so later changes to the kit don't reach your site by

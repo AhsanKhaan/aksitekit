@@ -118,6 +118,18 @@
       "npm": []
     },
     {
+      "id": "security-plan",
+      "agent": "secops-reviewer",
+      "summary": "Security review of the plan before any code: internal/docs/ARCHITECTURE.md, hosting, data flow, headers and CSP, third parties and new dependencies (threat model, the security-and-hardening and supply-chain checklists); Verdict PASS with 0 blockers",
+      "outputs": [
+        "internal/reports/security-plan.md"
+      ],
+      "checks": [
+        "security-plan-verdict"
+      ],
+      "npm": []
+    },
+    {
       "id": "design",
       "agent": "designer",
       "summary": "DESIGN.md in the google-labs-code/design.md format; AA contrast; self-hosted fonts",
@@ -179,6 +191,21 @@
       "npm": [
         "lint",
         "typecheck"
+      ]
+    },
+    {
+      "id": "security-diff",
+      "agent": "secops-reviewer",
+      "summary": "Security review of the branch diff before the pull request: Semgrep on the changed files, secrets, new dependencies and workflow changes (differential-review, semgrep); Verdict PASS with 0 blockers for the current HEAD",
+      "outputs": [
+        "internal/reports/security-diff.md"
+      ],
+      "checks": [
+        "security-diff-verdict"
+      ],
+      "npm": [
+        "check:repo",
+        "audit"
       ]
     },
     {

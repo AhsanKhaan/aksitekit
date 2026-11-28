@@ -84,6 +84,41 @@ describe('code-review stage', () => {
   });
 });
 
+describe('security before code: security-plan and security-diff stages', () => {
+  const plan = (verdict = 'PASS', blockers = 0) => `# Security plan review\nVerdict: ${verdict}\nBlockers: ${blockers}\n\n## Findings\nNone [M].\n`;
+
+  test('a PASS plan review with 0 blockers passes (no commit needed: it reviews the plan)', () => {
+    const r = gate(project({ 'internal/reports/security-plan.md': plan() }), 'security-plan');
+    expect(r.status, r.out).toBe(0);
+    expect(r.out).toMatch(/security plan review PASS, 0 blockers/);
+  });
+
+  test('an open blocker in the plan fails (planted)', () => {
+    const r = gate(project({ 'internal/reports/security-plan.md': plan('CHANGES REQUESTED', 1) }), 'security-plan');
+    expect(r.status).toBe(FAIL);
+    expect(r.out).toMatch(/security plan review: CHANGES REQUESTED, 1 blocker\(s\) open/);
+  });
+
+  test('a PASS diff review of HEAD passes its check; a review of another commit is stale (planted)', () => {
+    const root = project({});
+    const head = commit(root);
+    writeFileSync(path.join(root, 'internal', 'reports', 'security-diff.md'), review(head).replace('# Code review', '# Security diff review'));
+    const ok = gate(root, 'security-diff');
+    expect(ok.status, ok.out).toBe(BLOCKED); // the check passed; the fake project has no npm scripts
+    expect(ok.out).not.toMatch(/blocker\(s\) open|stale|has no/);
+    writeFileSync(path.join(root, 'internal', 'reports', 'security-diff.md'), review('c'.repeat(40)));
+    const stale = gate(root, 'security-diff');
+    expect(stale.status).toBe(FAIL);
+    expect(stale.out).toMatch(/the review is stale/);
+  });
+
+  test('a missing report fails', () => {
+    const r = gate(project({}), 'security-plan');
+    expect(r.status).not.toBe(0);
+    expect(r.out).toMatch(/security-plan\.md/);
+  });
+});
+
 describe('ai-search stage', () => {
   const report = { 'internal/reports/ai-search.md': '# AI search\nNo blockers [M].\n' };
   const llms = '# Example\n\n> Plain answers about examples.\n\n- [Hub](https://example-site.test/hub/)\n';

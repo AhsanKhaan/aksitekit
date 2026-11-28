@@ -50,7 +50,7 @@ Each agent has a file in `.claude/agents/`; its "Skills and tools" section lists
 | 10 | `reconciler` | Keyword map ↔ pages ↔ design ↔ briefs agree; parity vs competitors | `replica-diff` | `internal/reports/reconcile.md` | `npm run check:release`, `npm run audit:unique` |
 | 11 | `seo-auditor` | On-page and technical SEO of the built site, and prose that reads as human | marketingskills `seo-audit`, claude-seo `seo-technical` / `seo-schema` / `seo-sitemap` / `seo-content`, `humanizer` | `internal/reports/seo.md` | `npm run build` (runs `check-out.mjs`) |
 | 12 | `adsense-gatekeeper` | GO / NO-GO on the AdSense gate; never adds ad code | (ported agent) | `internal/reports/adsense.md` | `npm run gate:adsense` |
-| 13 | `secops-reviewer` | The security-check table: secrets, CVEs, SAST, CSP/XSS, CSRF, traversal, rate limits, leaks, CDN-only, email spoofing, and the skills themselves | trailofbits `semgrep` / `supply-chain-risk-auditor` / `agentic-actions-auditor` / `differential-review`, GitHub awesome-copilot `github-actions-hardening` / `security-review`, `security-and-hardening` | `internal/reports/security.md`, `internal/docs/SECURITY.md` | `npm run check:skills`, `npm run check:repo`, `npm run audit`, `npm run check:security -- <url>`; CI `security.yml` (gitleaks, Semgrep), ZAP |
+| 13 | `secops-reviewer` | Security before code (the plan after `architecture`, the branch diff before the PR), then the security-check table: secrets, CVEs, SAST, CSP/XSS, CSRF, traversal, rate limits, leaks, CDN-only, email spoofing, and the skills themselves | trailofbits `semgrep` / `supply-chain-risk-auditor` / `agentic-actions-auditor` / `differential-review`, GitHub awesome-copilot `github-actions-hardening` / `security-review`, `security-and-hardening` | `internal/reports/security-plan.md`, `internal/reports/security-diff.md`, `internal/reports/security.md`, `internal/docs/SECURITY.md` | `gate.mjs security-plan`, `gate.mjs security-diff`, `npm run check:skills`, `npm run check:repo`, `npm run audit`, `npm run check:security -- <url>`; CI `security.yml` (gitleaks, Semgrep), ZAP |
 | 14 | `cloudflare-reviewer` | Free-plan Cloudflare checklist, reads only; **only when the target is Cloudflare** | Cloudflare API MCP (reads), Cloudflare docs MCP | `internal/reports/cloudflare.md` | MCP reads against the checklist; `npm run check:live -- <url>` |
 | 15 | `responsive-checker` | 320–1280 px layouts, touch targets | Vercel `web-design-guidelines` (pinned rules), Playwright MCP | `internal/reports/responsive.md` | `npm run test:e2e` |
 | 16 | `performance-auditor` | Lighthouse budgets and Core Web Vitals | `core-web-vitals`, `accessibility`, cloudflare `web-perf`, Lighthouse CI (official), Chrome DevTools MCP | `internal/reports/performance.md` | `npm run audit:lighthouse`, `audit:perf`, `audit:a11y` |
@@ -74,9 +74,9 @@ question; it never guesses.
   idea ── idea-groomer: the idea × recon ──► internal/docs/IDEA.md ──► owner: APPROVE <hash>
   keywords ── owner drops Keyword Planner CSVs in internal/research/inputs/kp/ ──► ingest → select → cluster
   strategy + growth (90 days)
-  architecture → design ──► owner: APPROVE <hash> for internal/docs/DESIGN.md
+  architecture → security-plan (secops reviews the plan before any code) → design ──► owner: APPROVE <hash> for internal/docs/DESIGN.md
   build + tests
-  code-review (the diff, before any PR)
+  code-review (the diff, before any PR) → security-diff (Semgrep, secrets, dependencies on the diff, before any PR)
   reconcile
   reviews: seo · ai-search · adsense · security · responsive · performance
   preprod: PR to the production branch, preprod.yml green  (+ cloudflare-reviewer when hosting is Cloudflare)
@@ -102,11 +102,13 @@ outputs, runs the npm gates in order, and appends the result to the ledger. Scri
 | strategy | content-strategist | `internal/docs/CONTENT-STRATEGY.md`, `internal/research/out/content-plan.json`, `internal/research/out/briefs/*.md` | `node .claude/skills/gate/gate.mjs strategy` |
 | growth | growth-strategist | `internal/docs/GROWTH-90.md`, `internal/growth/plan.json` | `node .claude/skills/gate/gate.mjs growth`, then `npm run growth:today` (**C**) |
 | architecture | architect | `internal/docs/ARCHITECTURE.md`, `hosting.target` | `node .claude/skills/gate/gate.mjs architecture` |
+| security-plan | secops-reviewer | `internal/reports/security-plan.md` | `node .claude/skills/gate/gate.mjs security-plan` (Verdict PASS, 0 blockers): the plan is reviewed before any code is written |
 | design | designer | `internal/docs/DESIGN.md` | `node .claude/skills/gate/gate.mjs design` (DESIGN.md spec structure), `npm run lint:design` (the official linter, **E**), `npm run gate:design` (**C**) |
 | design-approval | owner | — | the owner types `APPROVE <hash>` for `internal/docs/DESIGN.md` as it is now; recorded with `gate.mjs record design-approval` |
 | build | coder | app code | `node .claude/skills/gate/gate.mjs build` (both approvals still match their files), `npm run verify` (**C**) |
 | tests | harness | `tests/**` | `npm test`, `npm run test:e2e` (**C**) |
 | code-review | code-reviewer | `internal/reports/code-review.md` | `node .claude/skills/gate/gate.mjs code-review` (Verdict PASS, 0 blockers, reviewed SHA = HEAD), `npm run lint`, `npm run typecheck` (**C**) |
+| security-diff | secops-reviewer | `internal/reports/security-diff.md` | `node .claude/skills/gate/gate.mjs security-diff` (Verdict PASS, 0 blockers, reviewed SHA = HEAD), `npm run check:repo`, `npm run audit`; CI repeats it on the PR before merge (`codeql.yml`, `security.yml`, `dependency-review.yml`) |
 | reconcile | reconciler | `internal/reports/reconcile.md` | `npm run check:release`, `npm run audit:unique` (**C**) |
 | seo | seo-auditor | `internal/reports/seo.md` | `npm run build` → `check-out.mjs` (**C**) and `internal/scripts/audits/seo-checks.mjs` (169 checks per page, `internal/docs/SEO-GATE.md`); `npm run audit:seo` |
 | ai-search | ai-search-auditor | `internal/reports/ai-search.md` | `node .claude/skills/gate/gate.mjs ai-search` (`llms.txt` starts with `# <name>`; `robots.txt` follows `bots`), `npm run audit:seo` |

@@ -166,6 +166,32 @@ function checkOutputs(stage) {
 
 // ---------- built-in checks ----------
 
+/**
+ * A reviewer's report decides its stage: "Verdict: PASS" and "Blockers: 0", and with atHead "Reviewed: <SHA>" matching
+ * HEAD, so a review of older code never passes.
+ */
+function reviewVerdict(p, label, reviewer, { atHead }) {
+  const text = readFileSync(abs(p), 'utf8');
+  const verdict = text.match(/^Verdict: (PASS|CHANGES REQUESTED)\s*$/m);
+  if (!verdict) fail(`${p} has no "Verdict: PASS" or "Verdict: CHANGES REQUESTED" line`, `${reviewer} writes it`);
+  const blockers = text.match(/^Blockers: (\d+)\s*$/m);
+  if (!blockers) fail(`${p} has no "Blockers: <n>" line`, `${reviewer} writes it`);
+  let where = '';
+  if (atHead) {
+    const reviewed = text.match(/^Reviewed: ([0-9a-f]{7,40})\s*$/m);
+    if (!reviewed) fail(`${p} has no "Reviewed: <commit SHA>" line`, `${reviewer} writes it`);
+    const git = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' });
+    const head = git.status === 0 ? git.stdout.trim() : '';
+    if (!head) blocked('git rev-parse HEAD failed, so the review can\'t be matched to a commit', 'run the gate inside the git checkout');
+    if (!head.startsWith(reviewed[1])) fail(`${p} reviewed ${reviewed[1].slice(0, 12)}, but HEAD is ${head.slice(0, 12)}: the review is stale`, `${reviewer} re-reviews HEAD`);
+    where = ` at ${head.slice(0, 12)}`;
+  }
+  if (verdict[1] !== 'PASS' || Number(blockers[1]) > 0) {
+    fail(`${label}: ${verdict[1]}, ${blockers[1]} blocker(s) open`, `fix them, then ${reviewer} re-reviews`);
+  }
+  return `${label} PASS${where}, 0 blockers`;
+}
+
 const CHECKS = {
   intake() {
     const cfg = config();
@@ -375,22 +401,17 @@ const CHECKS = {
   },
 
   'code-review-verdict'() {
-    const p = 'internal/reports/code-review.md';
-    const text = readFileSync(abs(p), 'utf8');
-    const verdict = text.match(/^Verdict: (PASS|CHANGES REQUESTED)\s*$/m);
-    if (!verdict) fail(`${p} has no "Verdict: PASS" or "Verdict: CHANGES REQUESTED" line`, 'code-reviewer writes it');
-    const blockers = text.match(/^Blockers: (\d+)\s*$/m);
-    if (!blockers) fail(`${p} has no "Blockers: <n>" line`, 'code-reviewer writes it');
-    const reviewed = text.match(/^Reviewed: ([0-9a-f]{7,40})\s*$/m);
-    if (!reviewed) fail(`${p} has no "Reviewed: <commit SHA>" line`, 'code-reviewer writes it');
-    const git = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' });
-    const head = git.status === 0 ? git.stdout.trim() : '';
-    if (!head) blocked('git rev-parse HEAD failed, so the review can\'t be matched to a commit', 'run the gate inside the git checkout');
-    if (!head.startsWith(reviewed[1])) fail(`${p} reviewed ${reviewed[1].slice(0, 12)}, but HEAD is ${head.slice(0, 12)}: the review is stale`, 'code-reviewer re-reviews HEAD');
-    if (verdict[1] !== 'PASS' || Number(blockers[1]) > 0) {
-      fail(`code review: ${verdict[1]}, ${blockers[1]} blocker(s) open`, 'coder fixes them, then code-reviewer re-reviews');
-    }
-    return `code review PASS at ${head.slice(0, 12)}, 0 blockers`;
+    return reviewVerdict('internal/reports/code-review.md', 'code review', 'code-reviewer', { atHead: true });
+  },
+
+  // Security review of the plan, before any code is written (AGENTS.md §3): docs/ARCHITECTURE.md and the stack.
+  'security-plan-verdict'() {
+    return reviewVerdict('internal/reports/security-plan.md', 'security plan review', 'secops-reviewer', { atHead: false });
+  },
+
+  // Security review of the branch diff (Semgrep, secrets, supply chain), before the pull request (AGENTS.md §3).
+  'security-diff-verdict'() {
+    return reviewVerdict('internal/reports/security-diff.md', 'security diff review', 'secops-reviewer', { atHead: true });
   },
 
   'ai-search-files'() {
