@@ -4,7 +4,7 @@
 //
 //   node internal/scripts/check-repo.mjs
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { closeSync, existsSync, fstatSync, openSync, readFileSync } from 'node:fs';
 import { findSecrets, isSecretPath } from '../../.claude/hooks/secret-patterns.mjs';
 import { isMain } from '../../scripts/lib/site.mjs';
 
@@ -64,6 +64,29 @@ export function supplyChainProblems({ pkg, npmrc, lockfile }) {
   return problems;
 }
 
+/**
+ * A tracked file's text ('' for a binary or oversized file), or null when it's gone from the working tree. One open file
+ * descriptor for the size check and the read, so the file can't be swapped between them (no check-then-use race).
+ */
+export function readTracked(f) {
+  let fd;
+  try {
+    fd = openSync(f, 'r');
+  } catch (e) {
+    if (e?.code === 'ENOENT') return null;
+    throw e;
+  }
+  try {
+    const st = fstatSync(fd);
+    if (!st.isFile()) return '';
+    const name = f.split('/').pop() ?? '';
+    if (st.size > 2 * 1024 * 1024 || !TEXT.test(name) || f === 'package-lock.json') return '';
+    return readFileSync(fd, 'utf8');
+  } finally {
+    closeSync(fd);
+  }
+}
+
 function trackedFiles() {
   const r = spawnSync('git', ['ls-files', '-z'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   if (r.status !== 0) throw new Error(`git ls-files failed: ${r.stderr}`);
@@ -75,17 +98,15 @@ if (isMain(import.meta.url)) {
     const problems = [];
     let scanned = 0;
     for (const f of trackedFiles()) {
-      if (!existsSync(f)) continue; // deleted in the working tree
-      const big = statSync(f).size > 2 * 1024 * 1024;
-      const name = f.split('/').pop();
-      const text = !big && TEXT.test(name) && f !== 'package-lock.json' ? readFileSync(f, 'utf8') : '';
+      const text = readTracked(f);
+      if (text === null) continue; // deleted in the working tree
       if (text.includes('\0')) continue;
       scanned++;
       problems.push(...fileProblems(f, text));
     }
     problems.push(...supplyChainProblems({
       pkg: JSON.parse(readFileSync('package.json', 'utf8')),
-      npmrc: existsSync('.npmrc') ? readFileSync('.npmrc', 'utf8') : '',
+      npmrc: readTracked('.npmrc') ?? '',
       lockfile: existsSync('package-lock.json'),
     }));
     if (problems.length) {

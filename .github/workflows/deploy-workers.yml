@@ -80,6 +80,12 @@ jobs:
           git merge-base --is-ancestor "$sha" "origin/$branch" || fail "the commit is not on the production branch ($branch)"
           git show "$sha:wrangler.jsonc" > /dev/null 2>&1 || git show "$sha:wrangler.json" > /dev/null 2>&1 || git show "$sha:wrangler.toml" > /dev/null 2>&1 \
             || fail "a Workers deploy needs wrangler.jsonc (or .json/.toml) with the static-assets directory; the architect writes it"
+          # Deploy boundary (README → "What reaches production"): assets.directory is build.outputDir, never a source
+          # folder or internal/, read from the commit being deployed.
+          outdir=$(git show "$sha:factory.config.json" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).build?.outputDir||"out"))')
+          wcfg=$(for f in wrangler.jsonc wrangler.json wrangler.toml; do git cat-file -e "$sha:$f" 2>/dev/null && { echo "$f"; break; }; done)
+          git show "$sha:$wcfg" > "$RUNNER_TEMP/$wcfg"
+          node .github/scripts/assets-boundary.mjs --outdir "$outdir" --wrangler "$RUNNER_TEMP/$wcfg" || fail "the static-assets directory is not the build folder (see the message above)"
           { echo "deploy=true"; echo "sha=$sha"; } >> "$GITHUB_OUTPUT"
 
   gates:

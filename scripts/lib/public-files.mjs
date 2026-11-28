@@ -1,6 +1,7 @@
 // The generated public files (internal/docs/TODO-step-c.md §2), as pure functions so the tests can plant failing cases:
 // robots.txt from factory.config.json → bots, the _headers rules (CSP and the security headers), security.txt, and the
 // sitemap and llms.txt built from the pages the build actually wrote.
+import { jsonLdScripts } from './html.mjs';
 import { isHeld, meta, mainOf, textOf, titleOf } from './site.mjs';
 
 // Crawler names (Google, Microsoft, OpenAI, Anthropic, Perplexity and Common Crawl crawler docs; HANDBOOK §8).
@@ -153,8 +154,8 @@ export function securityTxt({ siteUrl, email, now = new Date(), locale = 'en' })
 
 /** dateModified of the page itself in its JSON-LD (YYYY-MM-DD), if any. */
 export function modifiedOf(html) {
-  for (const m of html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)) {
-    const d = m[1].match(/"dateModified"\s*:\s*"(\d{4}-\d{2}-\d{2})/);
+  for (const s of jsonLdScripts(html)) {
+    const d = s.match(/"dateModified"\s*:\s*"(\d{4}-\d{2}-\d{2})/);
     if (d) return d[1];
   }
   return '';
@@ -213,3 +214,22 @@ export function llmsTxt({ name, published }) {
 export const llmsLinks = (text) => [...String(text).matchAll(/\]\((https?:\/\/[^)\s]+)\)/g)].map((m) => m[1]);
 /** <loc> values in a sitemap. */
 export const sitemapLocs = (text) => [...String(text).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(/&amp;/g, '&'));
+
+/**
+ * Wrangler's .assetsignore for a Workers static-assets build, written into build.outputDir after the build
+ * (gen-public-files.mjs, cloudflare-workers only). Defence in depth: the output folder holds only the build, check-out
+ * rule 6 fails on repository files in it, and these patterns keep Wrangler from uploading any that slip in.
+ * README → "What reaches production".
+ */
+export const ASSETS_IGNORE = [
+  '# Never upload repository files (README: What reaches production). Written by scripts/gen-public-files.mjs.',
+  'internal',
+  'internal/**',
+  '*.md',
+  '*.mjs',
+  '.env*',
+  '.dev.vars*',
+  'node_modules',
+  '.git',
+  '',
+].join('\n');

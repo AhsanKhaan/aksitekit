@@ -9,11 +9,23 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { buildContext, builtPages, canonicalsOf, internalLinks, isHeld, isMain, meta, outputDir, readConfig, siteUrl, slashed, tagsOf, headOf, titleOf, walk } from './lib/site.mjs';
 import { llmsLinks, sitemapLocs } from './lib/public-files.mjs';
+import { hostIs, hostsIn } from './lib/html.mjs';
 
 export const REQUIRED_FILES = ['robots.txt', 'sitemap.xml', 'llms.txt', '_headers', '404.html', 'favicon.ico', '.well-known/security.txt'];
-export const AD_PATTERNS = [/adsbygoogle/i, /pagead2\.googlesyndication\.com/i, /googlesyndication\.com\/pagead/i, /doubleclick\.net/i, /googleadservices\.com/i];
+/** Ad-serving domains: a page or script naming any host under them carries ad code (hostname match, never substring). */
+export const AD_HOSTS = ['googlesyndication.com', 'doubleclick.net', 'googleadservices.com'];
+/** What gives ad code away in a text: the AdSense slot class, or a URL on an ad host. Null when there is none. */
+export function adCodeIn(text) {
+  if (/\badsbygoogle\b/i.test(text)) return 'adsbygoogle';
+  for (const host of hostsIn(text)) {
+    const ad = AD_HOSTS.find((d) => hostIs(host, d));
+    if (ad) return host;
+  }
+  return null;
+}
 const MAX_LINKS = 150;
-
+/** Project control files that are never part of a site (rule 6). */
+export const REPO_ONLY_FILES = ['AGENTS.md', 'CLAUDE.md', 'factory.config.json', 'package.json', 'package-lock.json', 'skills.lock.json', 'seo-checks.json', 'audit-exceptions.json', 'wrangler.jsonc', 'wrangler.json', 'wrangler.toml', 'ledger.md'];
 /** All problems for a built site. `files` maps a path inside the output to its text (tests pass a planted site). */
 export function checkSite({ pages, files, origin, adsEnabled = false, production = false }) {
   const problems = [];
@@ -104,13 +116,24 @@ export function checkSite({ pages, files, origin, adsEnabled = false, production
     if (fileExists('ads.txt')) problems.push('ads.txt exists, but AdSense is off (monetization.adsense.enabled)');
     for (const [name, text] of files) {
       if (!/\.(?:html|js|txt|json)$/.test(name)) continue;
-      for (const re of AD_PATTERNS) if (re.test(text)) problems.push(`${name}: ad code (${re.source}) while AdSense is off`);
+      const ad = adCodeIn(text);
+      if (ad) problems.push(`${name}: ad code (${ad}) while AdSense is off`);
     }
   }
 
   // 5. Only site files: no hidden file or folder but .well-known/ (a .gitkeep, .DS_Store or .env would go live).
+  //    .assetsignore at the top is Wrangler's own control file (never uploaded) for Workers static assets.
   for (const name of files.keys()) {
+    if (name === '.assetsignore') continue;
     if (name.split('/').some((part) => part.startsWith('.') && part !== '.well-known')) problems.push(`${name}: a hidden file in the output folder (only .well-known/ is published)`);
+  }
+
+  // 6. No repository files: nothing from internal/ (pipeline, research, reports, vendored skills, gate scripts) and no
+  //    project control file. The deploy uploads this folder as is (README → "What reaches production").
+  for (const name of files.keys()) {
+    const base = name.split('/').pop() ?? '';
+    if (name.split('/')[0] === 'internal') problems.push(`${name}: internal/ content in the output folder (it must never be published)`);
+    else if (REPO_ONLY_FILES.includes(base)) problems.push(`${name}: a repository file in the output folder (it must never be published)`);
   }
   return { problems, stats: { pages: html.size, held: held.size, maxDepth: Math.max(0, ...depth.values()) } };
 }

@@ -61,7 +61,10 @@ describe('afterBuild', () => {
     expect(r.count).toBe(2);
     expect(r.files['sitemap.xml']).toContain('<loc>https://example-site.test/handbook/</loc>');
     expect(r.files['sitemap.xml']).not.toMatch(/held|404/);
-    expect(r.files['llms.txt'].startsWith('# Example Site\n')).toBe(true);
+    expect(r.files['llms.txt']?.startsWith('# Example Site\n')).toBe(true);
+    expect(r.files['.assetsignore']).toBeUndefined(); // Pages: no Wrangler control file
+    const workers = afterBuild({ ...cfg, hosting: { ...cfg.hosting, target: 'cloudflare-workers' } }, { SITE_OUT: out });
+    expect(workers.files['.assetsignore']).toMatch(/^internal\/\*\*$/m);
   });
 
   it('fails when the build wrote no home page', () => {

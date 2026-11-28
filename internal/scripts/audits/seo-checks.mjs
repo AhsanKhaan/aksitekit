@@ -21,6 +21,7 @@
 // SEO_CHECKS_CONFIG=<path>, SEO_CHECKS_FACTORY=<path> and SEO_CHECKS_OUT=<dir> point elsewhere (tests).
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
+import { decodeEntities, elementsOf, htmlText, jsonLdScripts, tokenize } from '../../../scripts/lib/html.mjs';
 import { TEMPLATE_URL } from '../../../scripts/lib/site.mjs';
 
 const args = process.argv.slice(2);
@@ -44,12 +45,19 @@ if (!siteUrl && !flag('--live')) {
 }
 
 // ---------- small HTML helpers (the export is generated, well-formed markup) ----------
-const decode = (s) => s.replace(/&nbsp;|&#160;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#x27;|&#39;|&apos;/g, "'").replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)));
-const BLOCK = /<\/(?:p|li|h[1-6]|td|th|tr|div|section|article|header|footer|nav|main|aside|figcaption|caption|dd|dt|blockquote|pre|summary|label|button|option)>|<br\s*\/?>/gi;
-const textOf = (html, { blocks = false } = {}) => {
-  let h = html.replace(/<(script|style|svg|noscript|template)\b[\s\S]*?<\/\1>/gi, ' ').replace(/<!--[\s\S]*?-->/g, ' ');
-  if (blocks) h = h.replace(BLOCK, ' . ');
-  return decode(h.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+// Text extraction goes through the tokenizer in scripts/lib/html.mjs (no regex HTML filtering), and character
+// references are decoded in one pass, so "&amp;lt;" reads as "&lt;", never "<".
+const decode = decodeEntities;
+const textOf = (html, { blocks = false } = {}) => htmlText(html, { blocks });
+/** Start-tag names of an HTML fragment, outside raw text and outside <template> content. */
+const startTags = (html) => {
+  const names = [];
+  let inTemplate = 0;
+  for (const t of tokenize(html)) {
+    if (t.type === 'start') { if (!inTemplate) names.push(t.name); if (t.name === 'template' && !t.selfClosing) inTemplate++; }
+    else if (t.type === 'end' && t.name === 'template' && inTemplate) inTemplate--;
+  }
+  return names;
 };
 const attrs = (tag) => Object.fromEntries([...tag.matchAll(/([:\w-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g)].slice(1).map((m) => [m[1].toLowerCase(), decode(m[2] ?? m[3] ?? m[4] ?? '')]));
 const tags = (html, name) => [...html.matchAll(new RegExp(`<${name}\\b[^>]*>`, 'gi'))].map((m) => ({ tag: m[0], index: m.index, a: attrs(m[0]) }));
@@ -92,7 +100,7 @@ function loadPage(file) {
   const main = (body.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i) || [, body])[1];
   const meta = (key, val) => tags(head, 'meta').filter((t) => (t.a[key] || '').toLowerCase() === val.toLowerCase());
   const robots = meta('name', 'robots').map((t) => t.a.content.toLowerCase()).join(',');
-  const jsonld = [...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => { try { return { ok: true, data: JSON.parse(m[1]) }; } catch (e) { return { ok: false, error: e.message }; } });
+  const jsonld = jsonLdScripts(html).map((s) => { try { return { ok: true, data: JSON.parse(s) }; } catch (e) { return { ok: false, error: e.message }; } });
   const links = elements(body, 'a').map((e) => ({ ...e, href: e.a.href ?? null, text: textOf(e.inner), alt: tags(e.inner, 'img').map((i) => i.a.alt || '').join(' ') }));
   return {
     file, route, html, head, body, main, robots, jsonld, links,
@@ -103,8 +111,8 @@ function loadPage(file) {
     h1: elements(body, 'h1').map((e) => textOf(e.inner)),
     headings: [...body.matchAll(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi)].map((m) => ({ level: Number(m[1]), text: textOf(m[2]) })),
     images: tags(body, 'img'),
-    scripts: [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].map((m) => ({ a: attrs(`<script ${m[1]}>`), content: m[2], inHead: m.index < headEnd })),
-    styles: [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]),
+    scripts: elementsOf(html, 'script').map((s) => ({ a: attrs(`<script ${s.attrs}>`), content: s.inner, inHead: s.index < headEnd })),
+    styles: elementsOf(html, 'style').map((s) => s.inner),
     text: textOf(body),
     mainText: textOf(main),
     mainBlocks: textOf(main, { blocks: true }),
@@ -202,9 +210,10 @@ check(CT, 'heading-length', 'Heading Length', 'warn', (p) => { const bad = p.hea
 check(CT, 'title-h1-duplicate', 'Title vs H1 Duplication', 'warn', (p) => (p.title[0] ?? '').trim().toLowerCase() !== (p.h1[0] ?? '').trim().toLowerCase() || 'title and H1 are identical');
 check(CT, 'title-pixels', 'Title Pixel Width', 'warn', (p) => { const w = pixelWidth(p.title[0] ?? ''); return w <= T.titleMaxPx || `~${w.toFixed(1)}px (max ${T.titleMaxPx}px)`; });
 check(CT, 'html-structure', 'Broken HTML Structure', 'fail', (p) => {
+  const toks = tokenize(p.body);
   for (const t of ['div', 'section', 'main', 'nav', 'header', 'footer', 'ul', 'ol', 'table', 'article', 'aside', 'form']) {
-    const open = (p.body.match(new RegExp(`<${t}\\b`, 'gi')) || []).length;
-    const close = (p.body.match(new RegExp(`</${t}>`, 'gi')) || []).length;
+    const open = toks.filter((k) => k.type === 'start' && k.name === t).length;
+    const close = toks.filter((k) => k.type === 'end' && k.name === t).length;
     if (open !== close) return `<${t}> opened ${open}, closed ${close}`;
   }
   return (p.html.match(/<body\b/gi) || []).length === 1 || 'more than one <body>';
@@ -249,7 +258,7 @@ check(L, 'descriptive-anchors', 'Descriptive Anchor Text', 'warn', (p) => {
 // is the anchor "Pets1" (found on calculatorporch.com's nav, 2026-10-27). Compare that with the text read tag by tag.
 check(L, 'joined-anchor-text', 'Anchor Text Not Run Together', 'fail', (p) => {
   const joined = p.links.filter((l) => l.href !== null).map((l) => {
-    const raw = decode(l.inner.replace(/<(script|style|svg|noscript|template)\b[\s\S]*?<\/\1>/gi, '').replace(/<[^>]+>/g, '')).replace(/\s+/g, ' ').trim();
+    const raw = htmlText(l.inner, { sep: '' });
     return { href: l.href, raw, spaced: l.text };
   }).filter(({ raw, spaced }) => raw && raw.split(' ').length < spaced.split(' ').length);
   return joined.length === 0 || `${joined.length} link(s) whose text runs together for crawlers: ${joined[0].href} reads "${joined[0].raw}", not "${joined[0].spaced}"`;
@@ -387,7 +396,7 @@ check(M, 'horizontal-scroll', 'No Horizontal Scroll', 'warn', (p) => !/style="[^
 const H = 'html';
 check(H, 'doctype', 'DOCTYPE Declaration', 'fail', (p) => /^\s*<!doctype html>/i.test(p.html) || 'no <!DOCTYPE html>');
 check(H, 'charset', 'Character Encoding', 'fail', (p) => /<meta charset="utf-8"/i.test(p.head) || 'no UTF-8 charset');
-check(H, 'head-elements', 'Valid Head Elements', 'fail', (p) => { const bad = [...p.head.replace(/<(script|style|title|noscript|template)\b[\s\S]*?<\/\1>/gi, '').matchAll(/<([a-z][a-z0-9-]*)\b/gi)].map((m) => m[1].toLowerCase()).filter((t) => !['html', 'head', 'meta', 'link', 'title', 'style', 'script', 'base', 'noscript', 'template'].includes(t)); return bad.length === 0 || `<${bad[0]}> inside <head>`; });
+check(H, 'head-elements', 'Valid Head Elements', 'fail', (p) => { const bad = startTags(p.head).filter((t) => !['html', 'head', 'meta', 'link', 'title', 'style', 'script', 'base', 'noscript', 'template'].includes(t)); return bad.length === 0 || `<${bad[0]}> inside <head>`; });
 check(H, 'noscript-head', 'Noscript in Head', 'warn', (p) => !/<noscript\b/i.test(p.head) || '<noscript> in <head>');
 check(H, 'single-head', 'Single Head Element', 'fail', (p) => (p.html.match(/<head\b/gi) || []).length === 1 || 'head element count ≠ 1');
 check(H, 'html-size', 'HTML Size Limit', 'fail', (p) => Buffer.byteLength(p.html) <= T.htmlMaxMb * 1024 * 1024 || `HTML over ${T.htmlMaxMb} MB`);

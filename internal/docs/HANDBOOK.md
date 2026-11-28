@@ -1,6 +1,6 @@
 # AK Site Kit handbook (technical reference)
 
-Everything about how `aksitekit` works, in detail. To start a website, read the [README](../README.md) first. Built with [Claude Code](https://code.claude.com). Not affiliated with or endorsed by Anthropic.
+Everything about how `aksitekit` works, in detail. To start a website, read the [README](../../README.md) first. Built with [Claude Code](https://code.claude.com). Not affiliated with or endorsed by Anthropic.
 
 A **template repository** that turns keyword research into a deployed, AdSense-ready static website. A team of Claude Code
 agents does the work; deterministic scripts and CI jobs decide whether each step passed. You start a new site from a

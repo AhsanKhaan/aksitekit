@@ -8,6 +8,7 @@ import { cloudflareState, branchAlias, pagesUrls } from './preview-url.mjs';
 import { scriptFiles, siteReady } from './site-ready.mjs';
 import { checkTarget } from './target-url.mjs';
 import { evaluate } from './zap-gate.mjs';
+import { assetsDirectory, boundaryProblems } from './assets-boundary.mjs';
 
 const env = { LIVE_SITE_URL: 'https://example.com', LIVE_PAGES_HOST: 'example-site.pages.dev' };
 
@@ -90,4 +91,23 @@ test('site-ready: template mode until a project exists (planted)', () => {
   assert.equal(siteReady({ config: { project: { domain: 'example.com' } }, pkg: { scripts: {} }, exists: all }).ready, false);
   assert.equal(siteReady({ config: { project: { domain: 'example.com' } }, pkg, exists: none }).ready, false);
   assert.equal(siteReady({ config: { project: { domain: 'example.com' } }, pkg, exists: all }).ready, true); // a real project
+});
+
+test('assets-boundary: only the build folder is uploaded (planted)', () => {
+  assert.deepEqual(boundaryProblems({ outdir: 'out' }), []);
+  assert.match(boundaryProblems({ outdir: 'internal' })[0], /is a source folder/);
+  assert.match(boundaryProblems({ outdir: 'internal/out' })[0], /is a source folder/);
+  assert.match(boundaryProblems({ outdir: '.' })[0], /is a source folder/);
+  const jsonc = '{\n  // the build folder\n  "name": "x", /* c */ "assets": { "directory": "./out/", },\n}\n';
+  assert.equal(assetsDirectory(jsonc, 'wrangler.jsonc'), './out/');
+  assert.deepEqual(boundaryProblems({ outdir: 'out', wranglerText: jsonc, wranglerName: 'wrangler.jsonc' }), []);
+  const root = '{ "assets": { "directory": "." } }';
+  const p = boundaryProblems({ outdir: 'out', wranglerText: root, wranglerName: 'wrangler.json' });
+  assert.match(p[0], /assets\.directory "\." is not build\.outputDir "out"/);
+  assert.match(p[1], /wrangler\.json assets\.directory "\." is a source folder/);
+  assert.match(boundaryProblems({ outdir: 'out', wranglerText: '{ "name": "x" }', wranglerName: 'wrangler.json' })[0], /no assets\.directory/);
+  const toml = 'name = "x"\n\n[assets]\ndirectory = "internal" # wrong\n';
+  assert.equal(assetsDirectory(toml, 'wrangler.toml'), 'internal');
+  assert.match(boundaryProblems({ outdir: 'out', wranglerText: toml, wranglerName: 'wrangler.toml' })[0], /is not build\.outputDir/);
+  assert.match(boundaryProblems({ outdir: 'out', wranglerText: '{ "assets": ', wranglerName: 'wrangler.json' })[0], /doesn't parse/);
 });

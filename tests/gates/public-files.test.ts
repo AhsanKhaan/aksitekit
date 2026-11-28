@@ -1,6 +1,7 @@
 // The generated public files (scripts/lib/public-files.mjs): robots policy, CSP and headers, security.txt, and the
 // sitemap and llms.txt built from the pages. Each rule has a planted case that must fail.
 import { describe, expect, it } from 'vitest';
+import { mentionsHost } from '../../scripts/lib/html.mjs';
 import {
   AI_SEARCH_BOTS, AI_TRAINING_BOTS, ADSENSE_BOTS, SEARCH_BOTS, blocksSite, botPolicyProblems, csp, headersFile, hstsValue,
   llmsTxt, publishedPages, robotsGroups, robotsTxt, securityTxt, sitemapXml,
@@ -54,8 +55,8 @@ describe('_headers and the CSP', () => {
   });
 
   it('allow-lists third parties only when the build turns them on', () => {
-    expect(csp({ analytics: true })).toMatch(/googletagmanager\.com/);
-    expect(csp({ ads: true })).toMatch(/googlesyndication\.com/);
+    expect(mentionsHost(csp({ analytics: true }), 'googletagmanager.com')).toBe(true);
+    expect(mentionsHost(csp({ ads: true }), 'googlesyndication.com')).toBe(true);
   });
 
   it('sends noindex on every non-indexable build and on preview hosts, HSTS on the real domain only', () => {

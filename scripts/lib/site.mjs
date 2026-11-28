@@ -6,6 +6,7 @@
 import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { decodeEntities, elementsOf, htmlText } from './html.mjs';
 
 /** RFC 2606 reserves example.com: the template builds against it until /start sets project.domain. */
 export const TEMPLATE_URL = 'https://example.com';
@@ -30,8 +31,30 @@ const folder = (value, key) => {
 /** Environment variables as the gates read them (process.env, or a planted object in the tests). */
 /** @typedef {Record<string, string | undefined>} Env */
 
+/**
+ * Folders that hold the repository's own source, never a build: the deploy uploads build.outputDir as is, so an output
+ * folder set to one of these (or inside internal/, where the pipeline, research and gate scripts live) would publish
+ * them. README → "What reaches production".
+ */
+export const SOURCE_FOLDERS = ['.', 'internal', 'app', 'components', 'lib', 'content', 'scripts', 'tests', 'public', 'node_modules', '.git', '.github', '.claude'];
+/** A problem with build.outputDir as a deploy boundary, or null. */
+export function outputDirProblem(dir) {
+  const v = String(dir ?? '').replace(/\/+$/, '');
+  const top = v.split('/')[0];
+  if (SOURCE_FOLDERS.includes(v) || top === 'internal' || top === '.git' || top === 'node_modules') {
+    return `factory.config.json → build.outputDir "${v}" is a source folder; the deploy would publish it (use a build folder such as "out" or "dist")`;
+  }
+  return null;
+}
+
 /** The folder the chosen technology builds into (build.outputDir). @param {any} cfg @param {Env} [env] */
-export const outputDir = (cfg, env = process.env) => env.SITE_OUT || folder(cfg.build?.outputDir || 'out', 'build.outputDir');
+export const outputDir = (cfg, env = process.env) => {
+  if (env.SITE_OUT) return env.SITE_OUT;
+  const dir = folder(cfg.build?.outputDir || 'out', 'build.outputDir');
+  const problem = outputDirProblem(dir);
+  if (problem) throw new Error(problem);
+  return dir;
+};
 /** The folder the technology copies into the output as is (Next.js, Astro and Vite: public; Hugo: static). */
 export const publicDir = (cfg) => folder(cfg.build?.publicDir || 'public', 'build.publicDir');
 
@@ -93,12 +116,8 @@ export function builtPages(out) {
 
 // ---------- HTML readers (the output is generated, well-formed markup) ----------
 
-export const decode = (s) => String(s)
-  .replace(/&nbsp;|&#160;/g, ' ')
-  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#x27;|&#39;|&apos;/g, "'")
-  .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
-  .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
-  .replace(/&amp;/g, '&');
+/** Character references decoded in one pass, so "&amp;lt;" stays "&lt;" (scripts/lib/html.mjs). */
+export const decode = decodeEntities;
 
 export function attrs(tag) {
   const out = {};
@@ -108,14 +127,11 @@ export function attrs(tag) {
 
 export const tagsOf = (html, name) => [...html.matchAll(new RegExp(`<${name}\\b[^>]*>`, 'gi'))].map((m) => attrs(m[0].replace(new RegExp(`^<${name}`, 'i'), '')));
 export const headOf = (html) => html.slice(0, Math.max(0, html.search(/<\/head>/i)));
-export const mainOf = (html) => (html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i) ?? [, ''])[1];
+export const mainOf = (html) => elementsOf(html, 'main')[0]?.inner ?? '';
 
-/** Visible text: scripts, styles, SVG and comments removed, block ends kept as spaces. */
+/** Visible text: scripts, styles, SVG and comments removed, tags kept as spaces (the tokenizer in html.mjs). */
 export function textOf(html) {
-  return decode(html
-    .replace(/<(script|style|svg|noscript|template)\b[\s\S]*?<\/\1>/gi, ' ')
-    .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+  return htmlText(html);
 }
 
 export const wordsOf = (text) => String(text).match(/[A-Z0-9][A-Z0-9'’-]*/gi) ?? [];

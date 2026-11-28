@@ -11,6 +11,16 @@
 //   npm run audit:ga -- [https://example.com]        (default: LIVE_SITE_URL, else https://project.domain)
 import { domainOf, isMain, readConfig } from '../../../scripts/lib/site.mjs';
 
+/** A request for the gtag.js loader: host www.googletagmanager.com (parsed, not matched) and path /gtag/js. */
+export function isGtagLoad(url) {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' && u.hostname === 'www.googletagmanager.com' && u.pathname === '/gtag/js';
+  } catch {
+    return false;
+  }
+}
+
 export const SENTINEL = 'aksitekit987654';
 
 /** Every event in captured collect hits, retries removed: [{ en, dl, dr, dt, raw }]. */
@@ -64,7 +74,7 @@ if (isMain(import.meta.url)) {
         hits.push({ url: route.request().url(), body: route.request().postData() });
         await route.abort();
       });
-      ctx.on('request', (r) => { if (/googletagmanager\.com\/gtag\/js/.test(r.url())) loads++; });
+      ctx.on('request', (r) => { if (isGtagLoad(r.url())) loads++; });
       const page = await ctx.newPage();
       const out = await steps(page, () => ({ events: eventsOf(hits), loads }));
       await ctx.close();

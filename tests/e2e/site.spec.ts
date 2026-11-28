@@ -4,6 +4,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
+import { mentionsHost } from '../../scripts/lib/html.mjs';
 
 const REPO = path.resolve(__dirname, '..', '..');
 const factory = JSON.parse(readFileSync(path.join(REPO, 'factory.config.json'), 'utf8'));
@@ -102,7 +103,7 @@ test('the worked example starts from its preset', async ({ page }) => {
 });
 
 const homeHtml = existsSync(path.join(OUT, 'index.html')) ? readFileSync(path.join(OUT, 'index.html'), 'utf8') : '';
-const analyticsBuilt = /googletagmanager\.com\/gtag\/js/.test(homeHtml) || /Cookie settings/.test(homeHtml);
+const analyticsBuilt = mentionsHost(homeHtml, 'googletagmanager.com') || /Cookie settings/.test(homeHtml);
 
 test('without analytics there is no banner, no cookie and no request to Google', async ({ page, context }) => {
   test.skip(analyticsBuilt, 'this build runs analytics; the consent tests below cover it');

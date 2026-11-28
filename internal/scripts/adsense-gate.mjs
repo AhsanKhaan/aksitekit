@@ -13,7 +13,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { builtPages, internalLinks, isHeld, isMain, mainOf, outputDir, readConfig, siteUrl, slashed, textOf } from '../../scripts/lib/site.mjs';
-import { AD_PATTERNS, readOutput } from '../../scripts/check-out.mjs';
+import { adCodeIn, readOutput } from '../../scripts/check-out.mjs';
+import { htmlText, mentionsHost } from '../../scripts/lib/html.mjs';
 import { AUTHOR_PREFIX, FLOORS, INVALID_TRAFFIC, PLACEHOLDER_TEXT, POLICY_RESTRICTED, TRUST_PAGES, YMYL, pageKind } from '../../scripts/lib/content-rules.mjs';
 
 const KEYWORD_MAP = process.env.KEYWORD_MAP || 'internal/research/out/keyword-map.json';
@@ -47,7 +48,7 @@ export function evaluate({ pages, files, cfg, origin, types = new Map() }) {
 
   // 2. Ads: none before approval; the full set once switched on.
   const adsTxt = files.get('ads.txt');
-  const adCode = [...files].filter(([n, t]) => /\.(?:html|js)$/.test(n) && AD_PATTERNS.some((re) => re.test(t))).map(([n]) => n);
+  const adCode = [...files].filter(([n, t]) => /\.(?:html|js)$/.test(n) && adCodeIn(t)).map(([n]) => n);
   if (!enabled) {
     if (adsTxt !== undefined) failures.push('ads.txt exists before AdSense is switched on (monetization.adsense.enabled)');
     if (adCode.length) failures.push(`ad code before AdSense is switched on: ${adCode.slice(0, 5).join(', ')}`);
@@ -60,12 +61,12 @@ export function evaluate({ pages, files, cfg, origin, types = new Map() }) {
     const privacy = live.find((p) => p.route === '/privacy/');
     if (privacy && !/advertis/i.test(textOf(mainOf(privacy.html)))) failures.push('/privacy/ doesn\'t describe advertising cookies, but ads are on');
     const headers = files.get('_headers') ?? '';
-    if (!/googlesyndication\.com/.test(headers)) failures.push('_headers: the CSP doesn\'t allow the AdSense hosts, so ads would be blocked');
+    if (!mentionsHost(headers, 'googlesyndication.com')) failures.push('_headers: the CSP doesn\'t allow the AdSense hosts, so ads would be blocked');
   }
 
   // 3. No placeholders, no example pages.
   for (const p of live) {
-    const text = textOf(p.html.replace(/<head\b[\s\S]*?<\/head>/i, ''));
+    const text = htmlText(p.html, { drop: ['head'] });
     const m = text.match(PLACEHOLDER_TEXT);
     if (m) failures.push(`${p.route}: placeholder text "${m[0]}"`);
     if (/\bdata-example-page\b/.test(p.html)) failures.push(`${p.route}: a template example page; AdSense reviews real content only`);

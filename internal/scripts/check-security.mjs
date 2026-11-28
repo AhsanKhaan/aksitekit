@@ -135,10 +135,31 @@ export function resourcesOutsideCsp(html, cspValue, self) {
 
 // eslint-disable-next-line no-script-url -- an XSS test payload sent to the live site, never run here
 export const XSS_PAYLOADS = ['"><script>alert(1)</script>', "'><img src=x onerror=alert(1)>", '" onmouseover="alert(1)', 'javascript:alert(1)//'];
-/** A payload echoed back unescaped (the tag or handler survives as markup). */
+/** What makes a payload dangerous when it comes back verbatim: a tag, an event handler or a script URL. */
+// eslint-disable-next-line no-script-url -- a marker to look for in the payloads above, never run
+const XSS_MARKERS = ['<script', '<img', 'onerror=', 'onmouseover=', 'javascript:'];
+/** A payload echoed back unescaped (the tag or handler survives as markup). Plain substring checks, no HTML regex. */
 export function xssEchoed(body, payload) {
-  if (!body.includes(payload)) return false;
-  return /<script>|<img |onerror=|onmouseover=|javascript:/.test(payload);
+  if (!String(body).includes(payload)) return false;
+  const p = String(payload).toLowerCase();
+  return XSS_MARKERS.some((m) => p.includes(m));
+}
+
+/**
+ * What a probe may send, from factory.config.json: a DNS name (the project domain, a DKIM selector's record) and an
+ * endpoint path on the project's own host. Anything else in the config is refused before a request is made, so no
+ * other file content can reach the network.
+ */
+export const DNS_NAME = /^(?=.{1,253}$)(?!-)[\w-]{1,63}(?:\.(?!-)[\w-]{1,63})+$/;
+export const DNS_LABEL = /^(?!-)[\w-]{1,63}$/;
+export const DNS_TYPES = ['A', 'AAAA', 'MX', 'TXT', 'CAA', 'DS', 'DNSKEY', 'NS'];
+export const ENDPOINT = /^\/[\w.~/-]*$/;
+/** A problem with an endpoint path from security.endpoints, or null. */
+export function endpointProblem(ep) {
+  const s = String(ep ?? '');
+  const segments = s.split('/').slice(1, s.endsWith('/') ? -1 : undefined);
+  if (s.length > 200 || !ENDPOINT.test(s) || segments.some((seg) => seg === '' || seg === '..' || seg === '.')) return `security.endpoints: "${s.slice(0, 60)}" is not a plain path on this site (/a/b, letters, digits, . _ ~ -)`;
+  return null;
 }
 
 export const TRAVERSAL_PROBES = ['/..%2f..%2f..%2fetc%2fpasswd', '/%2e%2e/%2e%2e/etc/passwd', '/..;/..;/etc/passwd', '/%252e%252e/%252e%252e/etc/passwd', '/..%5c..%5cwindows%5cwin.ini', '/....//....//etc/passwd'];
@@ -243,6 +264,7 @@ const fetchText = async (url, init = {}) => {
   return { res, h: headersOf(res), body: /text|html|xml|json|javascript/.test(type) ? await res.text() : (await res.arrayBuffer(), '') };
 };
 const doh = async (name, type) => {
+  if (!DNS_NAME.test(name) || !DNS_TYPES.includes(type)) throw new Error(`refusing a DNS lookup for "${String(name).slice(0, 60)}" (${type}): not a DNS name and record type`);
   const r = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${type}`, { headers: { accept: 'application/dns-json' } });
   return (await r.json()).Answer ?? [];
 };
@@ -326,6 +348,8 @@ export async function run(args, env = process.env) {
   const burst = burstProblems(statuses);
   check(!burst.length, `rate limiting: ${n} requests in about ${Math.ceil(n / 10)} s, no 5xx (${statuses.filter((s) => s === 429).length} answered 429)`, burst);
   for (const ep of cfg.security?.endpoints ?? []) {
+    const bad = endpointProblem(ep);
+    if (bad) { check(false, 'rate limiting on a configured endpoint', [bad]); continue; }
     const eps = [];
     for (let i = 0; i < n; i++) eps.push(await fetch(`${base}${ep}`, { method: 'POST', headers: { 'user-agent': UA } }).then((r) => r.status, () => 0));
     const p = burstProblems(eps, { endpoint: true });
@@ -339,7 +363,9 @@ export async function run(args, env = process.env) {
     const cdn = [cdnProblem(home.h, 'the home page'), cdnProblem(robots.h, 'robots.txt'), cdnProblem(missing.h, 'the 404 page')].filter(Boolean);
     check(!cdn.length, 'every response comes through Cloudflare (server: cloudflare, cf-ray)', cdn);
   }
-  const domain = domainOf(cfg);
+  const configured = domainOf(cfg);
+  const domain = DNS_NAME.test(configured) ? configured : '';
+  if (configured && !domain) check(false, 'project.domain is a DNS name', [`factory.config.json → project.domain "${configured.slice(0, 60)}" is not a DNS name: DNS and email checks skipped`]);
   const host = new URL(base).hostname;
   const ownDomain = domain && (host === domain || host === `www.${domain}`);
   if (cloudflare && ownDomain && !flag('--no-dns')) {
@@ -361,7 +387,10 @@ export async function run(args, env = process.env) {
   if (domain && !local && !flag('--no-email')) {
     const email = cfg.email ?? {};
     const dkim = {};
-    for (const s of email.dkimSelectors ?? []) dkim[s] = txt(await doh(`${s}._domainkey.${domain}`, 'TXT')).some((t) => /p=\S+/.test(t));
+    const selectors = (email.dkimSelectors ?? []).map(String);
+    const badSelectors = selectors.filter((s) => !DNS_LABEL.test(s));
+    if (badSelectors.length) check(false, 'email.dkimSelectors are DNS labels', badSelectors.map((s) => `"${s.slice(0, 60)}" is not a DNS label (letters, digits, - and _)`));
+    for (const s of selectors.filter((x) => DNS_LABEL.test(x))) dkim[s] = txt(await doh(`${s}._domainkey.${domain}`, 'TXT')).some((t) => /p=\S+/.test(t));
     const problems = emailProblems({
       spf: txt(await doh(domain, 'TXT')),
       mx: (await doh(domain, 'MX')).filter((a) => a.type === 15).map((a) => a.data),

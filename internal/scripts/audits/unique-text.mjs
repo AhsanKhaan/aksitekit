@@ -7,15 +7,14 @@
 //
 //   node internal/scripts/audits/unique-text.mjs           content pages (two or more URL segments) in build.outputDir
 //   node internal/scripts/audits/unique-text.mjs --all     every page
-import { builtPages, decode, isMain, mainOf, outputDir, readConfig } from '../../../scripts/lib/site.mjs';
+import { htmlText } from '../../../scripts/lib/html.mjs';
+import { builtPages, isMain, mainOf, outputDir, readConfig } from '../../../scripts/lib/site.mjs';
 
 export const THRESHOLD = 30;
 
 export function pageWords(html) {
   const main = mainOf(html) || html;
-  return decode(main
-    .replace(/<(script|style|svg|nav|aside|form|template)\b[\s\S]*?<\/\1>/gi, ' ')
-    .replace(/<[^>]+>/g, ' '))
+  return htmlText(main, { drop: ['nav', 'aside', 'form'] })
     .toLowerCase().replace(/[^a-z0-9%./]+/g, ' ').split(' ').filter(Boolean);
 }
 
