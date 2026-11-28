@@ -24,7 +24,7 @@ function project(files: Record<string, string>, bots: Record<string, string> = {
   cpSync(path.join(REPO, 'package.json'), path.join(root, 'package.json')); // gate.mjs reads the npm script names
   const cfg = { project: { name: 'Example', domain: 'example-site.test' }, hosting: { target: 'cloudflare-pages' }, build: { outputDir: 'out' }, bots };
   writeFileSync(path.join(root, 'factory.config.json'), JSON.stringify(cfg));
-  mkdirSync(path.join(root, 'reports'), { recursive: true });
+  mkdirSync(path.join(root, 'internal', 'reports'), { recursive: true });
   for (const [rel, text] of Object.entries(files)) {
     mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
     writeFileSync(path.join(root, rel), text);
@@ -51,7 +51,7 @@ describe('code-review stage', () => {
   test('a PASS review of HEAD with 0 blockers passes the check', () => {
     const root = project({});
     const head = commit(root);
-    writeFileSync(path.join(root, 'reports', 'code-review.md'), review(head));
+    writeFileSync(path.join(root, 'internal', 'reports', 'code-review.md'), review(head));
     const r = gate(root, 'code-review');
     expect(r.status, r.out).toBe(BLOCKED);
     expect(r.out).not.toMatch(/blocker\(s\) open|stale|has no/);
@@ -60,7 +60,7 @@ describe('code-review stage', () => {
   test('open blockers fail (planted)', () => {
     const root = project({});
     const head = commit(root);
-    writeFileSync(path.join(root, 'reports', 'code-review.md'), review(head, 'CHANGES REQUESTED', 2));
+    writeFileSync(path.join(root, 'internal', 'reports', 'code-review.md'), review(head, 'CHANGES REQUESTED', 2));
     const r = gate(root, 'code-review');
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/CHANGES REQUESTED, 2 blocker\(s\) open/);
@@ -69,14 +69,14 @@ describe('code-review stage', () => {
   test('a review of another commit is stale (planted)', () => {
     const root = project({});
     commit(root);
-    writeFileSync(path.join(root, 'reports', 'code-review.md'), review('c'.repeat(40)));
+    writeFileSync(path.join(root, 'internal', 'reports', 'code-review.md'), review('c'.repeat(40)));
     const r = gate(root, 'code-review');
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/the review is stale/);
   });
 
   test('a report without the verdict lines fails (planted)', () => {
-    const root = project({ 'reports/code-review.md': '# Code review\nLooks good to me.\n' });
+    const root = project({ 'internal/reports/code-review.md': '# Code review\nLooks good to me.\n' });
     commit(root);
     const r = gate(root, 'code-review');
     expect(r.status).toBe(FAIL);
@@ -84,8 +84,43 @@ describe('code-review stage', () => {
   });
 });
 
+describe('security before code: security-plan and security-diff stages', () => {
+  const plan = (verdict = 'PASS', blockers = 0) => `# Security plan review\nVerdict: ${verdict}\nBlockers: ${blockers}\n\n## Findings\nNone [M].\n`;
+
+  test('a PASS plan review with 0 blockers passes (no commit needed: it reviews the plan)', () => {
+    const r = gate(project({ 'internal/reports/security-plan.md': plan() }), 'security-plan');
+    expect(r.status, r.out).toBe(0);
+    expect(r.out).toMatch(/security plan review PASS, 0 blockers/);
+  });
+
+  test('an open blocker in the plan fails (planted)', () => {
+    const r = gate(project({ 'internal/reports/security-plan.md': plan('CHANGES REQUESTED', 1) }), 'security-plan');
+    expect(r.status).toBe(FAIL);
+    expect(r.out).toMatch(/security plan review: CHANGES REQUESTED, 1 blocker\(s\) open/);
+  });
+
+  test('a PASS diff review of HEAD passes its check; a review of another commit is stale (planted)', () => {
+    const root = project({});
+    const head = commit(root);
+    writeFileSync(path.join(root, 'internal', 'reports', 'security-diff.md'), review(head).replace('# Code review', '# Security diff review'));
+    const ok = gate(root, 'security-diff');
+    expect(ok.status, ok.out).toBe(BLOCKED); // the check passed; the fake project has no npm scripts
+    expect(ok.out).not.toMatch(/blocker\(s\) open|stale|has no/);
+    writeFileSync(path.join(root, 'internal', 'reports', 'security-diff.md'), review('c'.repeat(40)));
+    const stale = gate(root, 'security-diff');
+    expect(stale.status).toBe(FAIL);
+    expect(stale.out).toMatch(/the review is stale/);
+  });
+
+  test('a missing report fails', () => {
+    const r = gate(project({}), 'security-plan');
+    expect(r.status).not.toBe(0);
+    expect(r.out).toMatch(/security-plan\.md/);
+  });
+});
+
 describe('ai-search stage', () => {
-  const report = { 'reports/ai-search.md': '# AI search\nNo blockers [M].\n' };
+  const report = { 'internal/reports/ai-search.md': '# AI search\nNo blockers [M].\n' };
   const llms = '# Example\n\n> Plain answers about examples.\n\n- [Hub](https://example-site.test/hub/)\n';
   const openRobots = 'User-agent: *\nAllow: /\n\nUser-agent: GPTBot\nDisallow: /\n';
 

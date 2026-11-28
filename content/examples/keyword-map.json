@@ -1,5 +1,5 @@
 {
-  "$comment": "The template's example keyword map: CLEARLY FAKE DATA, not research. lib/registry.ts uses it only while research/out/keyword-map.json doesn't exist, so the starter builds one page of each type. The pages describe the kit itself, so no niche is implied. The keyword stage writes the real map; then delete content/examples/ and every content file marked \"example\": true (production-gate.mjs fails a production build until you do).",
+  "$comment": "The template's example keyword map: CLEARLY FAKE DATA, not research. lib/registry.ts uses it only while internal/research/out/keyword-map.json doesn't exist, so the starter builds one page of each type. The pages describe the kit itself, so no niche is implied. The keyword stage writes the real map; then delete content/examples/ and every content file marked \"example\": true (production-gate.mjs fails a production build until you do).",
   "pendingKd": 0,
   "pages": [
     {

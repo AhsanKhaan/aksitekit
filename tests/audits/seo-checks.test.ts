@@ -1,4 +1,4 @@
-// On-page SEO gate (scripts/audits/seo-checks.mjs, docs/SEO-GATE.md): a clean fake site passes, and each planted
+// On-page SEO gate (internal/scripts/audits/seo-checks.mjs, internal/docs/SEO-GATE.md): a clean fake site passes, and each planted
 // problem fails its own check. The fixtures are small fake sites written in the test; every page in them is fake data.
 import { afterAll, describe, expect, test } from 'vitest';
 import { spawnSync } from 'node:child_process';
@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const SCRIPT = fileURLToPath(new URL('../../scripts/audits/seo-checks.mjs', import.meta.url));
+const SCRIPT = fileURLToPath(new URL('../../internal/scripts/audits/seo-checks.mjs', import.meta.url));
 const SITE = 'https://example.test';
 const roots: string[] = [];
 afterAll(() => roots.forEach((r) => rmSync(r, { recursive: true, force: true })));

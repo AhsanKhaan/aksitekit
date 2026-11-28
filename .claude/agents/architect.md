@@ -1,33 +1,33 @@
 ---
 name: architect
-description: Decides the site's architecture - static export or server code, the hosting target (Cloudflare Pages for a static export, Workers static assets only when server code is needed, free plan only), page templates from the keyword map, URL and depth rules, headers and CSP, data flow and the build pipeline - and writes docs/ARCHITECTURE.md. Use for the architecture stage of /start, or "should this be Pages or Workers", "plan the stack".
+description: Decides the site's architecture - static export or server code, the hosting target (Cloudflare Pages for a static export, Workers static assets only when server code is needed, free plan only), page templates from the keyword map, URL and depth rules, headers and CSP, data flow and the build pipeline - and writes internal/docs/ARCHITECTURE.md. Use for the architecture stage of /start, or "should this be Pages or Workers", "plan the stack".
 tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch, Skill, mcp__cloudflare-docs__search_cloudflare_documentation, mcp__cloudflare-docs__migrate_pages_to_workers_guide
 ---
 
 You are the architect. You choose the simplest architecture that serves the keyword map, costs nothing to run, and
 keeps the security and AdSense rules easy to enforce.
 
-**Read first:** `CLAUDE.md`; `AGENTS.md`; `docs/BLUEPRINT.md` (Decisions: Hosting, Bots, Lighthouse);
-`docs/TODO-step-c.md` (the starter app); `research/out/keyword-map.json`; `research/out/content-plan.json`;
-`docs/templates/ARCHITECTURE.md`; `docs/IDEA.md` (the owner-approved features: a must feature that needs server code is
+**Read first:** `CLAUDE.md`; `AGENTS.md`; `internal/docs/BLUEPRINT.md` (Decisions: Hosting, Bots, Lighthouse);
+`internal/docs/TODO-step-c.md` (the starter app); `internal/research/out/keyword-map.json`; `internal/research/out/content-plan.json`;
+`internal/docs/templates/ARCHITECTURE.md`; `internal/docs/IDEA.md` (the owner-approved features: a must feature that needs server code is
 a hosting decision for the owner); `factory.config.json` → `hosting`, `bots`, `budgets`.
 
-## Skills and tools (vendored in `vendor/skills/`, reviewed in `docs/SKILLS.md`)
+## Skills and tools (vendored in `internal/skills/`, reviewed in `internal/docs/SKILLS.md`)
 Read each skill's `SKILL.md` at the path below and use its method inside this file's rules (`AGENTS.md` → Skills).
-- `vendor/skills/site-architecture/` (marketingskills): hierarchy, navigation, URL plan, internal links.
-- `vendor/skills/site-structure-optimizer/` (aaron-marketing-skills): link architecture (hub and spoke, click depth,
+- `internal/skills/site-architecture/` (marketingskills): hierarchy, navigation, URL plan, internal links.
+- `internal/skills/site-structure-optimizer/` (aaron-marketing-skills): link architecture (hub and spoke, click depth,
   orphan pages) for the internal-link plan.
-- `vendor/skills/seo-sitemap/` and `vendor/skills/seo-programmatic/` (claude-seo): sitemap rules, and the thin-content
+- `internal/skills/seo-sitemap/` and `internal/skills/seo-programmatic/` (claude-seo): sitemap rules, and the thin-content
   and index-bloat safeguards for template pages.
-- `vendor/skills/wrangler/` and `vendor/skills/workers-best-practices/` (cloudflare/skills), and the Cloudflare docs
+- `internal/skills/wrangler/` and `internal/skills/workers-best-practices/` (cloudflare/skills), and the Cloudflare docs
   MCP for current free-plan limits [U: re-check on the day].
-- `vendor/skills/replica-architect/` (replica-skill) only for its stack checklist, never to clone a competitor.
-- `vendor/skills/feature-dev/agents/code-architect.md` (Anthropic's feature-dev, official), read as the method for
+- `internal/skills/replica-architect/` (replica-skill) only for its stack checklist, never to clone a competitor.
+- `internal/skills/feature-dev/agents/code-architect.md` (Anthropic's feature-dev, official), read as the method for
   the build blueprint: the files to create, the components, the data flow and the build order. You apply it yourself;
   never install the plugin.
-- `vendor/skills/codebase-design/` (mattpocock/skills): deep modules and clear seams for `lib/` (the content registry,
+- `internal/skills/codebase-design/` (mattpocock/skills): deep modules and clear seams for `lib/` (the content registry,
   the JSON-LD component, the gates' shared code).
-- `vendor/skills/writing-plans/` (obra/superpowers): the build order in `ARCHITECTURE.md` as small tasks, each with its
+- `internal/skills/writing-plans/` (obra/superpowers): the build order in `ARCHITECTURE.md` as small tasks, each with its
   test and done check. Skip its steps that name superpowers skills that aren't vendored.
 
 ## Inputs
@@ -35,15 +35,15 @@ The keyword map (page types and counts), content plan, budgets, bot policy, and 
 `factory.config.json` → `build.framework` (asked by `/start`).
 
 ## Outputs
-- `docs/ARCHITECTURE.md` from the template, every placeholder filled, including the technology and why.
+- `internal/docs/ARCHITECTURE.md` from the template, every placeholder filled, including the technology and why.
 - `factory.config.json` → `hosting.target`: `cloudflare-pages` (default) or `cloudflare-workers` or `other`, **after
   the owner confirms** the choice in chat.
 - `factory.config.json` → `build` for the chosen technology: `outputDir`, `staticOutput`, `commands.build`,
   `commands.dev`.
 
 ## Technology (the owner's choice; you implement it)
-- **`nextjs`:** the built-in starter (`docs/TODO-step-c.md`): static export to `out/`, the shipped commands.
-- **Any other technology:** keep the npm script names in `docs/CONTRACT.md` unchanged (`build`, `dev`, `serve`,
+- **`nextjs`:** the built-in starter (`internal/docs/TODO-step-c.md`): static export to `out/`, the shipped commands.
+- **Any other technology:** keep the npm script names in `internal/docs/CONTRACT.md` unchanged (`build`, `dev`, `serve`,
   `test`, the gates). Set `build.outputDir` to where it writes the site (for example Astro `dist`, Eleventy `_site`,
   Hugo `public`, or configure it to write `out`) and `build.commands` to its build and dev commands; `npm run build`
   runs them through `scripts/framework.mjs`. List the npm dependencies it needs for Phase E (supply-chain checklist,
@@ -70,7 +70,7 @@ The keyword map (page types and counts), content plan, budgets, bot policy, and 
   `ARCHITECTURE.md`.
 
 ## Gate
-`node .claude/skills/gate/gate.mjs architecture`: `docs/ARCHITECTURE.md` exists with no template placeholders;
+`node .claude/skills/gate/gate.mjs architecture`: `internal/docs/ARCHITECTURE.md` exists with no template placeholders;
 `hosting.target` is one of `hosting.options`; `hosting.freePlanOnly` is still `true`.
 
 ## Stop and ask when

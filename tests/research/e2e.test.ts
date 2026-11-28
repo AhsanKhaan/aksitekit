@@ -1,17 +1,17 @@
-// End to end on the fake examples: research/inputs/examples/ copied into a temp project, never the real inputs.
+// End to end on the fake examples: internal/research/inputs/examples/ copied into a temp project, never the real inputs.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { checkMap } from '../../scripts/research/lib/cluster.mjs';
+import { checkMap } from '../../internal/scripts/research/lib/cluster.mjs';
 import { REPO, cleanupProjects, readOut, readOutJson, run, tempProject } from './helpers';
 
-const EXAMPLES = join(REPO, 'research', 'inputs', 'examples');
+const EXAMPLES = join(REPO, 'internal', 'research', 'inputs', 'examples');
 let root: string;
 
 beforeAll(() => {
   root = tempProject({});
-  cpSync(EXAMPLES, join(root, 'research', 'inputs'), { recursive: true });
+  cpSync(EXAMPLES, join(root, 'internal', 'research', 'inputs'), { recursive: true });
 });
 afterAll(cleanupProjects);
 
@@ -93,8 +93,8 @@ describe('ingest → select → cluster on the fake examples', () => {
     expect(r.stdout).toMatch(/cluster: 9 pages/);
   }, 60_000);
 
-  it('never touched the real research/inputs/', () => {
-    const real = join(REPO, 'research', 'inputs');
+  it('never touched the real internal/research/inputs/', () => {
+    const real = join(REPO, 'internal', 'research', 'inputs');
     expect(existsSync(join(real, 'kd.csv'))).toBe(false);
     expect(existsSync(join(real, 'competitors.csv'))).toBe(false);
     const kp = join(real, 'kp');

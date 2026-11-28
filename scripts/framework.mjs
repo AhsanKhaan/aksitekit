@@ -32,7 +32,7 @@ if (!/^[\w.-]+(?:\/[\w.-]+)*$/.test(outputDir) || outputDir.split('/').includes(
 }
 
 const command = String(b.commands?.[mode] || '').trim();
-if (!command) fail(`build.commands.${mode} is empty for "${framework}": the architect sets it (docs/CONTRACT.md)`);
+if (!command) fail(`build.commands.${mode} is empty for "${framework}": the architect sets it (internal/docs/CONTRACT.md)`);
 
 // The command comes from the repository's own config, never from user input or the network.
 console.log(`framework: ${framework} ${mode} → ${command}`);

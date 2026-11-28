@@ -60,7 +60,7 @@ export const pageContentSchema = z.strictObject({
 export type PageContent = z.infer<typeof pageContentSchema>;
 export type Block = z.infer<typeof blockSchema>;
 
-/** A keyword-map row (research/out/keyword-map.json, docs/CONTRACT.md). Extra fields are kept. */
+/** A keyword-map row (internal/research/out/keyword-map.json, internal/docs/CONTRACT.md). Extra fields are kept. */
 export const mapRowSchema = z.looseObject({
   url: z.string(),
   type: z.enum(['tool', 'guide', 'hub', 'instance']),

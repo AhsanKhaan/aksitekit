@@ -11,7 +11,7 @@ next-env.d.ts
 public/.well-known/security.txt
 
 # tests
-reports/
+internal/reports/
 test-results/
 playwright-report/
 coverage/

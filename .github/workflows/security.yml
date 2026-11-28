@@ -1,6 +1,6 @@
-# Security checks (docs/BLUEPRINT.md, security table).
+# Security checks (internal/docs/BLUEPRINT.md, security table).
 #   Static, on every pull request, push to main and weekly: gitleaks (git history), the npm audit gate (high and
-#   critical, with the reviewed exceptions in scripts/audit.mjs), npm registry signatures, Semgrep registry rules.
+#   critical, with the reviewed exceptions in internal/scripts/audit.mjs), npm registry signatures, Semgrep registry rules.
 #   ZAP baseline (passive) against a preview: on each successful deployment_status event (a deployment that reports
 #   its URL to GitHub), or by hand with a URL.
 #   ZAP full scan (active) weekly, and by hand before a release, against PREVIEW_URL or https://<LIVE_PAGES_HOST>/,
@@ -89,10 +89,10 @@ jobs:
 
       - name: Vulnerability gate (high and critical fail; reviewed exceptions in the project's script)
         run: |
-          if [ -f scripts/audit.mjs ]; then
+          if [ -f internal/scripts/audit.mjs ]; then
             npm run audit # the project's gate (Step C), with its reviewed exceptions
           else
-            echo "::notice::template mode: scripts/audit.mjs isn't built yet; running npm audit directly"
+            echo "::notice::template mode: internal/scripts/audit.mjs isn't built yet; running npm audit directly"
             npm audit --audit-level=high
           fi
 
@@ -101,7 +101,7 @@ jobs:
 
       # Software bill of materials (OpenSSF Scorecard: SBOM), CycloneDX from npm itself: no new tool or action.
       # Production dependencies only: they're what ships, and the dev tree fails npm's peer-dependency check until
-      # Step C settles the ESLint and TypeScript versions (docs/PROPOSAL-v2.md).
+      # Step C settles the ESLint and TypeScript versions (internal/docs/PROPOSAL-v2.md).
       - name: SBOM (CycloneDX, production dependencies)
         run: npm sbom --sbom-format cyclonedx --sbom-type application --omit dev > "$RUNNER_TEMP/sbom.cdx.json"
 
@@ -126,13 +126,13 @@ jobs:
           persist-credentials: false
 
       # Findings fail the job (--error). No SARIF upload: code scanning needs GitHub Code Security on private repos.
-      # vendor/skills is third-party text and helper scripts, copied byte for byte from reviewed pins; check:skills
+      # internal/skills is third-party text and helper scripts, copied byte for byte from reviewed pins; check:skills
       # (ci.yml) verifies every file's sha256, so the registry rules scan this repo's own code only.
       - name: Semgrep scan
         run: >-
           semgrep scan --error --metrics=off --disable-version-check
           --config p/ci --config p/typescript --config p/react --config p/nodejs --config p/secrets
-          --config p/github-actions --exclude vendor/skills
+          --config p/github-actions --exclude internal/skills
 
   zap-baseline:
     name: ZAP baseline (preview)

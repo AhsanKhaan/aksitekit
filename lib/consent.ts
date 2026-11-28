@@ -4,7 +4,7 @@
  *   GA4 waits for "Accept" (opt-in).
  * - Everyone else is counted by default and can switch it off with "Cookie settings" in the footer (opt-out).
  * - Backstop: Consent Mode's region default keeps analytics storage denied for EEA, UK and Swiss addresses.
- * Ad storage is always denied here. Ads need a Google-certified consent platform instead (scripts/adsense-gate.mjs).
+ * Ad storage is always denied here. Ads need a Google-certified consent platform instead (internal/scripts/adsense-gate.mjs).
  */
 export type ConsentChoice = 'granted' | 'denied';
 

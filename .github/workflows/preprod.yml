@@ -1,4 +1,4 @@
-# Pre-production checks (docs/BLUEPRINT.md flow: "pre-prod checks on the production branch" before the owner's GO).
+# Pre-production checks (internal/docs/BLUEPRINT.md flow: "pre-prod checks on the production branch" before the owner's GO).
 # Runs on pull requests whose base is the production branch (factory.config.json hosting.productionBranch, read at
 # run time), and by hand before a release. Every gate:
 #   gates:          gate:adsense, lint:design, gate:design, check:release, the production build (check-out and the on-page SEO gate run inside it), a

@@ -1,4 +1,4 @@
-// ZAP gate (docs/BLUEPRINT.md, security table: "any medium or high alert not in the reviewed exceptions file").
+// ZAP gate (internal/docs/BLUEPRINT.md, security table: "any medium or high alert not in the reviewed exceptions file").
 // ZAP's own exit code isn't used, because it also fails on Low and Informational warnings. This script decides:
 //   - fail on any Medium or High alert whose rule isn't an IGNORE line in the rules file;
 //   - fail on any alert, whatever its risk, whose rule is a FAIL line;

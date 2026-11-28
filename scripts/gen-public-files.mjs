@@ -1,4 +1,4 @@
-// The public files that depend on the project and the build (docs/TODO-step-c.md §2), for any technology.
+// The public files that depend on the project and the build (internal/docs/TODO-step-c.md §2), for any technology.
 //
 //   node scripts/gen-public-files.mjs                before the framework (`npm run dev`, `npm run build`): writes
 //                                                    robots.txt, _headers and .well-known/security.txt into
@@ -12,7 +12,7 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { builtPages, domainOf, indexable, isMain, outputDir, publicDir, readConfig, siteName, siteUrl } from './lib/site.mjs';
-import { headersFile, llmsTxt, publishedPages, robotsTxt, securityTxt, sitemapXml } from './lib/public-files.mjs';
+import { ASSETS_IGNORE, headersFile, llmsTxt, publishedPages, robotsTxt, securityTxt, sitemapXml } from './lib/public-files.mjs';
 
 const SITE_CONTENT = process.env.SITE_CONTENT || 'content/site.json';
 const BEFORE = ['robots.txt', '_headers', '.well-known/security.txt'];
@@ -47,7 +47,11 @@ export function afterBuild(cfg, env = process.env) {
   const { url } = siteUrl(cfg, env);
   const published = publishedPages(builtPages(out), url);
   if (!published.some((p) => p.route === '/')) throw new Error(`${out}/index.html is missing: the build wrote no home page`);
-  return { out, files: { 'sitemap.xml': sitemapXml(published), 'llms.txt': llmsTxt({ name: siteName(cfg), published }) }, count: published.length };
+  /** @type {Record<string, string>} */
+  const files = { 'sitemap.xml': sitemapXml(published), 'llms.txt': llmsTxt({ name: siteName(cfg), published }) };
+  // Workers static assets read .assetsignore from the assets folder; Pages uploads the folder as is (and has no such file).
+  if (cfg.hosting?.target === 'cloudflare-workers') files['.assetsignore'] = ASSETS_IGNORE;
+  return { out, files, count: published.length };
 }
 
 const write = (dir, name, text) => {

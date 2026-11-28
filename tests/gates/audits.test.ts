@@ -1,12 +1,12 @@
-// The audits' decision logic (scripts/audits/perf.mjs, a11y.mjs, unique-text.mjs, ga-live.mjs) and the Lighthouse
+// The audits' decision logic (internal/scripts/audits/perf.mjs, a11y.mjs, unique-text.mjs, ga-live.mjs) and the Lighthouse
 // budgets, on planted measurements. The browser runs themselves are exercised by the audit scripts, not here.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { budgetProblems, median } from '../../scripts/audits/perf.mjs';
-import { summarise } from '../../scripts/audits/a11y.mjs';
-import { THRESHOLD, pageWords, uniqueness } from '../../scripts/audits/unique-text.mjs';
-import { SENTINEL, eventsOf, visitProblems } from '../../scripts/audits/ga-live.mjs';
+import { budgetProblems, median } from '../../internal/scripts/audits/perf.mjs';
+import { summarise } from '../../internal/scripts/audits/a11y.mjs';
+import { THRESHOLD, pageWords, uniqueness } from '../../internal/scripts/audits/unique-text.mjs';
+import { SENTINEL, eventsOf, visitProblems } from '../../internal/scripts/audits/ga-live.mjs';
 
 const REPO = path.resolve(__dirname, '..', '..');
 const factory = JSON.parse(readFileSync(path.join(REPO, 'factory.config.json'), 'utf8'));

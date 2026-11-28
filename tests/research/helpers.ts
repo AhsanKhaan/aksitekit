@@ -83,7 +83,7 @@ export interface RunResult { code: number | null; stdout: string; stderr: string
 
 /** Runs one pipeline script the way `npm run research:*` does, against `root`. */
 export function run(script: 'kp-ingest' | 'keyword-select' | 'cluster', root: string, args: string[] = []): RunResult {
-  const r = spawnSync(process.execPath, [join(REPO, 'scripts', 'research', `${script}.mjs`), ...args], {
+  const r = spawnSync(process.execPath, [join(REPO, 'internal', 'scripts', 'research', `${script}.mjs`), ...args], {
     cwd: REPO,
     env: { ...process.env, FACTORY_ROOT: root },
     encoding: 'utf8',
@@ -91,7 +91,7 @@ export function run(script: 'kp-ingest' | 'keyword-select' | 'cluster', root: st
   return { code: r.status, stdout: r.stdout, stderr: r.stderr };
 }
 
-export const readOut = (root: string, name: string) => readFileSync(join(root, 'research', 'out', name), 'utf8');
+export const readOut = (root: string, name: string) => readFileSync(join(root, 'internal', 'research', 'out', name), 'utf8');
 export const readOutJson = (root: string, name: string) => JSON.parse(readOut(root, name));
 
 /** A keywords.json row, for unit tests of selection and clustering. */

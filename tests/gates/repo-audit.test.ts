@@ -1,8 +1,8 @@
-// check:repo (scripts/check-repo.mjs) and the vulnerability gate (scripts/audit.mjs), with planted failures.
+// check:repo (internal/scripts/check-repo.mjs) and the vulnerability gate (internal/scripts/audit.mjs), with planted failures.
 // Fake secrets are built by concatenation so this file itself holds none.
 import { describe, expect, it } from 'vitest';
-import { fileProblems, supplyChainProblems } from '../../scripts/check-repo.mjs';
-import { evaluate, exceptionProblems } from '../../scripts/audit.mjs';
+import { fileProblems, supplyChainProblems } from '../../internal/scripts/check-repo.mjs';
+import { evaluate, exceptionProblems } from '../../internal/scripts/audit.mjs';
 
 const fakeAwsKey = 'AKIA' + 'Z'.repeat(16);
 const fakeGithubToken = 'ghp' + '_' + 'a1'.repeat(18);
@@ -23,11 +23,11 @@ describe('check:repo', () => {
     expect(fileProblems('content/pages/x.json', '{"p": "Coming soon"}')).toEqual([expect.stringMatching(/content\/pages\/x\.json:1: placeholder text \(coming soon\)/)]);
     expect(fileProblems('app/page.tsx', '// TODO: write this')).toEqual([expect.stringMatching(/placeholder text \(TODO\)/)]);
     expect(fileProblems('components/X.tsx', 'Lorem ipsum dolor')).toEqual([expect.stringMatching(/lorem ipsum/)]);
-    expect(fileProblems('docs/notes.md', 'TODO: later')).toEqual([]);
+    expect(fileProblems('internal/docs/notes.md', 'TODO: later')).toEqual([]);
   });
 
   it('leaves vendored skills and marked gate fixtures to their own checks', () => {
-    expect(fileProblems('vendor/skills/x/SKILL.md', `example: ${fakeAwsKey}`)).toEqual([]);
+    expect(fileProblems('internal/skills/x/SKILL.md', `example: ${fakeAwsKey}`)).toEqual([]);
     expect(fileProblems('tests/x.test.ts', `// secret-scan:allow\n${fakeAwsKey}`)).toEqual([]);
   });
 
@@ -65,7 +65,7 @@ describe('npm audit gate', () => {
   const exception = { id: ID, package: 'some-pkg', reason: 'Only reachable from a build-time script with trusted input', reviewed: '2026-10-20', expires: '2026-12-31' };
 
   it('fails a high or critical advisory with no exception (planted)', () => {
-    expect(evaluate(report('high'), [], TODAY).failures).toEqual([expect.stringMatching(/some-pkg: Prototype pollution \(GHSA-abcd-efgh-ijkl, high\) is neither fixed nor in audit-exceptions\.json/)]);
+    expect(evaluate(report('high'), [], TODAY).failures).toEqual([expect.stringMatching(/some-pkg: Prototype pollution \(GHSA-abcd-efgh-ijkl, high\) is neither fixed nor in internal\/audit-exceptions.json/)]);
     expect(evaluate(report('critical'), [], TODAY).failures).toHaveLength(1);
   });
 

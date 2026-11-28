@@ -1,4 +1,4 @@
-// Self-test for the workflow helpers, run by ci.yml: each gate fails on a planted case (docs/TODO-step-c.md rule:
+// Self-test for the workflow helpers, run by ci.yml: each gate fails on a planted case (internal/docs/TODO-step-c.md rule:
 // every gate proves it fails when it should). No dependencies.
 //
 //   node .github/scripts/selftest.mjs
@@ -8,6 +8,7 @@ import { cloudflareState, branchAlias, pagesUrls } from './preview-url.mjs';
 import { scriptFiles, siteReady } from './site-ready.mjs';
 import { checkTarget } from './target-url.mjs';
 import { evaluate } from './zap-gate.mjs';
+import { assetsDirectory, boundaryProblems } from './assets-boundary.mjs';
 
 const env = { LIVE_SITE_URL: 'https://example.com', LIVE_PAGES_HOST: 'example-site.pages.dev' };
 
@@ -78,7 +79,7 @@ test('preview-url: branch alias and Cloudflare check parsing', () => {
 });
 
 test('site-ready: template mode until a project exists (planted)', () => {
-  const pkg = { scripts: { 'check:repo': 'node scripts/check-repo.mjs', audit: 'node scripts/audit.mjs', lint: 'eslint .', typecheck: 'tsc --noEmit', build: 'node scripts/production-gate.mjs && node scripts/framework.mjs build', 'test:e2e': 'playwright test' } };
+  const pkg = { scripts: { 'check:repo': 'node internal/scripts/check-repo.mjs', audit: 'node internal/scripts/audit.mjs', lint: 'eslint .', typecheck: 'tsc --noEmit', build: 'node scripts/production-gate.mjs && node scripts/framework.mjs build', 'test:e2e': 'playwright test' } };
   const all = () => true;
   const none = () => false;
   assert.deepEqual(scriptFiles('node a.mjs && node scripts/b.js build | node c.mjs'), ['a.mjs', 'scripts/b.js', 'c.mjs']);
@@ -90,4 +91,23 @@ test('site-ready: template mode until a project exists (planted)', () => {
   assert.equal(siteReady({ config: { project: { domain: 'example.com' } }, pkg: { scripts: {} }, exists: all }).ready, false);
   assert.equal(siteReady({ config: { project: { domain: 'example.com' } }, pkg, exists: none }).ready, false);
   assert.equal(siteReady({ config: { project: { domain: 'example.com' } }, pkg, exists: all }).ready, true); // a real project
+});
+
+test('assets-boundary: only the build folder is uploaded (planted)', () => {
+  assert.deepEqual(boundaryProblems({ outdir: 'out' }), []);
+  assert.match(boundaryProblems({ outdir: 'internal' })[0], /is a source folder/);
+  assert.match(boundaryProblems({ outdir: 'internal/out' })[0], /is a source folder/);
+  assert.match(boundaryProblems({ outdir: '.' })[0], /is a source folder/);
+  const jsonc = '{\n  // the build folder\n  "name": "x", /* c */ "assets": { "directory": "./out/", },\n}\n';
+  assert.equal(assetsDirectory(jsonc, 'wrangler.jsonc'), './out/');
+  assert.deepEqual(boundaryProblems({ outdir: 'out', wranglerText: jsonc, wranglerName: 'wrangler.jsonc' }), []);
+  const root = '{ "assets": { "directory": "." } }';
+  const p = boundaryProblems({ outdir: 'out', wranglerText: root, wranglerName: 'wrangler.json' });
+  assert.match(p[0], /assets\.directory "\." is not build\.outputDir "out"/);
+  assert.match(p[1], /wrangler\.json assets\.directory "\." is a source folder/);
+  assert.match(boundaryProblems({ outdir: 'out', wranglerText: '{ "name": "x" }', wranglerName: 'wrangler.json' })[0], /no assets\.directory/);
+  const toml = 'name = "x"\n\n[assets]\ndirectory = "internal" # wrong\n';
+  assert.equal(assetsDirectory(toml, 'wrangler.toml'), 'internal');
+  assert.match(boundaryProblems({ outdir: 'out', wranglerText: toml, wranglerName: 'wrangler.toml' })[0], /is not build\.outputDir/);
+  assert.match(boundaryProblems({ outdir: 'out', wranglerText: '{ "assets": ', wranglerName: 'wrangler.json' })[0], /doesn't parse/);
 });

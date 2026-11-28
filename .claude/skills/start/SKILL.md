@@ -35,15 +35,15 @@ Write what they said, and nothing they didn't:
   and `competitors: [{ "domain", "dr", "notes" }]`.
 - `factory.config.json` → `build`:
   - **Next.js:** `framework: "nextjs"`; keep the shipped `outputDir: "out"` and `commands` (`next build && node
-    scripts/flatten-segments.mjs`, `next dev`). The starter is built from `docs/TODO-step-c.md`.
+    scripts/flatten-segments.mjs`, `next dev`). The starter is built from `internal/docs/TODO-step-c.md`.
   - **Another technology:** `framework: "<name>"` (lowercase). Set `outputDir` and `commands.build` / `commands.dev`
     only if the owner gave them; otherwise leave the Next.js defaults in place and mark them for the architect, who
     sets them at the architecture stage (the intake gate only needs a non-empty build command). Changing
     `package.json` dependencies for the new technology is a Phase E change with the supply-chain checklist.
-- `research/inputs/competitors.csv`: header `domain,dr,notes`, one row per competitor (domains without `https://` or
+- `internal/research/inputs/competitors.csv`: header `domain,dr,notes`, one row per competitor (domains without `https://` or
   `www.`).
-- `research/inputs/idea.md`: `# The idea`, then `## In the owner's words` with their answer exactly as typed, then an
-  empty `## Owner answers` (format: `research/inputs/examples/idea.md`). Don't tidy, shorten or extend their words.
+- `internal/research/inputs/idea.md`: `# The idea`, then `## In the owner's words` with their answer exactly as typed, then an
+  empty `## Owner answers` (format: `internal/research/inputs/examples/idea.md`). Don't tidy, shorten or extend their words.
 
 Gate: `node .claude/skills/gate/gate.mjs intake`. It prints the **seed**: the competitor with the lowest DR (ties:
 alphabetical). Tell the owner which one it is and why: a low-DR site that still ranks shows keywords a new site can win.
@@ -54,7 +54,7 @@ Tell the owner exactly this (fill in the seed and markets):
 2. Enter the seed domain, choose **Use the entire site**, and set the location and language to the project's markets.
 3. Download **Historical metrics** as CSV (Keyword Planner's own file, UTF-16 tab-separated, is fine; so is Google
    Sheets → CSV UTF-8). Don't open it in Excel and re-save it as `.xlsx`.
-4. Save it as `research/inputs/kp/<seed-domain>.csv`. Other competitors are optional, one file each, named the same way.
+4. Save it as `internal/research/inputs/kp/<seed-domain>.csv`. Other competitors are optional, one file each, named the same way.
 5. Say "CSVs are in" when done.
 
 Keyword Planner is free with a Google Ads account; without ad spend it may show ranges instead of exact volumes
@@ -66,10 +66,10 @@ parallel), then `node .claude/skills/gate/gate.mjs recon`.
 ## 2b. Groom the idea, and get the owner's approval
 Still while the owner exports:
 1. **idea:** hand it to `idea-groomer`, then `node .claude/skills/gate/gate.mjs idea`.
-2. **BLOCKED on open questions** (§9 of `docs/IDEA.md`): ask the owner those questions in one message (use
-   AskUserQuestion when they're choices). Add each answer to `research/inputs/idea.md` → `## Owner answers` with the
+2. **BLOCKED on open questions** (§9 of `internal/docs/IDEA.md`): ask the owner those questions in one message (use
+   AskUserQuestion when they're choices). Add each answer to `internal/research/inputs/idea.md` → `## Owner answers` with the
    date, in the owner's words, then hand back to `idea-groomer` and re-run the gate.
-3. **idea-approval:** when `idea` passes, show the owner a short summary of `docs/IDEA.md` (the jobs, the must
+3. **idea-approval:** when `idea` passes, show the owner a short summary of `internal/docs/IDEA.md` (the jobs, the must
    features, the wave-1 slice, the positioning, what's out of scope), say where the file is, and give the hash the
    gate printed: "Type `APPROVE <hash>` to approve it, or tell me what to change."
    - A change: add it to `## Owner answers` (dated, their words), re-run `idea-groomer` and the gate. The hash
@@ -88,18 +88,18 @@ For each stage after `idea-approval`, in the order of `.claude/skills/gate/stage
    the same failure, stop and ask the owner. **BLOCKED** → read the `next` column:
    - an owner input (CSVs, a DR, a decision): ask the owner, then wait;
    - **a Step C script or file** (the starter app and most gates aren't built yet): say so plainly, e.g. "`npm run
-     gate:design` doesn't exist yet: it comes from Step C, see `docs/TODO-step-c.md`";
+     gate:design` doesn't exist yet: it comes from Step C, see `internal/docs/TODO-step-c.md`";
    - a Phase E `package.json` script: say which one is missing and that Phase E adds it.
 
 **Planning stages may run ahead of missing scripts.** `strategy`, `growth`, `architecture` and `design` write
 documents. If one of them is BLOCKED *only* because a Step C or Phase E script doesn't exist yet, keep its BLOCKED row,
 tell the owner, and continue to the next planning stage. Those stages re-run first once the scripts exist.
-**`design-approval`** works like `idea-approval`: when `design` passes, summarise `docs/DESIGN.md` (palette, fonts,
+**`design-approval`** works like `idea-approval`: when `design` passes, summarise `internal/docs/DESIGN.md` (palette, fonts,
 spacing, key components, and how it differs from the competitors), give the hash from
 `node .claude/skills/gate/gate.mjs design-approval`, and record only the owner's own `APPROVE <hash>`.
 
 **`build` and every stage after it need every earlier stage at PASS.** No exceptions. The build gate also checks
-that both approvals still match `docs/IDEA.md` and `docs/DESIGN.md`: if either file changed after the owner approved
+that both approvals still match `internal/docs/IDEA.md` and `internal/docs/DESIGN.md`: if either file changed after the owner approved
 it, build is BLOCKED until they approve the new version, and `record go` refuses the GO.
 
 ## 4. Pre-production, GO, deploy

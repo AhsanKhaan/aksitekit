@@ -1,8 +1,8 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { selectKeywords as selectKeywordsJs } from '../../scripts/research/lib/select.mjs';
-import { brandLabel, brandTerms, matchesBrand, normalizeDomain, tokenize } from '../../scripts/research/lib/inputs.mjs';
+import { selectKeywords as selectKeywordsJs } from '../../internal/scripts/research/lib/select.mjs';
+import { brandLabel, brandTerms, matchesBrand, normalizeDomain, tokenize } from '../../internal/scripts/research/lib/inputs.mjs';
 import { DEFAULT_RESEARCH, cleanupProjects, flat, readOut, readOutJson, row, run, tempProject, utf16Export } from './helpers';
 
 afterAll(cleanupProjects);
@@ -112,9 +112,9 @@ describe('keyword-select CLI', () => {
     { keyword: 'example christmas widget planner', avg: '1K – 10K', monthly: ['100 – 1K', '1K – 10K', '10K – 100K', ...flat('100 – 1K').slice(3)] },
   ];
   const files = (kd: string) => ({
-    'research/inputs/kp/fake-a.example.csv': utf16Export(exportRows),
-    'research/inputs/competitors.csv': 'domain,dr,notes\nfake-a.example,10,fake\n',
-    'research/inputs/kd.csv': kd,
+    'internal/research/inputs/kp/fake-a.example.csv': utf16Export(exportRows),
+    'internal/research/inputs/competitors.csv': 'domain,dr,notes\nfake-a.example,10,fake\n',
+    'internal/research/inputs/kd.csv': kd,
   });
 
   it('writes the missing-KD queue to kd-todo.csv, highest volume first', () => {
@@ -157,11 +157,11 @@ describe('keyword-select CLI', () => {
     const r = run('kp-ingest', root);
     expect(r.code).toBe(1);
     expect(r.stderr).toMatch(/kd\.csv:2: kd "high" for "example widget sizer" must be a number from 0 to 100/);
-    expect(existsSync(join(root, 'research', 'out', 'keywords.json'))).toBe(false);
+    expect(existsSync(join(root, 'internal', 'research', 'out', 'keywords.json'))).toBe(false);
   });
 
   it('fails without competitors.csv', () => {
-    const root = tempProject({ 'research/inputs/kp/fake-a.example.csv': utf16Export(exportRows) });
+    const root = tempProject({ 'internal/research/inputs/kp/fake-a.example.csv': utf16Export(exportRows) });
     expect(run('kp-ingest', root).code).toBe(0);
     const r = run('keyword-select', root);
     expect(r.code).toBe(1);

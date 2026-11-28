@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, test } from 'vitest';
 
-const SCRIPT = path.resolve(__dirname, '..', 'scripts', 'search-analyzer', 'gsc-api-to-csv.mjs');
+const SCRIPT = path.resolve(__dirname, '..', 'internal', 'scripts', 'search-analyzer', 'gsc-api-to-csv.mjs');
 const temps: string[] = [];
 afterEach(() => { for (const d of temps.splice(0)) rmSync(d, { recursive: true, force: true }); });
 

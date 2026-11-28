@@ -1,12 +1,12 @@
-// check:live (scripts/check-live.mjs) and check:security (scripts/check-security.mjs): every rule on planted
+// check:live (internal/scripts/check-live.mjs) and check:security (internal/scripts/check-security.mjs): every rule on planted
 // responses, DNS answers and output files. Nothing here touches the network.
 // Fake secrets are built by concatenation so this file itself holds none.
 import { describe, expect, it } from 'vitest';
-import { caaProblems, dnssecProblems, hstsProblems, nelProblems, robotsProblems } from '../../scripts/check-live.mjs';
+import { caaProblems, dnssecProblems, hstsProblems, nelProblems, robotsProblems } from '../../internal/scripts/check-live.mjs';
 import {
   burstProblems, cdnProblem, checkTarget, cspAllows, cspProblems, csrfProblem, emailProblems, headerLeaks, inRanges,
   resourcesOutsideCsp, scanOutput, traversalProblem, unproxiedRecords, xssEchoed, XSS_PAYLOADS,
-} from '../../scripts/check-security.mjs';
+} from '../../internal/scripts/check-security.mjs';
 import { csp, robotsTxt } from '../../scripts/lib/public-files.mjs';
 
 const SITE = 'https://example-site.test';

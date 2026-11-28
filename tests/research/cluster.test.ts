@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { URL_PATTERN, analyzeKeyword, buildMap, checkMap, singular, slugify } from '../../scripts/research/lib/cluster.mjs';
+import { URL_PATTERN, analyzeKeyword, buildMap, checkMap, singular, slugify } from '../../internal/scripts/research/lib/cluster.mjs';
 import { cleanupProjects, readOutJson, row, run, tempProject } from './helpers';
 
 afterAll(cleanupProjects);
@@ -188,11 +188,11 @@ describe('cluster CLI', () => {
 
   it('writes the map, and --check fails with a clear message on a hand-made cannibalization', () => {
     const rows = [kd('example widget sizer calculator', 2400), kd('example widget sizer chart', 1300)];
-    const root = tempProject({ 'research/out/selected.json': selectedJson(rows) });
+    const root = tempProject({ 'internal/research/out/selected.json': selectedJson(rows) });
     expect(run('cluster', root).code).toBe(0);
     expect(run('cluster', root, ['--check']).code).toBe(0);
 
-    const file = join(root, 'research', 'out', 'keyword-map.json');
+    const file = join(root, 'internal', 'research', 'out', 'keyword-map.json');
     const map = readOutJson(root, 'keyword-map.json');
     map.pages[1].primary = map.pages[0].primary;
     writeFileSync(file, JSON.stringify(map));
@@ -206,8 +206,8 @@ describe('cluster CLI', () => {
     // Different topics ("café" vs "cafe"), same slug.
     const rows = [kd('example café sizer', 2400), kd('example cafe sizer', 1300)];
     const root = tempProject({
-      'research/out/selected.json': selectedJson(rows),
-      'research/inputs/categories.csv': 'keyword,category\nexample café sizer,widgets\nexample cafe sizer,widgets\n',
+      'internal/research/out/selected.json': selectedJson(rows),
+      'internal/research/inputs/categories.csv': 'keyword,category\nexample café sizer,widgets\nexample cafe sizer,widgets\n',
     });
     const r = run('cluster', root);
     expect(r.code).toBe(1);

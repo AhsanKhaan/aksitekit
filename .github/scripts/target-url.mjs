@@ -1,4 +1,4 @@
-// Scan-target check (docs/BLUEPRINT.md, security table: probes only ever target the project's own preview or
+// Scan-target check (internal/docs/BLUEPRINT.md, security table: probes only ever target the project's own preview or
 // production hosts). Every ZAP scan and check:security run in CI passes its URL through here first.
 //
 //   TARGET_URL=<url> node .github/scripts/target-url.mjs

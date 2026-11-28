@@ -1,0 +1,34 @@
+# Dependency review on every pull request, before merge: fails when the PR adds or upgrades an npm package or a
+# GitHub Action with a known high or critical vulnerability (GitHub Advisory Database). It complements the npm audit
+# gate in security.yml, which checks the whole tree, by naming exactly what this PR changes.
+# Free on public repositories (it reads the dependency graph); on a private one it needs GitHub Code Security (paid),
+# so the job is skipped while the repository is private.
+# "Forbidden" (HTTP 403) from the dependency-review API means the repository's dependency graph is off: the owner
+# turns it on in Settings → Advanced Security (or Code security) → Dependency graph, then re-runs the job
+# (SECURITY.md → "Repository settings", step 4). Don't silence the job instead.
+# Security (.github/CI-CD.md): action pinned by commit SHA (internal/skills.lock.json); read-only token; no checkout,
+# no secrets, no PR comments (nothing written); never pull_request_target.
+name: dependency-review
+
+on:
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: dependency-review-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: dependency review (new and changed dependencies)
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec # v5.0.1
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: never

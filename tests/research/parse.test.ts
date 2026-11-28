@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { RuleViolation, decodeText, keywordKey, parseDelimited } from '../../scripts/research/lib/common.mjs';
+import { RuleViolation, decodeText, keywordKey, parseDelimited } from '../../internal/scripts/research/lib/common.mjs';
 import {
   computeSeasonality, mergeRows, parseKpExport, parseMonthHeader, parseVolume,
-} from '../../scripts/research/lib/kp.mjs';
+} from '../../internal/scripts/research/lib/kp.mjs';
 import { KP_HEADER, flat, utf16Export, utf8Csv } from './helpers';
 
 const months = (values: [number, number][]) => values.map(([min, max], i) => ({ month: `2026-${String(i + 1).padStart(2, '0')}`, min, max }));

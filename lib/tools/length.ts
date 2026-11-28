@@ -1,6 +1,6 @@
 /**
  * The example tool's logic (the starter's title and description length checker). It counts the way the SEO gate does
- * (scripts/audits/seo-checks.mjs: the string's length, after the browser collapses runs of spaces), against the same
+ * (internal/scripts/audits/seo-checks.mjs: the string's length, after the browser collapses runs of spaces), against the same
  * ranges the content schema enforces (lib/content/schema.ts). Pure functions, so the page text, the worked example
  * and the tool in the browser all use the same code, and the tests check it.
  */

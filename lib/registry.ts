@@ -3,20 +3,20 @@ import { join } from 'node:path';
 import { mapRowSchema, pageContentSchema, type MapRow, type PageContent } from '@/lib/content/schema';
 
 /**
- * The content registry (the Step C spec in docs/, §1): every page the site builds, read at build time.
- * - research/out/keyword-map.json (the keyword stage) decides which URLs exist and what each one targets; until it
+ * The content registry (the Step C spec in internal/docs/, §1): every page the site builds, read at build time.
+ * - internal/research/out/keyword-map.json (the keyword stage) decides which URLs exist and what each one targets; until it
  *   exists, the template's example map in content/examples/ stands in.
  * - content/pages/<slug>.json holds each page's text. A mapped URL without a content file isn't built yet; a content
  *   file without a mapped URL is an error, so no page ships that the research didn't ask for.
  * Any rule broken here throws, which fails the build with the reason.
  */
-export const KEYWORD_MAP = 'research/out/keyword-map.json';
+export const KEYWORD_MAP = 'internal/research/out/keyword-map.json';
 export const EXAMPLE_MAP = 'content/examples/keyword-map.json';
 export const CONTENT_DIR = 'content/pages';
 /** Top-level routes the app owns; a category can't take one of these names. */
 export const RESERVED = ['about', 'contact', 'privacy', 'terms', 'editorial-policy', 'authors', 'og'];
 
-/** The file name for a URL: "/a/b/" → "a--b", "/" → "home" (the same rule as the briefs in research/out/briefs/). */
+/** The file name for a URL: "/a/b/" → "a--b", "/" → "home" (the same rule as the briefs in internal/research/out/briefs/). */
 export const slugOf = (url: string): string => url.replace(/^\/+|\/+$/g, '').replace(/\//g, '--') || 'home';
 
 export interface Page extends PageContent {

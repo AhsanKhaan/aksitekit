@@ -4,7 +4,7 @@ import nextTs from 'eslint-config-next/typescript';
 import noUnsanitized from 'eslint-plugin-no-unsanitized';
 import regexp from 'eslint-plugin-regexp';
 
-// Security rules every project keeps (docs/TODO-step-c.md §1).
+// Security rules every project keeps (internal/docs/TODO-step-c.md §1).
 // eslint-config-next sets browser and Node globals for every file, scripts included.
 export default defineConfig([
   ...nextVitals,
@@ -47,10 +47,10 @@ export default defineConfig([
   {
     // Node scripts: the gates, the workflow helpers (.github/CI-CD.md: ESLint covers .github/scripts) and the hooks.
     // Config files by script extension only: ESLint 10 lints every file a `files` pattern names, factory.config.json too.
-    files: ['scripts/**/*.mjs', '.github/scripts/**/*.mjs', '.claude/**/*.mjs', '*.config.{js,mjs,cjs,ts,mts,cts}'],
+    files: ['scripts/**/*.mjs', 'internal/scripts/**/*.mjs', '.github/scripts/**/*.mjs', '.claude/**/*.mjs', '*.config.{js,mjs,cjs,ts,mts,cts}'],
     rules: { 'no-console': 'off' },
   },
-  // .claude/worktrees/ holds other sessions' git worktrees (full copies of the repo); vendor/skills/ holds reviewed
+  // .claude/worktrees/ holds other sessions' git worktrees (full copies of the repo); internal/skills/ holds reviewed
   // third-party files that are never edited (npm run check:skills).
-  globalIgnores(['.next/**', 'out/**', 'node_modules/**', 'next-env.d.ts', 'test-results/**', 'playwright-report/**', '.lighthouseci/**', 'coverage/**', 'docs/**', '.claude/worktrees/**', 'vendor/skills/**', 'public/**']),
+  globalIgnores(['.next/**', 'out/**', 'node_modules/**', 'next-env.d.ts', 'test-results/**', 'playwright-report/**', '.lighthouseci/**', 'coverage/**', 'internal/docs/**', '.claude/worktrees/**', 'internal/skills/**', 'public/**']),
 ]);

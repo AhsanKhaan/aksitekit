@@ -86,6 +86,8 @@ jobs:
           [[ "$project" =~ ^[a-z0-9][a-z0-9-]{0,57}$ ]] || fail "set the CLOUDFLARE_PAGES_PROJECT repo variable (or project.name) to the Pages project name"
           outdir=$(node -p 'require("./factory.config.json").build?.outputDir || "out"')
           [[ "$outdir" =~ ^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$ && "/$outdir/" != *"/../"* ]] || fail "build.outputDir must be a relative folder inside the repo"
+          # Deploy boundary (README → "What reaches production"): never a source folder, never internal/.
+          node .github/scripts/assets-boundary.mjs --outdir "$outdir" || fail "build.outputDir is not a build folder (see the message above)"
           { echo "deploy=true"; echo "sha=$sha"; echo "branch=$branch"; echo "project=$project"; echo "outdir=$outdir"; } >> "$GITHUB_OUTPUT"
 
   gates:

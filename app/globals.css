@@ -1,8 +1,8 @@
 /*
  * The starter's styles. Tailwind v4 provides the reset and the utilities; source(none) plus the @source lines limit
- * its scan to the app's own code, so it never reads vendor/skills/, the docs or the worktrees.
- * Tokens come from docs/templates/DESIGN.md (every text pair passes WCAG AA; npm run gate:design checks docs/DESIGN.md).
- * The designer's docs/DESIGN.md replaces them; keep the names. No dark mode until DESIGN.md defines and checks one.
+ * its scan to the app's own code, so it never reads internal/skills/, the docs or the worktrees.
+ * Tokens come from internal/docs/templates/DESIGN.md (every text pair passes WCAG AA; npm run gate:design checks internal/docs/DESIGN.md).
+ * The designer's internal/docs/DESIGN.md replaces them; keep the names. No dark mode until DESIGN.md defines and checks one.
  */
 @import 'tailwindcss' source(none);
 @source '.';

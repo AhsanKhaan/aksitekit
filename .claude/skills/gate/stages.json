@@ -1,5 +1,5 @@
 {
-  "$comment": "Pipeline stages in order. gate.mjs reads this file. 'outputs' must exist ({competitor} expands to each competitor domain; a path ending in / needs at least one file). 'checks' are built-in checks in gate.mjs. 'npm' are npm scripts from docs/CONTRACT.md, run in order. 'manual' stages are recorded with the owner's confirmation; 'approves' names the file an approval stage pins by its content hash (the owner types APPROVE <hash>). 'when' skips a stage that doesn't apply. 'npmProduces' runs the npm scripts before checking outputs (they create them).",
+  "$comment": "Pipeline stages in order. gate.mjs reads this file. 'outputs' must exist ({competitor} expands to each competitor domain; a path ending in / needs at least one file). 'checks' are built-in checks in gate.mjs. 'npm' are npm scripts from internal/docs/CONTRACT.md, run in order. 'manual' stages are recorded with the owner's confirmation; 'approves' names the file an approval stage pins by its content hash (the owner types APPROVE <hash>). 'when' skips a stage that doesn't apply. 'npmProduces' runs the npm scripts before checking outputs (they create them).",
   "stages": [
     {
       "id": "intake",
@@ -7,8 +7,8 @@
       "summary": "Domain, competitors and their DR (owner supplies DR), the technology, and the owner's idea in their own words; the lowest-DR competitor becomes the keyword seed",
       "outputs": [
         "factory.config.json",
-        "research/inputs/competitors.csv",
-        "research/inputs/idea.md"
+        "internal/research/inputs/competitors.csv",
+        "internal/research/inputs/idea.md"
       ],
       "checks": [
         "intake"
@@ -20,7 +20,7 @@
       "agent": "competitor-recon",
       "summary": "Structure, page types and UX gaps of each competitor, and how it serves the owner's idea, from public pages only; no copied text",
       "outputs": [
-        "research/out/recon/{competitor}.md"
+        "internal/research/out/recon/{competitor}.md"
       ],
       "checks": [
         "recon-no-copy",
@@ -33,7 +33,7 @@
       "agent": "idea-groomer",
       "summary": "The owner's idea matched against every recon file: visitors' jobs, coverage by competitor, gaps, ranked features, the wave-1 slice, positioning and open questions",
       "outputs": [
-        "docs/IDEA.md"
+        "internal/docs/IDEA.md"
       ],
       "checks": [
         "idea-brief",
@@ -44,24 +44,24 @@
     {
       "id": "idea-approval",
       "agent": "owner",
-      "summary": "The owner approves docs/IDEA.md as it is now by typing APPROVE <hash>",
+      "summary": "The owner approves internal/docs/IDEA.md as it is now by typing APPROVE <hash>",
       "outputs": [],
       "checks": [],
       "npm": [],
-      "manual": "Owner typed 'APPROVE <hash>' in chat for docs/IDEA.md at its current content",
-      "approves": "docs/IDEA.md"
+      "manual": "Owner typed 'APPROVE <hash>' in chat for internal/docs/IDEA.md at its current content",
+      "approves": "internal/docs/IDEA.md"
     },
     {
       "id": "keywords",
       "agent": "keyword-researcher",
       "summary": "Keyword Planner CSVs → keywords.json → selected.json → keyword-map.json",
       "needs": [
-        "research/inputs/kp/"
+        "internal/research/inputs/kp/"
       ],
       "outputs": [
-        "research/out/keywords.json",
-        "research/out/selected.json",
-        "research/out/keyword-map.json"
+        "internal/research/out/keywords.json",
+        "internal/research/out/selected.json",
+        "internal/research/out/keyword-map.json"
       ],
       "checks": [
         "json-outputs"
@@ -78,9 +78,9 @@
       "agent": "content-strategist",
       "summary": "Content strategy, wave-1 briefs, JSON-LD plan per page type",
       "outputs": [
-        "docs/CONTENT-STRATEGY.md",
-        "research/out/content-plan.json",
-        "research/out/briefs/"
+        "internal/docs/CONTENT-STRATEGY.md",
+        "internal/research/out/content-plan.json",
+        "internal/research/out/briefs/"
       ],
       "checks": [
         "content-plan",
@@ -93,8 +93,8 @@
       "agent": "growth-strategist",
       "summary": "90-day ADHD-friendly growth plan: one task a day, at most 45 minutes, a done check each",
       "outputs": [
-        "docs/GROWTH-90.md",
-        "growth/plan.json"
+        "internal/docs/GROWTH-90.md",
+        "internal/growth/plan.json"
       ],
       "checks": [
         "growth-plan",
@@ -109,7 +109,7 @@
       "agent": "architect",
       "summary": "ARCHITECTURE.md and hosting target (Pages for a static export, Workers only for server code)",
       "outputs": [
-        "docs/ARCHITECTURE.md"
+        "internal/docs/ARCHITECTURE.md"
       ],
       "checks": [
         "hosting",
@@ -118,11 +118,23 @@
       "npm": []
     },
     {
+      "id": "security-plan",
+      "agent": "secops-reviewer",
+      "summary": "Security review of the plan before any code: internal/docs/ARCHITECTURE.md, hosting, data flow, headers and CSP, third parties and new dependencies (threat model, the security-and-hardening and supply-chain checklists); Verdict PASS with 0 blockers",
+      "outputs": [
+        "internal/reports/security-plan.md"
+      ],
+      "checks": [
+        "security-plan-verdict"
+      ],
+      "npm": []
+    },
+    {
       "id": "design",
       "agent": "designer",
       "summary": "DESIGN.md in the google-labs-code/design.md format; AA contrast; self-hosted fonts",
       "outputs": [
-        "docs/DESIGN.md"
+        "internal/docs/DESIGN.md"
       ],
       "checks": [
         "design-md",
@@ -136,12 +148,12 @@
     {
       "id": "design-approval",
       "agent": "owner",
-      "summary": "The owner approves docs/DESIGN.md as it is now by typing APPROVE <hash>",
+      "summary": "The owner approves internal/docs/DESIGN.md as it is now by typing APPROVE <hash>",
       "outputs": [],
       "checks": [],
       "npm": [],
-      "manual": "Owner typed 'APPROVE <hash>' in chat for docs/DESIGN.md at its current content",
-      "approves": "docs/DESIGN.md"
+      "manual": "Owner typed 'APPROVE <hash>' in chat for internal/docs/DESIGN.md at its current content",
+      "approves": "internal/docs/DESIGN.md"
     },
     {
       "id": "build",
@@ -169,9 +181,9 @@
     {
       "id": "code-review",
       "agent": "code-reviewer",
-      "summary": "The branch diff reviewed against CLAUDE.md, docs/CONTRACT.md, tests and security regressions; Verdict PASS with 0 blockers for the current HEAD",
+      "summary": "The branch diff reviewed against CLAUDE.md, internal/docs/CONTRACT.md, tests and security regressions; Verdict PASS with 0 blockers for the current HEAD",
       "outputs": [
-        "reports/code-review.md"
+        "internal/reports/code-review.md"
       ],
       "checks": [
         "code-review-verdict"
@@ -182,11 +194,26 @@
       ]
     },
     {
+      "id": "security-diff",
+      "agent": "secops-reviewer",
+      "summary": "Security review of the branch diff before the pull request: Semgrep on the changed files, secrets, new dependencies and workflow changes (differential-review, semgrep); Verdict PASS with 0 blockers for the current HEAD",
+      "outputs": [
+        "internal/reports/security-diff.md"
+      ],
+      "checks": [
+        "security-diff-verdict"
+      ],
+      "npm": [
+        "check:repo",
+        "audit"
+      ]
+    },
+    {
       "id": "reconcile",
       "agent": "reconciler",
       "summary": "Keyword map ↔ pages ↔ design ↔ briefs agree; parity report against competitors",
       "outputs": [
-        "reports/reconcile.md"
+        "internal/reports/reconcile.md"
       ],
       "checks": [],
       "npm": [
@@ -199,7 +226,7 @@
       "agent": "seo-auditor",
       "summary": "Titles, canonicals, sitemap, schema, internal links, depth ≤ 3; the 169-check on-page gate (stuffing, thin pages, titles, E-E-A-T, a11y)",
       "outputs": [
-        "reports/seo.md"
+        "internal/reports/seo.md"
       ],
       "checks": [],
       "npm": [
@@ -212,7 +239,7 @@
       "agent": "ai-search-auditor",
       "summary": "AEO and GEO: AI crawlers per the bot policy, llms.txt, answer-first passages, entities, dates and sources",
       "outputs": [
-        "reports/ai-search.md"
+        "internal/reports/ai-search.md"
       ],
       "checks": [
         "ai-search-files"
@@ -226,7 +253,7 @@
       "agent": "adsense-gatekeeper",
       "summary": "Required pages, consent, no ad code before approval, policy-risk scan",
       "outputs": [
-        "reports/adsense.md"
+        "internal/reports/adsense.md"
       ],
       "checks": [],
       "npm": [
@@ -238,8 +265,8 @@
       "agent": "secops-reviewer",
       "summary": "Secrets, CVEs, SAST, CSP, XSS, CSRF, path traversal, rate limiting, private-URL exposure, CDN-only, email spoofing",
       "outputs": [
-        "reports/security.md",
-        "docs/SECURITY.md"
+        "internal/reports/security.md",
+        "internal/docs/SECURITY.md"
       ],
       "checks": [
         "no-template-placeholders"
@@ -258,7 +285,7 @@
       "agent": "responsive-checker",
       "summary": "320–1280 px: no horizontal scroll, touch targets",
       "outputs": [
-        "reports/responsive.md"
+        "internal/reports/responsive.md"
       ],
       "checks": [],
       "npm": [
@@ -270,7 +297,7 @@
       "agent": "performance-auditor",
       "summary": "Lighthouse budgets and Core Web Vitals limits from factory.config.json",
       "outputs": [
-        "reports/performance.md"
+        "internal/reports/performance.md"
       ],
       "checks": [],
       "npm": [
@@ -294,7 +321,7 @@
       "summary": "Free-plan Cloudflare checklist through MCP reads; writes only with the owner's yes",
       "when": "cloudflare",
       "outputs": [
-        "reports/cloudflare.md"
+        "internal/reports/cloudflare.md"
       ],
       "checks": [],
       "npm": []
@@ -328,10 +355,10 @@
       "agent": "doc-generator",
       "summary": "PRD, DESIGN, ARCHITECTURE, SECURITY and the AGENTS.md project section regenerated from the agents' outputs",
       "outputs": [
-        "docs/PRD.md",
-        "docs/DESIGN.md",
-        "docs/ARCHITECTURE.md",
-        "docs/SECURITY.md",
+        "internal/docs/PRD.md",
+        "internal/docs/DESIGN.md",
+        "internal/docs/ARCHITECTURE.md",
+        "internal/docs/SECURITY.md",
         "AGENTS.md"
       ],
       "checks": [

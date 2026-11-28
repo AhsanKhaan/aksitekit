@@ -54,10 +54,10 @@ function project(files: Record<string, string> = {}) {
   const cfg = { project: { name: 'Example', domain: 'example-site.test' }, hosting: { target: 'cloudflare-pages' }, build: { outputDir: 'out' } };
   const all: Record<string, string> = {
     'factory.config.json': JSON.stringify(cfg),
-    'research/inputs/competitors.csv': 'domain,dr,notes\nrival-one.test,12,\nrival-two.test,30,\n',
-    'research/inputs/idea.md': IDEA_INPUT,
-    'research/out/recon/rival-one.test.md': recon('rival-one.test'),
-    'research/out/recon/rival-two.test.md': recon('rival-two.test'),
+    'internal/research/inputs/competitors.csv': 'domain,dr,notes\nrival-one.test,12,\nrival-two.test,30,\n',
+    'internal/research/inputs/idea.md': IDEA_INPUT,
+    'internal/research/out/recon/rival-one.test.md': recon('rival-one.test'),
+    'internal/research/out/recon/rival-two.test.md': recon('rival-two.test'),
     ...files,
   };
   for (const [rel, text] of Object.entries(all)) {
@@ -77,8 +77,8 @@ const gate = (root: string, stage: string) => run(root, stage, '--dry-run');
 function ledger(root: string, until: string, evidence: Record<string, string> = {}) {
   const rows = STAGES.slice(0, STAGES.findIndex((s) => s.id === until))
     .map((s) => `| 2026-10-30T10:00Z | ${s.id} | fake | 1 | PASS | fake | ${evidence[s.id] ?? 'ok'} | next |`);
-  mkdirSync(path.join(root, 'reports'), { recursive: true });
-  writeFileSync(path.join(root, 'reports', 'ledger.md'), `# Pipeline ledger\n\n| When (UTC) | Stage | Agent | Attempt | Result | Gate | Evidence | Next |\n|---|---|---|---|---|---|---|---|\n${rows.join('\n')}\n`);
+  mkdirSync(path.join(root, 'internal', 'reports'), { recursive: true });
+  writeFileSync(path.join(root, 'internal', 'reports', 'ledger.md'), `# Pipeline ledger\n\n| When (UTC) | Stage | Agent | Attempt | Result | Gate | Evidence | Next |\n|---|---|---|---|---|---|---|---|\n${rows.join('\n')}\n`);
 }
 
 describe('recon stage: the owner\'s idea', () => {
@@ -88,7 +88,7 @@ describe('recon stage: the owner\'s idea', () => {
   });
 
   test('a recon file without it fails (planted)', () => {
-    const r = gate(project({ 'research/out/recon/rival-two.test.md': recon('rival-two.test', false) }), 'recon');
+    const r = gate(project({ 'internal/research/out/recon/rival-two.test.md': recon('rival-two.test', false) }), 'recon');
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/rival-two\.test\.md has no "## Against the owner's idea" section/);
   });
@@ -97,7 +97,7 @@ describe('recon stage: the owner\'s idea', () => {
 describe('idea stage', () => {
   test('a groomed idea that covers every job and competitor passes, and prints the hash to approve', () => {
     const text = idea();
-    const r = gate(project({ 'docs/IDEA.md': text }), 'idea');
+    const r = gate(project({ 'internal/docs/IDEA.md': text }), 'idea');
     expect(r.status, r.out).toBe(PASS);
     expect(r.out).toContain(`APPROVE ${hash(text)}`);
     expect(r.out).toMatch(/2 job\(s\), 2 feature\(s\) \(1 must\), 2 competitor\(s\) matched/);
@@ -105,60 +105,60 @@ describe('idea stage', () => {
 
   test("the owner's words reworded fails (planted)", () => {
     const own = "## 1. The owner's idea\n> A free website where people sizing example widgets enter measurements and get a size.\n";
-    const r = gate(project({ 'docs/IDEA.md': idea({ own }) }), 'idea');
+    const r = gate(project({ 'internal/docs/IDEA.md': idea({ own }) }), 'idea');
     expect(r.status).toBe(FAIL);
-    expect(r.out).toMatch(/must quote research\/inputs\/idea\.md/);
+    expect(r.out).toMatch(/must quote internal\/research\/inputs\/idea\.md/);
   });
 
   test('a missing section fails (planted)', () => {
-    const r = gate(project({ 'docs/IDEA.md': idea({ position: '' }) }), 'idea');
+    const r = gate(project({ 'internal/docs/IDEA.md': idea({ position: '' }) }), 'idea');
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/has no "## 7\. Positioning" section/);
   });
 
   test('a competitor left out of the coverage fails (planted)', () => {
     const cover = '## 3. Coverage by competitor\n| Job | rival-one.test |\n|---|---|\n| J1 | partly |\n| J2 | no |\n';
-    const r = gate(project({ 'docs/IDEA.md': idea({ cover }) }), 'idea');
+    const r = gate(project({ 'internal/docs/IDEA.md': idea({ cover }) }), 'idea');
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/§3 doesn't cover rival-two\.test/);
   });
 
   test('a feature without evidence fails (planted)', () => {
     const features = SECTIONS.features.replace('| rival-two.test recon |', '| — |');
-    const r = gate(project({ 'docs/IDEA.md': idea({ features }) }), 'idea');
+    const r = gate(project({ 'internal/docs/IDEA.md': idea({ features }) }), 'idea');
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/"What the size means" has no evidence/);
   });
 
   test('a job with no feature fails (planted)', () => {
     const features = SECTIONS.features.split('\n').filter((l) => !l.includes('J2')).join('\n');
-    const r = gate(project({ 'docs/IDEA.md': idea({ features }) }), 'idea');
+    const r = gate(project({ 'internal/docs/IDEA.md': idea({ features }) }), 'idea');
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/no feature for J2/);
   });
 
   test('no "must" feature fails (planted)', () => {
-    const r = gate(project({ 'docs/IDEA.md': idea({ features: SECTIONS.features.replace('| must |', '| could |') }) }), 'idea');
+    const r = gate(project({ 'internal/docs/IDEA.md': idea({ features: SECTIONS.features.replace('| must |', '| could |') }) }), 'idea');
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/no "must" feature/);
   });
 
   test('a long quote outside the owner\'s sections fails (planted)', () => {
     const win = '## 4. Where we can win\nOne review said "the calculator is buried under three ads and a long story about the history of widget sizes".\n';
-    const r = gate(project({ 'docs/IDEA.md': idea({ win }) }), 'idea');
+    const r = gate(project({ 'internal/docs/IDEA.md': idea({ win }) }), 'idea');
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/IDEA\.md:\d+ quotes more than 15 words/);
   });
 
   test('an unanswered question for the owner blocks it', () => {
     const open = "## 9. Open questions for the owner\n- [x] Metric too? → yes, both (owner, 2026-10-30)\n- [ ] Should the guide come before the calculator?\n";
-    const r = gate(project({ 'docs/IDEA.md': idea({ open }) }), 'idea');
+    const r = gate(project({ 'internal/docs/IDEA.md': idea({ open }) }), 'idea');
     expect(r.status).toBe(BLOCKED);
     expect(r.out).toMatch(/1 unanswered question\(s\) for the owner/);
   });
 
   test('a template placeholder left in fails (planted)', () => {
-    const r = gate(project({ 'docs/IDEA.md': idea({ wave: '## 6. Wave 1\n{{WAVE1_SLICE}}\n' }) }), 'idea');
+    const r = gate(project({ 'internal/docs/IDEA.md': idea({ wave: '## 6. Wave 1\n{{WAVE1_SLICE}}\n' }) }), 'idea');
     expect(r.status).toBe(FAIL);
     expect(r.out).toMatch(/template placeholder/);
   });
@@ -167,30 +167,30 @@ describe('idea stage', () => {
 describe('approval stages', () => {
   test('the manual stage shows the hash the owner types', () => {
     const text = idea();
-    const r = gate(project({ 'docs/IDEA.md': text }), 'idea-approval');
+    const r = gate(project({ 'internal/docs/IDEA.md': text }), 'idea-approval');
     expect(r.status).toBe(BLOCKED);
     expect(r.out).toContain(`types APPROVE ${hash(text)}`);
   });
 
   test('records the owner\'s APPROVE for the file as it is now', () => {
     const text = idea();
-    const root = project({ 'docs/IDEA.md': text });
+    const root = project({ 'internal/docs/IDEA.md': text });
     ledger(root, 'idea-approval');
     const r = run(root, 'record', 'idea-approval', 'PASS', `owner typed: APPROVE ${hash(text)}`);
     expect(r.status, r.out).toBe(PASS);
-    expect(readFileSync(path.join(root, 'reports', 'ledger.md'), 'utf8')).toContain(`| idea-approval | owner | 1 | PASS | gate.mjs record idea-approval | owner typed: APPROVE ${hash(text)} |`);
+    expect(readFileSync(path.join(root, 'internal', 'reports', 'ledger.md'), 'utf8')).toContain(`| idea-approval | owner | 1 | PASS | gate.mjs record idea-approval | owner typed: APPROVE ${hash(text)} |`);
   });
 
   test('refuses an APPROVE for another version of the file (planted)', () => {
-    const root = project({ 'docs/IDEA.md': idea() });
+    const root = project({ 'internal/docs/IDEA.md': idea() });
     ledger(root, 'idea-approval');
     const r = run(root, 'record', 'idea-approval', 'PASS', 'owner typed: APPROVE 0123456789ab');
     expect(r.status).toBe(USAGE);
-    expect(r.out).toMatch(/the owner approved 0123456789ab, but docs\/IDEA\.md is [0-9a-f]{12} now/);
+    expect(r.out).toMatch(/the owner approved 0123456789ab, but internal\/docs\/IDEA\.md is [0-9a-f]{12} now/);
   });
 
   test('refuses evidence without the owner\'s APPROVE (planted)', () => {
-    const root = project({ 'docs/IDEA.md': idea() });
+    const root = project({ 'internal/docs/IDEA.md': idea() });
     ledger(root, 'idea-approval');
     const r = run(root, 'record', 'idea-approval', 'PASS', 'looks fine');
     expect(r.status).toBe(USAGE);
@@ -205,7 +205,7 @@ describe('build and GO refuse a stale approval', () => {
   });
 
   test('approvals that match both files let build go on to its npm gate', () => {
-    const root = project({ 'docs/IDEA.md': idea(), 'docs/DESIGN.md': DESIGN });
+    const root = project({ 'internal/docs/IDEA.md': idea(), 'internal/docs/DESIGN.md': DESIGN });
     ledger(root, 'build', approved(idea(), DESIGN));
     const r = gate(root, 'build');
     expect(r.status).toBe(BLOCKED);
@@ -214,25 +214,25 @@ describe('build and GO refuse a stale approval', () => {
   });
 
   test('blocks build until the owner approves (planted)', () => {
-    const root = project({ 'docs/IDEA.md': idea(), 'docs/DESIGN.md': DESIGN });
+    const root = project({ 'internal/docs/IDEA.md': idea(), 'internal/docs/DESIGN.md': DESIGN });
     const r = gate(root, 'build');
     expect(r.status).toBe(BLOCKED);
-    expect(r.out).toMatch(/the owner hasn't approved docs\/IDEA\.md/);
+    expect(r.out).toMatch(/the owner hasn't approved internal\/docs\/IDEA\.md/);
   });
 
   test('blocks build when DESIGN.md changed after the approval (planted)', () => {
-    const root = project({ 'docs/IDEA.md': idea(), 'docs/DESIGN.md': `${DESIGN}\nA late change.\n` });
+    const root = project({ 'internal/docs/IDEA.md': idea(), 'internal/docs/DESIGN.md': `${DESIGN}\nA late change.\n` });
     ledger(root, 'build', approved(idea(), DESIGN));
     const r = gate(root, 'build');
     expect(r.status).toBe(BLOCKED);
-    expect(r.out).toMatch(/docs\/DESIGN\.md changed since the owner approved it/);
+    expect(r.out).toMatch(/internal\/docs\/DESIGN\.md changed since the owner approved it/);
   });
 
   test('refuses the GO when IDEA.md changed after the approval (planted)', () => {
-    const root = project({ 'docs/IDEA.md': idea({ scope: '## 8. Out of scope\nAccounts and comments.\n' }), 'docs/DESIGN.md': DESIGN });
+    const root = project({ 'internal/docs/IDEA.md': idea({ scope: '## 8. Out of scope\nAccounts and comments.\n' }), 'internal/docs/DESIGN.md': DESIGN });
     ledger(root, 'go', approved(idea(), DESIGN));
     const r = run(root, 'record', 'go', 'PASS', 'owner typed: GO 1a2b3c4');
     expect(r.status).toBe(USAGE);
-    expect(r.out).toMatch(/no GO while an approval is out of date: docs\/IDEA\.md changed/);
+    expect(r.out).toMatch(/no GO while an approval is out of date: internal\/docs\/IDEA\.md changed/);
   });
 });

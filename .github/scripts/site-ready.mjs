@@ -1,4 +1,4 @@
-// Template mode (docs/CONTRACT.md): the site jobs (build, lint, typecheck, e2e, Lighthouse, pre-production gates,
+// Template mode (internal/docs/CONTRACT.md): the site jobs (build, lint, typecheck, e2e, Lighthouse, pre-production gates,
 // deploys) run only once a project exists. On the template itself, and in a new copy before /start and Step C, they
 // skip instead of failing, while the template's own checks (tests, helper self-tests, gitleaks, Semgrep, npm audit)
 // still run. No dependencies.
@@ -6,7 +6,7 @@
 //   node .github/scripts/site-ready.mjs        writes `ready` and `reason` to $GITHUB_OUTPUT (or prints them)
 //
 // A project exists when factory.config.json → project.domain is set (by /start) and every file the site's npm
-// scripts call with `node <file>` is in the repository (Step C, docs/TODO-step-c.md).
+// scripts call with `node <file>` is in the repository (Step C, internal/docs/TODO-step-c.md).
 import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { writeOutputs } from './target-url.mjs';
@@ -30,7 +30,7 @@ export function siteReady({ config, pkg, exists }) {
   if (missingScripts.length) return { ready: false, reason: `template mode: package.json has no ${missingScripts.join(', ')} script` };
   const missingFiles = [...new Set(SITE_SCRIPTS.flatMap((s) => scriptFiles(scripts[s])))].filter((f) => !exists(f));
   if (missingFiles.length) {
-    return { ready: false, reason: `template mode: the site isn't built yet (missing ${missingFiles.join(', ')}; see docs/TODO-step-c.md)` };
+    return { ready: false, reason: `template mode: the site isn't built yet (missing ${missingFiles.join(', ')}; see internal/docs/TODO-step-c.md)` };
   }
   return { ready: true, reason: `project ${domain}: site jobs run` };
 }

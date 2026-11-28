@@ -1,7 +1,7 @@
-# CI: the contract's `verify` chain (docs/CONTRACT.md) on every pull request and every push to main, and the gates the
+# CI: the contract's `verify` chain (internal/docs/CONTRACT.md) on every pull request and every push to main, and the gates the
 # deploy workflows call (workflow_call) before they deploy anything.
 # Template mode (.github/scripts/site-ready.mjs): until a project exists (/start set project.domain and Step C built the
-# scripts, docs/TODO-step-c.md), the `site` job skips instead of failing; the `tests` job (unit tests, workflow helper
+# scripts, internal/docs/TODO-step-c.md), the `site` job skips instead of failing; the `tests` job (unit tests, workflow helper
 # self-tests) always runs, so the template's own CI stays meaningful.
 # Security (.github/CI-CD.md): actions pinned to full commit SHAs; read-only token; no secrets (callers pass none);
 # never pull_request_target; install scripts blocked by .npmrc (ignore-scripts=true).

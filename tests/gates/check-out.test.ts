@@ -1,6 +1,7 @@
 // The output check (scripts/check-out.mjs) on a planted site: it passes clean, and fails on each broken rule.
 import { describe, expect, it } from 'vitest';
 import { checkSite } from '../../scripts/check-out.mjs';
+import { outputDir, outputDirProblem } from '../../scripts/lib/site.mjs';
 import { ORIGIN, pageHtml, site, withPage } from './site-fixture';
 
 const run = (s: ReturnType<typeof site>, opts: { adsEnabled?: boolean; production?: boolean } = {}) => checkSite({ ...s, origin: ORIGIN, ...opts }).problems as string[];
@@ -87,10 +88,43 @@ describe('check-out', () => {
     expect(run(site()).join('\n')).not.toMatch(/\.well-known/);
   });
 
+  it('allows Wrangler\'s .assetsignore at the top of the output only', () => {
+    const s = site();
+    s.files.set('.assetsignore', 'internal\n');
+    expect(run(s)).toEqual([]);
+    s.files.set('og/.assetsignore', '');
+    expect(run(s)).toEqual(['og/.assetsignore: a hidden file in the output folder (only .well-known/ is published)']);
+  });
+
+  it('fails internal/ content or a repository file in the output (planted: the ledger, a skill, the config)', () => {
+    const s = site();
+    s.files.set('internal/reports/ledger.md', '# Pipeline ledger');
+    s.files.set('internal/skills/x/SKILL.md', '');
+    s.files.set('factory.config.json', '{}');
+    s.files.set('docs/AGENTS.md', '');
+    expect(run(s)).toEqual([
+      'internal/reports/ledger.md: internal/ content in the output folder (it must never be published)',
+      'internal/skills/x/SKILL.md: internal/ content in the output folder (it must never be published)',
+      'factory.config.json: a repository file in the output folder (it must never be published)',
+      'docs/AGENTS.md: a repository file in the output folder (it must never be published)',
+    ]);
+  });
+
   it('fails without the required files', () => {
     const s = site();
     s.files.delete('.well-known/security.txt');
     s.files.delete('robots.txt');
     expect(run(s)).toEqual(['missing robots.txt in the output folder', 'missing .well-known/security.txt in the output folder']);
+  });
+});
+
+describe('build.outputDir as the deploy boundary', () => {
+  it('refuses a source folder or anything under internal/, and accepts a build folder', () => {
+    for (const bad of ['.', 'internal', 'internal/out', 'app', 'public', 'scripts', 'node_modules/x', '.github']) {
+      expect(outputDirProblem(bad), bad).toMatch(/is a source folder/);
+      expect(() => outputDir({ build: { outputDir: bad } }, {}), bad).toThrow(/is a source folder|relative folder/);
+    }
+    for (const ok of ['out', 'dist', 'build', '_site', 'public-build']) expect(outputDirProblem(ok), ok).toBeNull();
+    expect(outputDir({ build: { outputDir: 'dist' } }, {})).toBe('dist');
   });
 });

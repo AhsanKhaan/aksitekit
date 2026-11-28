@@ -13,7 +13,7 @@ Claude Code agents do the work, automatic checks decide when each step is done, 
 ![Status: pre-release](https://img.shields.io/badge/status-pre--release-yellow)
 
 [Quick start](#quick-start) · [Step-by-step guide](#step-by-step-guide) · [Commands](#commands) ·
-[Troubleshooting](#troubleshooting) · [FAQ](#faq) · [Handbook](docs/HANDBOOK.md)
+[Troubleshooting](#troubleshooting) · [FAQ](#faq) · [Handbook](internal/docs/HANDBOOK.md)
 
 </div>
 
@@ -80,29 +80,29 @@ flowchart LR
 ```
 
 Each stage belongs to one agent. The agent writes a file, a script checks it, and the next stage starts only when the
-check passes. Every result goes into a ledger (`reports/ledger.md`), so you can stop at any point and `/start` carries
+check passes. Every result goes into a ledger (`internal/reports/ledger.md`), so you can stop at any point and `/start` carries
 on from there. In short: **agents propose, scripts decide, you approve.**
 
 ### The stages
 | Stage | Agent | What you get | What decides it passed |
 |---|---|---|---|
-| Intake | orchestrator | Your domain, competitors and technology in `factory.config.json`, and your idea in `research/inputs/idea.md` | `/gate intake` |
+| Intake | orchestrator | Your domain, competitors and technology in `factory.config.json`, and your idea in `internal/research/inputs/idea.md` | `/gate intake` |
 | Competitor recon | competitor-recon | One map of each competitor's public pages, including how well it lets visitors do what your idea describes | `/gate recon` |
-| Idea | idea-groomer | `docs/IDEA.md`: your idea matched against every competitor, with the visitors' jobs, the gaps, ranked features, the first slice to build and the positioning | `/gate idea` |
-| Idea approval | you | | You type `APPROVE <hash>` for that exact version of `docs/IDEA.md` |
+| Idea | idea-groomer | `internal/docs/IDEA.md`: your idea matched against every competitor, with the visitors' jobs, the gaps, ranked features, the first slice to build and the positioning | `/gate idea` |
+| Idea approval | you | | You type `APPROVE <hash>` for that exact version of `internal/docs/IDEA.md` |
 | Keywords | keyword-researcher | The keyword map: one page per main keyword | `npm run research:all` |
 | Content plan | content-strategist | Waves of pages and a brief for each page | `/gate strategy` |
 | Growth plan | growth-strategist | 90 days of daily tasks | `/gate growth` |
 | Architecture | architect | Technology, hosting, URL and link rules | `/gate architecture` |
-| Design | designer | `docs/DESIGN.md`: colours, fonts and spacing as tokens | `/gate design`: the official DESIGN.md linter (`npm run lint:design`) and `npm run gate:design` (contrast) |
-| Design approval | you | | You type `APPROVE <hash>` for that exact version of `docs/DESIGN.md` |
+| Design | designer | `internal/docs/DESIGN.md`: colours, fonts and spacing as tokens | `/gate design`: the official DESIGN.md linter (`npm run lint:design`) and `npm run gate:design` (contrast) |
+| Design approval | you | | You type `APPROVE <hash>` for that exact version of `internal/docs/DESIGN.md` |
 | Build and tests | coder, harness | The site and its tests | `npm run verify`, and both approvals still match their files |
-| Code review | code-reviewer | `reports/code-review.md` | Verdict PASS for that exact commit |
-| Reviews | reconciler, seo-auditor, ai-search-auditor, adsense-gatekeeper, secops-reviewer, responsive-checker, performance-auditor | One report each in `reports/` | Each review's own scripts: the SEO gate, `gate:adsense`, the security checks, the e2e tests, Lighthouse |
+| Code review | code-reviewer | `internal/reports/code-review.md` | Verdict PASS for that exact commit |
+| Reviews | reconciler, seo-auditor, ai-search-auditor, adsense-gatekeeper, secops-reviewer, responsive-checker, performance-auditor | One report each in `internal/reports/` | Each review's own scripts: the SEO gate, `gate:adsense`, the security checks, the e2e tests, Lighthouse |
 | Pre-production | orchestrator | A pull request to `main` | `preprod.yml` green for that commit |
 | GO | you | | You type `GO <commit>` in chat |
 | Deploy | devsecops-deployer | The live site and a deploy report | `check:live` and `check:seo-live` on your domain |
-| Docs | doc-generator | `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/SECURITY.md` | `/gate docs` |
+| Docs | doc-generator | `internal/docs/PRD.md`, `internal/docs/ARCHITECTURE.md`, `internal/docs/SECURITY.md` | `/gate docs` |
 
 On a Cloudflare target, the cloudflare-reviewer also checks your zone before the GO. Every output file and command is in
 [AGENTS.md → Gate table](AGENTS.md#4-gate-table).
@@ -115,11 +115,11 @@ code enforces them.
 |---|---|
 | No secrets read, printed or committed (`.env*`, `.dev.vars*`, keys, tokens) | `.claude/hooks/guard.mjs` blocks it before Claude runs the tool; a secret scan runs after every edit (`.claude/hooks/post-edit.mjs`); `npm run check:repo` and gitleaks in CI |
 | No push to `main`, no force-push, no skipped hooks | `guard.mjs`, and branch protection on `main` once you turn it on ([Setup](.github/CI-CD.md#setup-the-owner-once-per-project)) |
-| Nothing is built from an idea or a design you haven't approved | `/gate build` stays blocked until your `APPROVE <hash>` matches `docs/IDEA.md` and `docs/DESIGN.md` as they are now; a later edit to either needs your approval again |
+| Nothing is built from an idea or a design you haven't approved | `/gate build` stays blocked until your `APPROVE <hash>` matches `internal/docs/IDEA.md` and `internal/docs/DESIGN.md` as they are now; a later edit to either needs your approval again |
 | Nothing deploys without your GO for that exact commit | `/deploy-production` waits for `GO <commit>` in chat, and the GO is refused while an approval is out of date; on a public repository, the `production` environment's required reviewer too |
 | Only the built site goes live | The deploy uploads the build output folder (`build.outputDir`, `out/` for Next.js) and nothing else: the agents, scripts, tests, research and docs stay in your repository |
 | No ad code or `ads.txt` before AdSense approves your account | `npm run gate:adsense` |
-| No stuffed, thin or duplicate pages | The SEO gate in every build ([docs/SEO-GATE.md](docs/SEO-GATE.md)) and `npm run audit:unique` |
+| No stuffed, thin or duplicate pages | The SEO gate in every build ([internal/docs/SEO-GATE.md](internal/docs/SEO-GATE.md)) and `npm run audit:unique` |
 | Only reviewed, pinned outside skills | `npm run check:skills`, which checks a hash for every file |
 | No placeholder text on the site; exact dependency versions; no install scripts; nothing published less than 7 days ago | `npm run check:repo` and `.npmrc` |
 | Free tools only | `factory.config.json` → `paidTools.allowed` is `false`; a step that needs a paid tool stops and asks you |
@@ -149,7 +149,7 @@ yes in chat for that exact change.
   previews also get ZAP scans and checks for XSS, path traversal, leaked private URLs and email spoofing.
 - **Vetted skills.** The outside skills the agents use are found through Skillselion, must pass the skills.sh security
   audit (Gen Agent Trust Hub, Socket and Snyk), and are reviewed, pinned to a commit at least 7 days old and
-  hash-checked in CI ([docs/SKILLS.md](docs/SKILLS.md)).
+  hash-checked in CI ([internal/docs/SKILLS.md](internal/docs/SKILLS.md)).
 - **Free to run.** Free tools only. A step that would need a paid tool stops and asks you, with a free alternative.
 - **Your choice of technology.** Next.js is built in; any tool that outputs plain HTML pages works.
 - **A 90-day plan you can follow.** One task a day, 25 to 45 minutes [P], shown by `/today`.
@@ -164,7 +164,7 @@ yes in chat for that exact change.
 | A Claude plan that includes Claude Code | Pro, Max, Team, Enterprise or a Console account (the free claude.ai plan doesn't include Claude Code) | |
 | A Google Ads account | Free access to Keyword Planner | |
 | [Python](https://www.python.org/downloads/) 3, optional | The designer's style search and the competitor review ranking; without it the agents read the data directly | `python --version` |
-| [Google Chrome](https://www.google.com/chrome/), optional | rea's deeper look at JavaScript-heavy competitor sites, in a throwaway profile ([docs/MCP.md](docs/MCP.md#enabled-with-limits-community-owner-approved)) | |
+| [Google Chrome](https://www.google.com/chrome/), optional | rea's deeper look at JavaScript-heavy competitor sites, in a throwaway profile ([internal/docs/MCP.md](internal/docs/MCP.md#enabled-with-limits-community-owner-approved)) | |
 | Later: a Cloudflare account and a domain | To put the site online on the free plan | |
 
 Install Claude Code with the official installer:
@@ -213,7 +213,7 @@ GitHub copies the files into a new repository with a single commit, unlinked fro
 **Public or private?** Public is recommended for a site you'll deploy. On GitHub Free, a private repository can't use
 the `production` approval gate, environment secrets or branch protection, and it gets 2,000 Actions minutes a month
 [M: docs.github.com, 2026-10-25] ([details](.github/CI-CD.md#private-repo-caveats-m-checked-on-docsgithubcom-2026-10-25)).
-A public repository shows everything you commit, including the Keyword Planner files in `research/inputs/kp/`, so keep
+A public repository shows everything you commit, including the Keyword Planner files in `internal/research/inputs/kp/`, so keep
 those out of git if you go public.
 
 **Done when:** the new repository is under your account.
@@ -244,7 +244,7 @@ project's settings and safety hooks run (for example, the guard that stops anyon
 - **Markets and language,** if they differ from the defaults.
 - **Technology:** Next.js (built in) or another one, such as Astro, Eleventy or Hugo.
 - **Your idea:** in a few sentences, what visitors should be able to do on your site, and who they are. Rough is fine:
-  it's saved word for word in `research/inputs/idea.md`, and the next stages build on it.
+  it's saved word for word in `internal/research/inputs/idea.md`, and the next stages build on it.
 
 It saves your answers and picks the competitor with the **lowest DR** as the starting point. A weak site that still
 ranks shows you keywords a new site can win.
@@ -256,26 +256,26 @@ ranks shows you keywords a new site can win.
 1. In Google Keyword Planner, choose **Discover new keywords → Start with a website**.
 2. Enter the starting competitor's domain, choose **Use the entire site**, and set your location and language.
 3. Download **Historical metrics** as CSV. Don't open it in Excel and save it as `.xlsx`.
-4. Save it as `research/inputs/kp/<competitor-domain>.csv`. Files for other competitors are optional.
+4. Save it as `internal/research/inputs/kp/<competitor-domain>.csv`. Files for other competitors are optional.
 5. Tell Claude "CSVs are in".
 
 While you do this, the competitor-recon agent maps each competitor's public pages: page types, structure, gaps, and
 how well each one lets visitors do what your idea describes.
-It never copies their text or design. More detail: [research/inputs/README.md](research/inputs/README.md).
+It never copies their text or design. More detail: [internal/research/inputs/README.md](internal/research/inputs/README.md).
 
-**Done when:** the file is in `research/inputs/kp/` and the keyword stage reads it without a format error.
+**Done when:** the file is in `internal/research/inputs/kp/` and the keyword stage reads it without a format error.
 
 ### Step 6: Approve your idea
 Still while you export, the idea-groomer matches your idea against every competitor's recon and writes
-`docs/IDEA.md`:
+`internal/docs/IDEA.md`:
 - the jobs visitors come to do, and how well each competitor does them today;
 - where nobody serves them well, including what the competitors' readers complain about;
 - the features, each marked must, should, could or won't, with the evidence behind it;
 - the smallest first version worth building, and one sentence on how the site stands out;
 - what's out of scope, and the questions only you can answer.
 
-Claude asks you those questions first. Your answers are added to `research/inputs/idea.md`, in your words, and the
-idea is groomed again. Then you get a short summary and a 12-character hash. Read `docs/IDEA.md`, and either type
+Claude asks you those questions first. Your answers are added to `internal/research/inputs/idea.md`, in your words, and the
+idea is groomed again. Then you get a short summary and a 12-character hash. Read `internal/docs/IDEA.md`, and either type
 `APPROVE <hash>` or say what to change. The keyword stage waits for your approval. If the file changes later, build
 stops until you approve the new version.
 
@@ -299,7 +299,7 @@ The next stages run one after another, each with its own check:
 - **90-day growth plan:** one task a day.
 - **Architecture:** the technology, hosting (Cloudflare Pages for a static site, Workers only if server code is
   needed; it asks you), URL rules and internal links.
-- **Design:** colours, fonts and layout as design tokens in `docs/DESIGN.md`, checked for contrast. Then you approve it
+- **Design:** colours, fonts and layout as design tokens in `internal/docs/DESIGN.md`, checked for contrast. Then you approve it
   the same way as the idea: type `APPROVE <hash>`, or say what to change. Build waits for your approval.
 
 **Done when:** `/gate status` shows strategy, growth, architecture, design and design-approval as passed.
@@ -311,7 +311,7 @@ speed (Lighthouse: Accessibility, Best Practices and SEO 100 [P]; Performance at
 starter ships one example page of each type, which the coder replaces with your pages.
 
 **Done when:** `npm run verify` passes, the code review says PASS for the current commit, and every review has its
-report in `reports/`.
+report in `internal/reports/`.
 
 ### Step 10: Go live
 1. Set up Cloudflare and GitHub once: [.github/CI-CD.md → Setup](.github/CI-CD.md#setup-the-owner-once-per-project).
@@ -319,7 +319,7 @@ report in `reports/`.
    branch protection.
 2. Open a pull request to `main`. The pre-production checks run on it.
 3. When they pass, type `GO <commit>` in chat for that exact commit. Nothing deploys without it, and the GO is
-   refused while `docs/IDEA.md` or `docs/DESIGN.md` differs from the version you approved.
+   refused while `internal/docs/IDEA.md` or `internal/docs/DESIGN.md` differs from the version you approved.
 4. The kit deploys, checks the live site, and tells you how to roll back if anything is wrong.
 
 **Done when:** `npm run check:live -- https://<your-domain>` and
@@ -367,14 +367,14 @@ in the parking lot instead of today's work, and no more than three tasks are eve
 
 | Command | What it does |
 |---|---|
-| `npm run audit:seo` | The on-page SEO gate on every page ([docs/SEO-GATE.md](docs/SEO-GATE.md)) |
+| `npm run audit:seo` | The on-page SEO gate on every page ([internal/docs/SEO-GATE.md](internal/docs/SEO-GATE.md)) |
 | `npm run audit:a11y` | Accessibility (axe-core, WCAG 2.2 A and AA) on every page |
 | `npm run audit:perf` | Lab page speed against the Core Web Vitals budgets |
 | `npm run audit:lighthouse` | Lighthouse CI against the score budgets |
 | `npm run audit:unique` | How much of each page's text appears on no other page (stops near-duplicate pages) |
 | `npm run gate:adsense` | The trust pages, no ad code or `ads.txt` before approval, and the other AdSense rules |
-| `npm run lint:design` | The official DESIGN.md linter: the format, token references and colour values in `docs/DESIGN.md` |
-| `npm run gate:design` | WCAG AA contrast for every colour pair in `docs/DESIGN.md` |
+| `npm run lint:design` | The official DESIGN.md linter: the format, token references and colour values in `internal/docs/DESIGN.md` |
+| `npm run gate:design` | WCAG AA contrast for every colour pair in `internal/docs/DESIGN.md` |
 | `npm run check:security -- <url>` | Security checks on a preview or your domain (`--static` checks only the build folder) |
 
 **After a deploy**
@@ -395,16 +395,16 @@ in the parking lot instead of today's work, and no more than three tasks are eve
 ## What you get
 | File | What it holds |
 |---|---|
-| `research/out/keyword-map.json` | Every page to build, its main and secondary keywords, and the evidence |
-| `research/out/selected.json` | The keywords kept, and every rejected one with its reason |
-| `research/out/recon/*.md` | Each competitor's structure and gaps |
-| `docs/IDEA.md` | Your idea, groomed against the competitors: jobs, gaps, ranked features, the first slice, positioning |
-| `docs/CONTENT-STRATEGY.md`, `research/out/briefs/*.md` | The content plan and one brief per page |
-| `docs/ARCHITECTURE.md` | Technology, hosting, URL and link rules |
-| `docs/DESIGN.md` | The design as tokens a developer can apply exactly |
-| `docs/GROWTH-90.md`, `growth/plan.json` | The 90-day plan |
-| `reports/*.md` | The SEO, AdSense, security, responsive and speed reviews (kept on your machine; `reports/` is gitignored) |
-| `reports/ledger.md` | Every check that ran, with its result |
+| `internal/research/out/keyword-map.json` | Every page to build, its main and secondary keywords, and the evidence |
+| `internal/research/out/selected.json` | The keywords kept, and every rejected one with its reason |
+| `internal/research/out/recon/*.md` | Each competitor's structure and gaps |
+| `internal/docs/IDEA.md` | Your idea, groomed against the competitors: jobs, gaps, ranked features, the first slice, positioning |
+| `internal/docs/CONTENT-STRATEGY.md`, `internal/research/out/briefs/*.md` | The content plan and one brief per page |
+| `internal/docs/ARCHITECTURE.md` | Technology, hosting, URL and link rules |
+| `internal/docs/DESIGN.md` | The design as tokens a developer can apply exactly |
+| `internal/docs/GROWTH-90.md`, `internal/growth/plan.json` | The 90-day plan |
+| `internal/reports/*.md` | The SEO, AdSense, security, responsive and speed reviews (kept on your machine; `internal/reports/` is gitignored) |
+| `internal/reports/ledger.md` | Every check that ran, with its result |
 
 ## Configuration
 Your project's settings live in `factory.config.json`. `/start` fills in the project; the rest are starting defaults
@@ -424,23 +424,55 @@ Your project's settings live in `factory.config.json`. `/start` fills in the pro
 Only you change the thresholds. An agent that thinks one should change asks you first.
 
 ## Project structure
+The repository root holds the website and what building and deploying it needs. Everything that plans, researches,
+checks or documents the site lives under `internal/`, which never reaches production.
+
 ```text
-.claude/agents/       the agents, one file each
-.claude/skills/       /start, /today, /gate, /keyword-pipeline, /deploy-production
-.claude/hooks/        the guard (secrets, pushes to main) and the scan after every edit
-vendor/skills/        reviewed outside skills the agents read, hash-checked
-app/, components/,    the Next.js starter site
+app/, components/,     the Next.js starter site (pages, components, helpers, page content)
 lib/, content/
-public/               static files served as they are
-research/inputs/      your idea, Keyword Planner files and competitors.csv
-research/out/         keyword map, briefs and recon (generated)
-scripts/              the checks that decide (keyword pipeline, gates, audits)
-tests/                unit tests (Vitest) and browser tests (tests/e2e, Playwright)
-docs/                 handbook, contract, SEO gate, skills review, document templates
-.github/workflows/    CI, security scans, Lighthouse, pre-production, deploy
-factory.config.json   your project's settings
-skills.lock.json      every outside skill, MCP server and GitHub Action, pinned
+public/                static files the build copies as they are
+scripts/               the build chain: production gate, generated public files, framework runner, check-out, local server
+tests/                 unit tests (Vitest) and browser tests (tests/e2e, Playwright)
+factory.config.json    your project's settings (the build reads them)
+package.json, *.config.*, lighthouserc.json, tsconfig.json
+.github/workflows/     CI, security scans (CodeQL, Semgrep, gitleaks, dependency review, Scorecard), Lighthouse, deploy
+.claude/agents/        the agents, one short file each (Claude Code discovers them only here)
+.claude/skills/        /start, /today, /gate, /keyword-pipeline, /deploy-production, and the gate runner
+.claude/hooks/         the guard (secrets, pushes to main) and the scan after every edit
+CLAUDE.md, AGENTS.md   the rules and the agent map (read by coding agents from the root)
+
+internal/              pipeline, research and gates: never deployed
+  docs/                handbook, contract, blueprint, SEO gate, skills review, templates, and your IDEA/DESIGN/PRD docs
+  research/inputs/     your idea, Keyword Planner files and competitors.csv
+  research/out/        keyword map, briefs and recon (generated)
+  reports/             the ledger and every agent's report (git-ignored)
+  growth/              the 90-day plan (plan.json)
+  scripts/             the checks that decide: keyword pipeline, audits, design contrast, AdSense gate, repo,
+                       security, skills and live checks, the Search Console analyzer
+  skills/              reviewed outside skills the agents read, hash-checked by npm run check:skills
+  skills.lock.json     every outside skill, MCP server and GitHub Action, pinned
+  seo-checks.json, audit-exceptions.json   the gates' settings and reviewed exceptions
 ```
+
+**Why `.claude/` stays where it is.** Claude Code finds agents only in `.claude/agents/` and skills only in
+`.claude/skills/`, so those discovery files stay there, short, and point at `internal/` for everything heavy: the
+vendored skills, the docs, the gate and audit scripts. `.claude/` is a hidden folder and, like `internal/`, is never
+part of the build output.
+
+### What reaches production
+Only the build output folder (`factory.config.json` → `build.outputDir`, `out/` for the Next.js starter) is uploaded:
+Cloudflare Pages deploys that folder (`deploy-pages.yml`), and Workers serves it as static assets
+(`assets.directory` in `wrangler.jsonc`, `deploy-workers.yml`). The static export holds only what `app/` renders
+and what `public/` contains. Four checks keep `internal/` and the repo's own files out of it:
+
+1. `build.outputDir` can't be a source folder (`.`, `internal`, `app`, `public`, `scripts`, ...): every gate refuses
+   it (`scripts/lib/site.mjs`).
+2. `check-out` fails the build if the output holds anything under `internal/`, a project file (`factory.config.json`,
+   `package.json`, `AGENTS.md`, the lock, the ledger, a wrangler config) or a hidden file.
+3. A Workers build also gets an `.assetsignore` (internal, `*.md`, `*.mjs`, `.env*`), so Wrangler skips such files
+   even if one slipped in.
+4. Both deploy workflows run `.github/scripts/assets-boundary.mjs` before uploading: the folder must be the build
+   folder, and on Workers `assets.directory` must equal `build.outputDir`.
 
 ## Keeping your site up to date
 A repository made from a template starts with its own history, so later changes to the kit don't reach your site by
@@ -450,8 +482,8 @@ themselves. To take one:
    remote and `git cherry-pick` its commit.
 3. Run `npm run verify` and open a pull request as usual.
 
-Leave the files generated for your site alone (`factory.config.json`, `research/`, `content/pages/`, `docs/IDEA.md`,
-`docs/DESIGN.md` and the other project docs): they're yours, not the kit's.
+Leave the files generated for your site alone (`factory.config.json`, `internal/research/`, `content/pages/`, `internal/docs/IDEA.md`,
+`internal/docs/DESIGN.md` and the other project docs): they're yours, not the kit's.
 
 ## Status
 | Part | State |
@@ -460,9 +492,9 @@ Leave the files generated for your site alone (`factory.config.json`, `research/
 | Keyword pipeline (Keyword Planner files → keyword map) | Ready, with tests |
 | CI and security scans | Ready (site checks wait for a project; see [Template mode](.github/CI-CD.md#template-mode)) |
 | Vetted skills | Ready |
-| On-page SEO gate: 169 checks on every page, for keyword stuffing, thin pages, titles and trust links | Ready, with tests ([docs/SEO-GATE.md](docs/SEO-GATE.md)); runs once a site is built |
-| Starter website (Next.js, one example page of each type) and the site checks | Ready, with tests ([docs/TODO-step-c.md](docs/TODO-step-c.md)) |
-| `npm run lint` | Ready: ESLint 10 reads the code through TypeScript 6's API, alongside the TypeScript 7 compiler, until the lint rules support TypeScript 7 ([docs/TODO-step-c.md](docs/TODO-step-c.md#lint-on-typescript-7)) |
+| On-page SEO gate: 169 checks on every page, for keyword stuffing, thin pages, titles and trust links | Ready, with tests ([internal/docs/SEO-GATE.md](internal/docs/SEO-GATE.md)); runs once a site is built |
+| Starter website (Next.js, one example page of each type) and the site checks | Ready, with tests ([internal/docs/TODO-step-c.md](internal/docs/TODO-step-c.md)) |
+| `npm run lint` | Ready: ESLint 10 reads the code through TypeScript 6's API, alongside the TypeScript 7 compiler, until the lint rules support TypeScript 7 ([internal/docs/TODO-step-c.md](internal/docs/TODO-step-c.md#lint-on-typescript-7)) |
 
 `/start` takes you from keyword research through the build, and `npm run verify` passes end to end (on the bare
 template, with `SITE_URL=https://example.com`).
@@ -511,9 +543,9 @@ passes once your own pages replace them.
 **Some CI jobs show as skipped.** That's template mode: site checks skip until `/start` sets a domain and the starter
 site exists. Tests and security scans always run.
 
-**`npm run check:skills` fails.** A file in `vendor/skills/` changed. Those files must match their reviewed copies
-byte for byte: undo the change with `git checkout -- vendor/skills`, or update the skill properly
-([docs/SKILLS.md](docs/SKILLS.md)).
+**`npm run check:skills` fails.** A file in `internal/skills/` changed. Those files must match their reviewed copies
+byte for byte: undo the change with `git checkout -- internal/skills`, or update the skill properly
+([internal/docs/SKILLS.md](internal/docs/SKILLS.md)).
 
 ## FAQ
 **Should I fork it or use the template?** Use the template. Your site gets its own clean repository; a fork stays
@@ -548,8 +580,8 @@ scrapes it or pays for it.
 images, code or design.
 
 **Are the outside skills safe?** Each one was read file by file, is pinned to a commit at least 7 days old, and is
-stored in `vendor/skills/` with a hash for every file that CI checks. Skills that failed review are listed with the
-reasons in [docs/SKILLS.md](docs/SKILLS.md).
+stored in `internal/skills/` with a hash for every file that CI checks. Skills that failed review are listed with the
+reasons in [internal/docs/SKILLS.md](internal/docs/SKILLS.md).
 
 ## Glossary
 | Term | Meaning |
@@ -557,7 +589,7 @@ reasons in [docs/SKILLS.md](docs/SKILLS.md).
 | Agent | A Claude Code helper with one job, defined in `.claude/agents/` |
 | Stage | One step of the pipeline, owned by one agent |
 | Gate | The script or CI job that decides whether a stage passed |
-| Ledger | `reports/ledger.md`: every gate run and its result, so `/start` can carry on |
+| Ledger | `internal/reports/ledger.md`: every gate run and its result, so `/start` can carry on |
 | GO | Your approval to deploy one exact commit, typed in chat as `GO <commit>` |
 | DR (Domain Rating) | A score for how strong a site's backlinks are; you read it from a free checker |
 | KD (keyword difficulty) | How hard it is to reach Google's first page for a keyword; estimated, never paid for |
@@ -570,25 +602,25 @@ reasons in [docs/SKILLS.md](docs/SKILLS.md).
 | AEO and GEO | Answer and generative engine optimisation: being found and quoted by AI search |
 | Core Web Vitals | Google's speed measures: LCP (loading), INP (response to input) and CLS (layout shift) |
 | Template mode | CI skips the site checks until your project exists |
-| Vendored skill | An outside skill copied into `vendor/skills/` after review, and hash-checked |
+| Vendored skill | An outside skill copied into `internal/skills/` after review, and hash-checked |
 
 ## Getting help
 1. Check [Troubleshooting](#troubleshooting) and the [FAQ](#faq).
 2. Ask Claude in your project: `/gate status`, or "why did the seo stage fail?".
-3. Read the reference docs: [docs/HANDBOOK.md](docs/HANDBOOK.md) for how everything works,
-   [.github/CI-CD.md](.github/CI-CD.md) for CI and deploys, [docs/SEO-GATE.md](docs/SEO-GATE.md) for SEO gate
+3. Read the reference docs: [internal/docs/HANDBOOK.md](internal/docs/HANDBOOK.md) for how everything works,
+   [.github/CI-CD.md](.github/CI-CD.md) for CI and deploys, [internal/docs/SEO-GATE.md](internal/docs/SEO-GATE.md) for SEO gate
    failures.
 4. Still stuck? Open an issue on the kit's repository with the command you ran, its output and the commit
    (`git rev-parse --short HEAD`). Never paste a secret, token or key.
 
 ## Security
 To report a vulnerability in the kit, follow [SECURITY.md](SECURITY.md): report it privately with **Security → Report
-a vulnerability**, never in a public issue. A site built from the kit gets its own `docs/SECURITY.md`, written by the
+a vulnerability**, never in a public issue. A site built from the kit gets its own `internal/docs/SECURITY.md`, written by the
 secops-reviewer agent.
 
 ## Contributing
 1. Create a branch from `main` (`git switch -c fix/<short-name>`). Never commit or push to `main`.
-2. Make the change. [docs/CONTRACT.md](docs/CONTRACT.md) says which part of the kit owns each file.
+2. Make the change. [internal/docs/CONTRACT.md](internal/docs/CONTRACT.md) says which part of the kit owns each file.
 3. Run `npm run verify` (run `npx playwright install chromium` once first). The kit itself has no domain, so give the
    build a stand-in one, as in [Troubleshooting](#troubleshooting):
    ```bash
@@ -599,16 +631,16 @@ secops-reviewer agent.
 
 Three rules for every change: don't loosen a gate to make it pass, add an npm dependency only with the supply-chain
 checklist in [CLAUDE.md](CLAUDE.md), and change a vendored skill only through the review in
-[docs/SKILLS.md](docs/SKILLS.md). The rules the agents follow are in [CLAUDE.md](CLAUDE.md) and
+[internal/docs/SKILLS.md](internal/docs/SKILLS.md). The rules the agents follow are in [CLAUDE.md](CLAUDE.md) and
 [AGENTS.md](AGENTS.md).
 
 ## Licence
 No licence has been chosen yet. Until one is added, normal copyright applies: you can read this repository, but
-reusing it needs the author's permission. The skills in `vendor/skills/` keep their own licences (MIT, Apache-2.0 or
+reusing it needs the author's permission. The skills in `internal/skills/` keep their own licences (MIT, Apache-2.0 or
 CC BY-SA 4.0), included in each folder.
 
 ## Acknowledgements
 The agents read skills by Corey Haines (marketingskills), agricidaniel (claude-seo), aaron-he-zhu
 (aaron-marketing-skills), Siqi Chen (humanizer), Next Level Builder (UI UX Pro Max), Jake Schincariol (Replica), morluto
 (REA), Addy Osmani, Trail of Bits, Sentry, Vercel, Anthropic and Cloudflare. The full list, with versions and licences,
-is in [docs/SKILLS.md](docs/SKILLS.md).
+is in [internal/docs/SKILLS.md](internal/docs/SKILLS.md).

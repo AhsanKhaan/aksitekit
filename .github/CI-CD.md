@@ -1,8 +1,8 @@
 # CI/CD (`.github/`)
 
 GitHub Actions for the factory: free GitHub-hosted runners and free tools only. Agents propose; these workflows decide.
-The npm scripts they call are the frozen names in `docs/CONTRACT.md`. Until Step C implements them
-(`docs/TODO-step-c.md`), the workflows that call them fail. That's expected.
+The npm scripts they call are the frozen names in `internal/docs/CONTRACT.md`. Until Step C implements them
+(`internal/docs/TODO-step-c.md`), the workflows that call them fail. That's expected.
 
 Claude in CI (`anthropics/claude-code-action`) is **not used**: it needs a paid Anthropic API key. It's an optional
 add-on for an owner who chooses to pay; CI itself only runs deterministic scripts.
@@ -25,7 +25,7 @@ The technology is the owner's choice at `/start` (`factory.config.json` → `bui
 | `workflows/deploy-pages.yml` | by hand from the production branch; a push to `main` when `AUTO_DEPLOY` is `true` | only if `hosting.target` is `cloudflare-pages`: the CI gates (`ci.yml`) on the exact commit, then production build, `wrangler pages deploy <build.outputDir>`, then `check:live` | the `production` environment approval (the owner's GO), then `check:live` |
 | `workflows/deploy-workers.yml` | same as above | only if `hosting.target` is `cloudflare-workers`: production build, `wrangler deploy` (Workers static assets from the project's `wrangler.jsonc`), then `check:live` | same as above |
 | `workflows/live-check.yml` | daily 05:41 UTC, by hand | `check:live`, `check:security` and `check:seo-live` against `LIVE_SITE_URL` (and `LIVE_PAGES_HOST`); skips while `LIVE_SITE_URL` is unset | the scripts' exit codes |
-| `workflows/codeql.yml` | every PR, push to `main`, Mondays 06:17 UTC | CodeQL (`security-extended`) on the repo's own JavaScript and TypeScript, `vendor/skills` excluded. **Skipped while the repo is private** (code scanning is paid there); starts by itself once it's public | CodeQL's code-scanning alerts |
+| `workflows/codeql.yml` | every PR, push to `main`, Mondays 06:17 UTC | CodeQL (`security-extended`) on the repo's own JavaScript and TypeScript, `internal/skills` excluded. **Skipped while the repo is private** (code scanning is paid there); starts by itself once it's public | CodeQL's code-scanning alerts |
 | `workflows/scorecard.yml` | push to `main`, Mondays 05:41 UTC, by hand | OpenSSF Scorecard: publishes the score and uploads its SARIF to code scanning. **Skipped while the repo is private** (needs GitHub Advanced Security there) | informational score; findings appear as code-scanning alerts |
 | `CODEOWNERS` | every PR | the owner reviews every change, with the files that decide agent behaviour and gates listed on their own | a ruleset that requires code-owner review (Setup) |
 | `dependabot.yml` | weekly (Monday) | grouped npm and GitHub Actions updates with a 7-day cooldown (matches `.npmrc` `min-release-age=7`); security updates aren't delayed | CI on the Dependabot PR |
@@ -46,10 +46,10 @@ Helpers (Node, no dependencies; `ci.yml` runs their planted failing cases with `
 
 `.github/scripts/site-ready.mjs` decides whether a project exists: `factory.config.json` → `project.domain` is set (by
 `/start`) and every file the site's npm scripts run (`node scripts/…`) is in the repository (Step C,
-`docs/TODO-step-c.md`). Until then:
+`internal/docs/TODO-step-c.md`). Until then:
 - **skip** (shown as *skipped*, not failed): `ci.yml` → `site`, `lighthouse.yml`, `preprod.yml`, and the deploys;
 - **still run:** `ci.yml` → `tests` (unit tests and helper self-tests), `security.yml` (gitleaks, Semgrep, and
-  `npm audit --audit-level=high` until the project's `scripts/audit.mjs` exists).
+  `npm audit --audit-level=high` until the project's `internal/scripts/audit.mjs` exists).
 
 So the template repository itself, and a fresh copy before `/start` and Step C, has green CI that still checks what
 exists. Nothing needs switching on: the site jobs start running on the first push where a project exists.
@@ -209,7 +209,7 @@ Dependabot bumps the actions (SHA and comment). Bump the rest by hand, about mon
 - Keep the 7-day rule: no version published less than a week ago.
 
 ## What these workflows expect from Step C [U]
-These are the interfaces assumed (as specified in `docs/TODO-step-c.md`). Step C confirms them or asks
+These are the interfaces assumed (as specified in `internal/docs/TODO-step-c.md`). Step C confirms them or asks
 Step E to adjust the workflows:
 - `npm run serve` serves `build.outputDir` (whatever technology built it) with the `_headers` rules on `PORT` (default 4321); Playwright's `webServer` does the same.
 - `lighthouserc.json` collects from `http://localhost:4321/…` (or sets `startServerCommand` / `staticDistDir`, which the
